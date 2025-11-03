@@ -1,12 +1,3 @@
-CREATE TABLE `departamentos` (
-  `id` INT PRIMARY KEY AUTO_INCREMENT,
-  `nombre` VARCHAR(100) NOT NULL,
-  `descripcion` TEXT,
-  `activo` BOOLEAN DEFAULT true,
-  `created_at` TIMESTAMP DEFAULT (CURRENT_TIMESTAMP),
-  `updated_at` TIMESTAMP DEFAULT (CURRENT_TIMESTAMP)
-);
-
 CREATE TABLE `cargos` (
   `id` INT PRIMARY KEY AUTO_INCREMENT,
   `nombre` VARCHAR(100) NOT NULL COMMENT 'Entrenador, Recepcionista, Limpieza, Administración, Gerente',
@@ -19,7 +10,6 @@ CREATE TABLE `cargos` (
 
 CREATE TABLE `empleados` (
   `id` INT PRIMARY KEY AUTO_INCREMENT,
-  `departamento_id` INT NOT NULL,
   `cargo_id` INT NOT NULL,
   `codigo_empleado` VARCHAR(20) UNIQUE NOT NULL,
   `nombres` VARCHAR(100) NOT NULL,
@@ -32,7 +22,7 @@ CREATE TABLE `empleados` (
   `fecha_ingreso` DATE NOT NULL,
   `fecha_salida` DATE,
   `tipo_contrato` ENUM ('Tiempo completo', 'Medio tiempo') NOT NULL,
-  `estado` ENUM ('activo', 'inactivo', 'vacaciones', 'licencia') DEFAULT 'activo',
+  `estado` ENUM ('activo', 'inactivo', 'vacaciones') DEFAULT 'activo',
   `created_at` TIMESTAMP DEFAULT (CURRENT_TIMESTAMP),
   `updated_at` TIMESTAMP DEFAULT (CURRENT_TIMESTAMP)
 );
@@ -54,18 +44,6 @@ CREATE TABLE `nominas` (
   `generada_por` INT,
   `aprobada_por` INT,
   `pagada_por` INT,
-  `created_at` TIMESTAMP DEFAULT (CURRENT_TIMESTAMP),
-  `updated_at` TIMESTAMP DEFAULT (CURRENT_TIMESTAMP)
-);
-
-CREATE TABLE `asistencias` (
-  `id` INT PRIMARY KEY AUTO_INCREMENT,
-  `empleado_id` INT NOT NULL,
-  `fecha` DATE NOT NULL,
-  `hora_entrada` TIME,
-  `hora_salida` TIME,
-  `horas_trabajadas` DECIMAL(5,2),
-  `observaciones` TEXT,
   `created_at` TIMESTAMP DEFAULT (CURRENT_TIMESTAMP),
   `updated_at` TIMESTAMP DEFAULT (CURRENT_TIMESTAMP)
 );
@@ -129,15 +107,6 @@ CREATE TABLE `membresias` (
   `updated_at` TIMESTAMP DEFAULT (CURRENT_TIMESTAMP)
 );
 
-CREATE TABLE `metodos_pago` (
-  `id` INT PRIMARY KEY AUTO_INCREMENT,
-  `nombre` VARCHAR(50) NOT NULL,
-  `descripcion` TEXT,
-  `activo` BOOLEAN DEFAULT true,
-  `created_at` TIMESTAMP DEFAULT (CURRENT_TIMESTAMP),
-  `updated_at` TIMESTAMP DEFAULT (CURRENT_TIMESTAMP)
-);
-
 CREATE TABLE `facturas` (
   `id` INT PRIMARY KEY AUTO_INCREMENT,
   `numero_factura` VARCHAR(50) UNIQUE NOT NULL,
@@ -145,11 +114,8 @@ CREATE TABLE `facturas` (
   `empleado_responsable_id` INT NOT NULL,
   `fecha_emision` DATE NOT NULL,
   `tipo_venta` ENUM ('Membresía', 'Servicio', 'Producto/Equipo') NOT NULL,
-  `subtotal` DECIMAL(10,2) NOT NULL,
-  `impuestos` DECIMAL(10,2) DEFAULT 0,
-  `descuento` DECIMAL(10,2) DEFAULT 0,
   `total` DECIMAL(10,2) NOT NULL,
-  `estado` ENUM ('pendiente', 'pagada', 'parcial', 'anulada') DEFAULT 'pendiente',
+  `estado` ENUM ('pendiente', 'pagada', 'anulada') DEFAULT 'pendiente',
   `observaciones` TEXT,
   `created_at` TIMESTAMP DEFAULT (CURRENT_TIMESTAMP),
   `updated_at` TIMESTAMP DEFAULT (CURRENT_TIMESTAMP)
@@ -158,7 +124,6 @@ CREATE TABLE `facturas` (
 CREATE TABLE `detalles_factura` (
   `id` INT PRIMARY KEY AUTO_INCREMENT,
   `factura_id` INT NOT NULL,
-  `concepto` VARCHAR(200) NOT NULL,
   `cantidad` INT NOT NULL DEFAULT 1,
   `precio_unitario` DECIMAL(10,2) NOT NULL,
   `subtotal` DECIMAL(10,2) NOT NULL,
@@ -171,7 +136,6 @@ CREATE TABLE `detalles_factura` (
 CREATE TABLE `pagos` (
   `id` INT PRIMARY KEY AUTO_INCREMENT,
   `factura_id` INT NOT NULL,
-  `metodo_pago_id` INT NOT NULL,
   `monto` DECIMAL(10,2) NOT NULL,
   `fecha_pago` DATE NOT NULL,
   `referencia` VARCHAR(100),
@@ -211,10 +175,8 @@ CREATE TABLE `productos` (
   `codigo` VARCHAR(50) UNIQUE NOT NULL,
   `nombre` VARCHAR(100) NOT NULL,
   `descripcion` VARCHAR(255),
-  `precio_venta` DECIMAL(10,2) NOT NULL,
-  `precio_compra` DECIMAL(10,2) NOT NULL,
-  `stock_actual` INT DEFAULT 0,
-  `stock_minimo` INT DEFAULT 0,
+  `precio_unitario` DECIMAL(10,2) NOT NULL,
+  `stock` INT DEFAULT 0,
   `unidad_medida` VARCHAR(20) DEFAULT 'unidad',
   `fecha_ingreso` DATE,
   `activo` BOOLEAN DEFAULT true,
@@ -241,7 +203,7 @@ CREATE TABLE `equipos` (
   `modelo` VARCHAR(50),
   `fecha_adquisicion` DATE NOT NULL,
   `costo` DECIMAL(10,2),
-  `estado` ENUM ('operativo', 'mantenimiento', 'dañado', 'fuera_servicio') DEFAULT 'operativo',
+  `estado` ENUM ('operativo', 'dañado', 'fuera_servicio') DEFAULT 'operativo',
   `ubicacion` VARCHAR(100),
   `observaciones` TEXT,
   `created_at` TIMESTAMP DEFAULT (CURRENT_TIMESTAMP),
@@ -295,10 +257,6 @@ CREATE TABLE `inscripciones_clases` (
   `updated_at` TIMESTAMP DEFAULT (CURRENT_TIMESTAMP)
 );
 
-CREATE INDEX `idx_nombre` ON `departamentos` (`nombre`);
-
-CREATE INDEX `idx_activo` ON `departamentos` (`activo`);
-
 CREATE INDEX `idx_nombre` ON `cargos` (`nombre`);
 
 CREATE INDEX `idx_activo` ON `cargos` (`activo`);
@@ -318,10 +276,6 @@ CREATE INDEX `idx_fecha_pago` ON `nominas` (`fecha_pago`);
 CREATE INDEX `idx_estado` ON `nominas` (`estado`);
 
 CREATE INDEX `idx_mes_anio` ON `nominas` (`mes`, `anio`);
-
-CREATE UNIQUE INDEX `unique_asistencia` ON `asistencias` (`empleado_id`, `fecha`);
-
-CREATE INDEX `idx_fecha` ON `asistencias` (`fecha`);
 
 CREATE INDEX `idx_codigo` ON `clientes` (`codigo_cliente`);
 
@@ -348,10 +302,6 @@ CREATE INDEX `idx_estado` ON `membresias` (`estado`);
 CREATE INDEX `idx_fechas` ON `membresias` (`fecha_inicio`, `fecha_fin`);
 
 CREATE INDEX `idx_membresias_vigentes` ON `membresias` (`fecha_fin`, `estado`);
-
-CREATE INDEX `idx_nombre` ON `metodos_pago` (`nombre`);
-
-CREATE INDEX `idx_activo` ON `metodos_pago` (`activo`);
 
 CREATE INDEX `idx_numero` ON `facturas` (`numero_factura`);
 
@@ -389,9 +339,9 @@ CREATE INDEX `idx_nombre` ON `productos` (`nombre`);
 
 CREATE INDEX `idx_activo` ON `productos` (`activo`);
 
-CREATE INDEX `idx_stock` ON `productos` (`stock_actual`);
+CREATE INDEX `idx_stock` ON `productos` (`stock`);
 
-CREATE INDEX `idx_productos_stock_critico` ON `productos` (`stock_actual`, `stock_minimo`);
+CREATE INDEX `idx_productos_stock_critico` ON `productos` (`stock`);
 
 CREATE INDEX `idx_nombre` ON `categorias_equipos` (`nombre`);
 
@@ -429,8 +379,6 @@ CREATE INDEX `idx_fecha` ON `inscripciones_clases` (`fecha_inscripcion`);
 
 CREATE INDEX `idx_estado` ON `inscripciones_clases` (`estado`);
 
-ALTER TABLE `empleados` ADD FOREIGN KEY (`departamento_id`) REFERENCES `departamentos` (`id`);
-
 ALTER TABLE `empleados` ADD FOREIGN KEY (`cargo_id`) REFERENCES `cargos` (`id`);
 
 ALTER TABLE `nominas` ADD FOREIGN KEY (`empleado_id`) REFERENCES `empleados` (`id`);
@@ -440,8 +388,6 @@ ALTER TABLE `nominas` ADD FOREIGN KEY (`generada_por`) REFERENCES `empleados` (`
 ALTER TABLE `nominas` ADD FOREIGN KEY (`aprobada_por`) REFERENCES `empleados` (`id`);
 
 ALTER TABLE `nominas` ADD FOREIGN KEY (`pagada_por`) REFERENCES `empleados` (`id`);
-
-ALTER TABLE `asistencias` ADD FOREIGN KEY (`empleado_id`) REFERENCES `empleados` (`id`);
 
 ALTER TABLE `membresia_beneficios` ADD FOREIGN KEY (`tipo_membresia_id`) REFERENCES `tipos_membresia` (`id`) ON DELETE CASCADE;
 
@@ -458,8 +404,6 @@ ALTER TABLE `facturas` ADD FOREIGN KEY (`empleado_responsable_id`) REFERENCES `e
 ALTER TABLE `detalles_factura` ADD FOREIGN KEY (`factura_id`) REFERENCES `facturas` (`id`) ON DELETE CASCADE;
 
 ALTER TABLE `pagos` ADD FOREIGN KEY (`factura_id`) REFERENCES `facturas` (`id`);
-
-ALTER TABLE `pagos` ADD FOREIGN KEY (`metodo_pago_id`) REFERENCES `metodos_pago` (`id`);
 
 ALTER TABLE `productos` ADD FOREIGN KEY (`categoria_id`) REFERENCES `categorias_productos` (`id`);
 
