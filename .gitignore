@@ -33,3 +33,13 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### maven-wrapper ###
+.mvn/wrapper/maven-wrapper.jar
+.mvn
+### Mysql-Docker dist
+database
+
+### env file
+.env
+

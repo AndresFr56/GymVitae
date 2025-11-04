@@ -1,32 +1,22 @@
 services:
   database_gym:
     image: mysql
-    container_name: gymvitae_database
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: gymvitae_root_2024
-      MYSQL_DATABASE: gym_system
-      MYSQL_USER: gym_admin
-      MYSQL_PASSWORD: gym_pass_2024
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       TZ: America/Guayaquil
     ports:
       - "3306:3306"
     volumes:
-      - gym_mysql_data:/var/lib/mysql
+      - ./database:/var/lib/mysql
       - ./Resources/gym_system.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
-      - ./mysql-config/my.cnf:/etc/mysql/conf.d/custom.cnf:ro
-      - ./backups:/backups
     networks:
-      - gym_network
-    command: --default-authentication-plugin=mysql_native_password
+      - gymvitae_networks
 
-volumes:
-  gym_mysql_data:
-    driver: local
-    name: gymvitae_mysql_data
-
-# Redes
 networks:
-  gym_network:
+  gymvitae_networks:
     driver: bridge
-    name: gymvitae_network
+    name: gymvitae_networks
