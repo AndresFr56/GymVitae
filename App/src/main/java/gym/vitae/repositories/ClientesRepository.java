@@ -102,20 +102,20 @@ public class ClientesRepository extends Repository<Clientes> implements IReposit
 
 	@Override
 	public boolean delete(int id) throws SQLException {
-		String sql = "DELETE FROM clientes WHERE id = ?";
+		String sql = "UPDATE clientes SET estado = 'suspendido' WHERE id = ?";
 		try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) { ps.setInt(1, id); return ps.executeUpdate() > 0; }
 	}
 
 	@Override
 	public Optional<Clientes> findById(int id) throws SQLException {
-		String sql = "SELECT * FROM clientes WHERE id = ?";
+		String sql = "SELECT * FROM clientes WHERE id = ? AND estado = 'activo' ";
 		try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) { ps.setInt(1, id); try (ResultSet rs = ps.executeQuery()) { if (rs.next()) return Optional.of(mapRow(rs)); } }
 		return Optional.empty();
 	}
 
 	@Override
 	public List<Clientes> findAll() throws SQLException {
-		String sql = "SELECT * FROM clientes ORDER BY id";
+		String sql = "SELECT * FROM clientes WHERE estado='activo' ORDER BY id";
 		List<Clientes> list = new ArrayList<>();
 		try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) { while (rs.next()) list.add(mapRow(rs)); }
 		return list;
@@ -123,14 +123,14 @@ public class ClientesRepository extends Repository<Clientes> implements IReposit
 
 	@Override
 	public long count() throws SQLException {
-		String sql = "SELECT COUNT(*) FROM clientes";
+		String sql = "SELECT COUNT(*) FROM clientes WHERE estado='activo'";
 		try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) { if (rs.next()) return rs.getLong(1); }
 		return 0;
 	}
 
 	@Override
 	public boolean existsById(int id) throws SQLException {
-		String sql = "SELECT 1 FROM clientes WHERE id = ? LIMIT 1";
+		String sql = "SELECT 1 FROM clientes WHERE id = ? AND estado='activo' LIMIT 1";
 		try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) { ps.setInt(1, id); try (ResultSet rs = ps.executeQuery()) { return rs.next(); } }
 	}
 

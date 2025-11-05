@@ -60,7 +60,7 @@ public class PersonalRepository extends Repository<Personal> {
     @Override
     public boolean update(Personal entity) throws SQLException {
         String sql = "UPDATE empleados " +
-                "SET cargo_id=?, codigo_empleado=?, nombres=?, apellidos=?, cedula=?, genero=?, telefono=?, direccion=?, email=?, fecha_ingreso=?, fecha_salida=?, tipo_contrato=?, estado=? WHERE id=?";
+                "SET cargo_id=?, codigo_empleado=?, nombres=?, apellidos=?, cedula=?, genero=?, telefono=?, direccion=?, email=?, fecha_ingreso=?, fecha_salida=?, tipo_contrato=?, estado=? WHERE id=? AND estado != 'inactivo'";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, entity.getCargoId());
@@ -83,7 +83,7 @@ public class PersonalRepository extends Repository<Personal> {
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM empleados WHERE id = ?";
+        String sql = "UPDATE empleados SET estado = 'inactivo' WHERE id = ?" ;
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -93,7 +93,7 @@ public class PersonalRepository extends Repository<Personal> {
 
     @Override
     public Optional<Personal> findById(int id) throws SQLException {
-        String sql = "SELECT * FROM empleados WHERE id = ?";
+        String sql = "SELECT * FROM empleados WHERE id = ? AND estado != 'inactivo'";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -106,7 +106,7 @@ public class PersonalRepository extends Repository<Personal> {
 
     @Override
     public List<Personal> findAll() throws SQLException {
-        String sql = "SELECT * FROM empleados ORDER BY id";
+        String sql = "SELECT * FROM empleados ORDER BY id WHERE estado != 'inactivo'";
         List<Personal> list = new ArrayList<>();
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
@@ -119,7 +119,7 @@ public class PersonalRepository extends Repository<Personal> {
 
     @Override
     public long count() throws SQLException {
-        String sql = "SELECT COUNT(*) FROM empleados";
+        String sql = "SELECT COUNT(*) FROM empleados WHERE estado != 'inactivo'";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {

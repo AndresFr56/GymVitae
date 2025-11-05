@@ -88,7 +88,23 @@ public class MembresiasRepository extends Repository<Membresias> {
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM membresias WHERE id = ?";
+        String sql = "UPDATE membresias SET estado = 'cancelado' WHERE id = ?";
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    public boolean suspend(int id ) throws SQLException{
+        String sql = "UPDATE membresias SET estado = 'suspendida' WHERE id = ?";
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    public boolean defeated(int id ) throws SQLException{
+        String sql = "UPDATE membresias SET estado = 'vencida' WHERE id = ?";
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;

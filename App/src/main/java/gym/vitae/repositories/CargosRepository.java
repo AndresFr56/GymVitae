@@ -50,13 +50,14 @@ public class CargosRepository extends Repository<Cargos> implements IRepository<
 
 	@Override
 	public boolean delete(int id) throws SQLException {
-		String sql = "DELETE FROM cargos WHERE id = ?";
-		try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) { ps.setInt(1, id); return ps.executeUpdate() > 0; }
+		String sql = "UPDATE cargos SET activo = false WHERE id = ?";
+		try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id); return ps.executeUpdate() > 0; }
 	}
 
 	@Override
 	public Optional<Cargos> findById(int id) throws SQLException {
-		String sql = "SELECT * FROM cargos WHERE id = ?";
+		String sql = "SELECT * FROM cargos WHERE id = ? AND activo = true";
 		try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 			ps.setInt(1, id);
 			try (ResultSet rs = ps.executeQuery()) { if (rs.next()) return Optional.of(mapRow(rs)); }
@@ -66,7 +67,7 @@ public class CargosRepository extends Repository<Cargos> implements IRepository<
 
 	@Override
 	public List<Cargos> findAll() throws SQLException {
-		String sql = "SELECT * FROM cargos ORDER BY id";
+		String sql = "SELECT * FROM cargos WHERE activo = true ORDER BY id";
 		List<Cargos> list = new ArrayList<>();
 		try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) { while (rs.next()) list.add(mapRow(rs)); }
 		return list;
@@ -74,14 +75,14 @@ public class CargosRepository extends Repository<Cargos> implements IRepository<
 
 	@Override
 	public long count() throws SQLException {
-		String sql = "SELECT COUNT(*) FROM cargos";
+		String sql = "SELECT COUNT(*) FROM cargos WHERE activo = true";
 		try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) { if (rs.next()) return rs.getLong(1); }
 		return 0;
 	}
 
 	@Override
 	public boolean existsById(int id) throws SQLException {
-		String sql = "SELECT 1 FROM cargos WHERE id = ? LIMIT 1";
+		String sql = "SELECT 1 FROM cargos WHERE id = ? AND activo = true LIMIT 1";
 		try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) { ps.setInt(1, id); try (ResultSet rs = ps.executeQuery()) { return rs.next(); } }
 	}
 

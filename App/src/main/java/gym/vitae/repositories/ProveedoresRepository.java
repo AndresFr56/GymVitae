@@ -64,7 +64,7 @@ public class ProveedoresRepository extends Repository<Proveedores>{
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM proveedores WHERE id = ?";
+        String sql = "UPDATE proveedores SET activo = false WHERE id = ?";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -74,7 +74,7 @@ public class ProveedoresRepository extends Repository<Proveedores>{
 
     @Override
     public Optional<Proveedores> findById(int id) throws SQLException {
-        String sql = "SELECT * FROM proveedores WHERE id = ?";
+        String sql = "SELECT * FROM proveedores WHERE id = ? AND activo=true LIMIT 1";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -87,7 +87,7 @@ public class ProveedoresRepository extends Repository<Proveedores>{
 
     @Override
     public List<Proveedores> findAll() throws SQLException {
-        String sql = "SELECT * FROM proveedores ORDER BY id";
+        String sql = "SELECT * FROM proveedores WHERE activo=true ORDER BY id";
         List<Proveedores> list = new ArrayList<>();
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
@@ -98,7 +98,7 @@ public class ProveedoresRepository extends Repository<Proveedores>{
 
     @Override
     public long count() throws SQLException {
-        String sql = "SELECT COUNT(*) FROM proveedores";
+        String sql = "SELECT COUNT(*) FROM proveedores WHERE activo=true";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             if (rs.next()) return rs.getLong(1);
@@ -108,7 +108,7 @@ public class ProveedoresRepository extends Repository<Proveedores>{
 
     @Override
     public boolean existsById(int id) throws SQLException {
-        String sql = "SELECT 1 FROM proveedores WHERE id = ? LIMIT 1";
+        String sql = "SELECT 1 FROM proveedores WHERE id = ? AND activo=true LIMIT 1";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -120,7 +120,7 @@ public class ProveedoresRepository extends Repository<Proveedores>{
 
     @Override
     public List<Proveedores> findAll(int offset, int limit) throws SQLException {
-        String sql = "SELECT * FROM proveedores ORDER BY id LIMIT ? OFFSET ?";
+        String sql = "SELECT * FROM proveedores WHERE activo=true ORDER BY id LIMIT ? OFFSET ?";
         List<Proveedores> list = new ArrayList<>();
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

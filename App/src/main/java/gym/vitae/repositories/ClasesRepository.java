@@ -56,7 +56,7 @@ public class ClasesRepository extends Repository<Clases> implements IRepository<
 
 	@Override
 	public boolean delete(int id) throws SQLException {
-		String sql = "DELETE FROM clases WHERE id = ?";
+		String sql = "UPDATE clases SET activo = false WHERE id = ?";
 		try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 			ps.setInt(1, id);
 			return ps.executeUpdate() > 0;
@@ -65,7 +65,7 @@ public class ClasesRepository extends Repository<Clases> implements IRepository<
 
 	@Override
 	public Optional<Clases> findById(int id) throws SQLException {
-		String sql = "SELECT * FROM clases WHERE id = ?";
+		String sql = "SELECT * FROM clases WHERE id = ? AND activo = true";
 		try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 			ps.setInt(1, id);
 			try (ResultSet rs = ps.executeQuery()) { if (rs.next()) return Optional.of(mapRow(rs)); }
@@ -75,7 +75,7 @@ public class ClasesRepository extends Repository<Clases> implements IRepository<
 
 	@Override
 	public List<Clases> findAll() throws SQLException {
-		String sql = "SELECT * FROM clases ORDER BY id";
+		String sql = "SELECT * FROM clases WHERE activo = true ORDER BY id";
 		List<Clases> list = new ArrayList<>();
 		try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 			while (rs.next()) list.add(mapRow(rs));
@@ -92,7 +92,7 @@ public class ClasesRepository extends Repository<Clases> implements IRepository<
 
 	@Override
 	public boolean existsById(int id) throws SQLException {
-		String sql = "SELECT 1 FROM clases WHERE id = ? LIMIT 1";
+		String sql = "SELECT 1 FROM clases WHERE id = ? AND activo = false LIMIT 1";
 		try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) { ps.setInt(1, id); try (ResultSet rs = ps.executeQuery()) { return rs.next(); } }
 	}
 
