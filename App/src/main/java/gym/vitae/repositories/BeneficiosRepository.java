@@ -1,39 +1,31 @@
 package gym.vitae.repositories;
 
-import gym.vitae.model.Clases;
+import gym.vitae.model.Beneficios;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ClasesRepository extends Repository<Clases> {
+public class BeneficiosRepository extends Repository<Beneficios> {
 
-    private Clases mapRow(ResultSet rs) throws SQLException {
-        Clases c = new Clases();
-        c.setId(rs.getInt("id"));
-        c.setNombre(rs.getString("nombre"));
-        c.setDescripcion(rs.getString("descripcion"));
-        c.setDuracionMinutos(rs.getInt("duracion_minutos"));
-        c.setCapacidadMaxima(rs.getInt("capacidad_maxima"));
-        c.setNivel(rs.getString("nivel"));
-        c.setActiva(rs.getBoolean("activa"));
-        c.setCreatedAt(rs.getTimestamp("created_at"));
-        c.setUpdatedAt(rs.getTimestamp("updated_at"));
-        return c;
+    private Beneficios mapRow(ResultSet rs) throws SQLException {
+        Beneficios b = new Beneficios();
+        b.setId(rs.getInt("id"));
+        b.setNombre(rs.getString("nombre"));
+        b.setDescripcion(rs.getString("descripcion"));
+        b.setCreatedAt(rs.getTimestamp("created_at"));
+        b.setUpdatedAt(rs.getTimestamp("updated_at"));
+        return b;
     }
 
     @Override
-    public Clases save(Clases entity) throws SQLException {
-        String sql = "INSERT INTO clases (nombre, descripcion, duracion_minutos, capacidad_maxima, nivel, activa) VALUES (?, ?, ?, ?, ?, ?)";
+    public Beneficios save(Beneficios entity) throws SQLException {
+        String sql = "INSERT INTO beneficios (nombre, descripcion) VALUES (?, ?)";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, entity.getNombre());
             ps.setString(2, entity.getDescripcion());
-            ps.setInt(3, entity.getDuracionMinutos());
-            ps.setInt(4, entity.getCapacidadMaxima());
-            ps.setString(5, entity.getNivel());
-            ps.setBoolean(6, entity.getActiva() != null ? entity.getActiva() : true);
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) entity.setId(rs.getInt(1));
@@ -43,23 +35,19 @@ public class ClasesRepository extends Repository<Clases> {
     }
 
     @Override
-    public boolean update(Clases entity) throws SQLException {
-        String sql = "UPDATE clases SET nombre=?, descripcion=?, duracion_minutos=?, capacidad_maxima=?, nivel=?, activa=? WHERE id=?";
+    public boolean update(Beneficios entity) throws SQLException {
+        String sql = "UPDATE beneficios SET nombre=?, descripcion=? WHERE id=?";
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, entity.getNombre());
             ps.setString(2, entity.getDescripcion());
-            ps.setInt(3, entity.getDuracionMinutos());
-            ps.setInt(4, entity.getCapacidadMaxima());
-            ps.setString(5, entity.getNivel());
-            ps.setBoolean(6, entity.getActiva() != null ? entity.getActiva() : true);
-            ps.setInt(7, entity.getId());
+            ps.setInt(3, entity.getId());
             return ps.executeUpdate() > 0;
         }
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "UPDATE clases SET activo = false WHERE id = ?";
+        String sql = "DELETE FROM beneficios WHERE id = ?";
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;
@@ -67,8 +55,8 @@ public class ClasesRepository extends Repository<Clases> {
     }
 
     @Override
-    public Optional<Clases> findById(int id) throws SQLException {
-        String sql = "SELECT * FROM clases WHERE id = ? AND activo = true";
+    public Optional<Beneficios> findById(int id) throws SQLException {
+        String sql = "SELECT * FROM beneficios WHERE id = ?";
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
@@ -79,9 +67,9 @@ public class ClasesRepository extends Repository<Clases> {
     }
 
     @Override
-    public List<Clases> findAll() throws SQLException {
-        String sql = "SELECT * FROM clases WHERE activo = true ORDER BY id";
-        List<Clases> list = new ArrayList<>();
+    public List<Beneficios> findAll() throws SQLException {
+        String sql = "SELECT * FROM beneficios ORDER BY id";
+        List<Beneficios> list = new ArrayList<>();
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) list.add(mapRow(rs));
         }
@@ -90,7 +78,7 @@ public class ClasesRepository extends Repository<Clases> {
 
     @Override
     public long count() throws SQLException {
-        String sql = "SELECT COUNT(*) FROM clases";
+        String sql = "SELECT COUNT(*) FROM beneficios";
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             if (rs.next()) return rs.getLong(1);
         }
@@ -99,7 +87,7 @@ public class ClasesRepository extends Repository<Clases> {
 
     @Override
     public boolean existsById(int id) throws SQLException {
-        String sql = "SELECT 1 FROM clases WHERE id = ? AND activo = false LIMIT 1";
+        String sql = "SELECT 1 FROM beneficios WHERE id = ? LIMIT 1";
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
@@ -109,9 +97,9 @@ public class ClasesRepository extends Repository<Clases> {
     }
 
     @Override
-    public List<Clases> findAll(int offset, int limit) throws SQLException {
-        String sql = "SELECT * FROM clases ORDER BY id LIMIT ? OFFSET ?";
-        List<Clases> list = new ArrayList<>();
+    public List<Beneficios> findAll(int offset, int limit) throws SQLException {
+        String sql = "SELECT * FROM beneficios ORDER BY id LIMIT ? OFFSET ?";
+        List<Beneficios> list = new ArrayList<>();
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, limit);
             ps.setInt(2, offset);
