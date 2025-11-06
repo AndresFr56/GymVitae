@@ -1,6 +1,6 @@
 services:
   database_gym:
-    image: mysql
+    image: mysql:lastest
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -11,8 +11,26 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - ./database:/var/lib/mysql
+      - ./Database:/var/lib/mysql
       - ./Resources/gym_system.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    networks:
+      - gymvitae_networks
+
+  db_testing_gym:
+    image: mysql:lastest
+    restart: no
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_TEST_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_TEST_DATABASE}
+      MYSQL_USER: ${MYSQL_TEST_USER}
+      MYSQL_PASSWORD: ${MYSQL_TEST_PASSWORD}
+      TZ: America/Guayaquil
+    ports:
+      - "3306:3307"
+    volumes:
+      - ./Resources/gym_system.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    depends_on:
+      - database_gym
     networks:
       - gymvitae_networks
 
