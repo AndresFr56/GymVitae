@@ -450,13 +450,6 @@ CREATE INDEX `idx_nombre` ON `proveedores` (`nombre`);
 
 CREATE INDEX `idx_activo` ON `proveedores` (`activo`);
 
--- Índices Categorías Productos
-CREATE INDEX `idx_nombre` ON `categorias_productos` (`nombre`);
-
-CREATE INDEX `idx_tipo` ON `categorias_productos` (`tipo_item`);
-
-CREATE INDEX `idx_activo` ON `categorias_productos` (`activo`);
-
 -- Índices Productos
 CREATE INDEX `idx_codigo` ON `productos` (`codigo`);
 
@@ -467,11 +460,6 @@ CREATE INDEX `idx_activo` ON `productos` (`activo`);
 CREATE INDEX `idx_stock` ON `productos` (`stock`);
 
 CREATE INDEX `idx_productos_stock_critico` ON `productos` (`stock`);
-
--- Índices Categorías Equipos
-CREATE INDEX `idx_nombre` ON `categorias_equipos` (`nombre`);
-
-CREATE INDEX `idx_activo` ON `categorias_equipos` (`activo`);
 
 -- Índices Equipos
 CREATE INDEX `idx_codigo` ON `equipos` (`codigo`);
@@ -657,7 +645,9 @@ VALUES ('Gerente',
        ('Entrenador',
         800.00,
         'Instructor de clases grupales'),
-       ('Limpieza', 500.00, 'Personal de limpieza');
+       ('Limpieza',
+        500.00,
+        'Personal de limpieza');
 
 -- Beneficios
 INSERT INTO beneficios (nombre, descripcion)
@@ -680,11 +670,11 @@ VALUES (1, 'EMP-2024000001', 'Carlos', 'Mendoza Silva', '0912345678', 'Masculino
         'carlos.mendoza@gymvitae.com', '2023-01-15', 'Tiempo completo', 'activo'),
        (2, 'EMP-2024000002', 'María', 'González Pérez', '0923456789', 'Femenino', '0976543210', 'Cdla. Kennedy Mz 45',
         'maria.gonzalez@gymvitae.com', '2023-03-20', 'Tiempo completo', 'activo'),
-       (2, 'EMP-2024000003', 'José', 'Ramírez López', '0934567890', 'Masculino', '0965432109', 'Urdesa Norte 789',
-        'jose.ramirez@gymvitae.com', '2023-06-10', 'Medio tiempo', 'activo'),
-       (3, 'EMP-2024000004', 'Ana', 'Torres Vega', '0945678901', 'Femenino', '0954321098', 'Samborondón Km 2.5',
+       (3, 'EMP-2024000003', 'Ana', 'Torres Vega', '0945678901', 'Femenino', '0954321098', 'Samborondón Km 2.5',
         'ana.torres@gymvitae.com', '2023-08-01', 'Tiempo completo', 'activo'),
-       (4, 'EMP-2024000005', 'Luis', 'Paredes Castro', '0956789012', 'Masculino', '0943210987', 'Alborada 7ma Etapa',
+       (4, 'EMP-2024000004', 'José', 'Ramírez López', '0934567890', 'Masculino', '0965432109', 'Urdesa Norte 789',
+        'jose.ramirez@gymvitae.com', '2023-06-10', 'Medio tiempo', 'activo'),
+       (5, 'EMP-2024000005', 'Luis', 'Paredes Castro', '0956789012', 'Masculino', '0943210987', 'Alborada 7ma Etapa',
         'luis.paredes@gymvitae.com', '2024-01-15', 'Medio tiempo', 'activo');
 
 
@@ -769,11 +759,6 @@ VALUES ('Spinning',
         60,
         12,
         'intermedio'),
-       ('Zumba',
-        'Baile aeróbico al ritmo de música latina',
-        50,
-        25,
-        'todos'),
        ('Pilates',
         'Fortalecimiento del core y postura',
         55,
@@ -791,6 +776,17 @@ VALUES ('Spinning',
         20,
         'principiante');
 
+INSERT INTO horarios (clase_id, instructor_id, dia_semana, hora_inicio, hora_fin, cupos_disponibles, activo)
+VALUES (1, 4, 'lunes', '06:00:00', '06:45:00', 20, TRUE),
+       (1, 4, 'miercoles', '06:00:00', '06:45:00', 20, TRUE),
+       (1, 4, 'viernes', '06:00:00', '06:45:00', 20, TRUE),
+       (2, 4, 'martes', '18:00:00', '19:00:00', 15, TRUE),
+       (2, 4, 'jueves', '18:00:00', '19:00:00', 15, TRUE),
+       (3, 4, 'lunes', '19:00:00', '19:50:00', 25, TRUE),
+       (3, 4, 'miercoles', '19:00:00', '19:50:00', 25, TRUE);
+
+-- Clientes
+
 INSERT INTO clientes (codigo_cliente, nombres, apellidos, cedula, genero, telefono, direccion, email, fecha_nacimiento,
                       contacto_emergencia, telefono_emergencia, estado)
 VALUES ('CLI-2024000001', 'Pedro', 'Sánchez Ruiz', '0967890123', 'Masculino', '0932109876', 'Cdla. Guayacanes Mz 10',
@@ -803,6 +799,37 @@ VALUES ('CLI-2024000001', 'Pedro', 'Sánchez Ruiz', '0967890123', 'Masculino', '
         'sofia.castro@email.com', '1988-03-12', 'Miguel Castro', '0965432109', 'activo'),
        ('CLI-2024000005', 'Miguel', 'Herrera Vásquez', '0901234567', 'Masculino', '0954321098', 'Kennedy Norte Mz 88',
         'miguel.herrera@email.com', '1995-07-18', 'Elena Vásquez', '0943210987', 'activo');
+
+
+-- Inscripciones a clases
+INSERT INTO inscripciones_clases (horario_id, cliente_id, fecha_inscripcion, estado)
+VALUES (1, 1, '2024-11-01', 'activa'),
+       (1, 3, '2024-11-01', 'activa'),
+       (4, 2, '2024-10-20', 'activa'),
+       (4, 4, '2024-11-05', 'activa'),
+       (6, 1, '2024-11-02', 'activa');
+
+-- Proveedores
+INSERT INTO proveedores (codigo, nombre, contacto, telefono, email, direccion, activo)
+VALUES ('PROV-001', 'Suplementos Ecuador S.A.', 'Carlos López', '042345678', 'ventas@suplementosec.com',
+        'Av. Francisco de Orellana Km 2', TRUE),
+       ('PROV-002', 'Equipos Fitness Pro', 'Ana Mora', '042456789', 'info@fitnesspro.com',
+        'Cdla. Urdesa Circunvalación Sur 123', TRUE),
+       ('PROV-003', 'Distribuidora Deportiva', 'Juan Pérez', '042567890', 'ventas@distdeportiva.com',
+        'Av. Carlos Julio Arosemena Km 1.5', TRUE),
+       ('PROV-004', 'Nutrición y Vida', 'María Torres', '042678901', 'contacto@nutrivida.com', 'Mall del Sol Local 45',
+        TRUE),
+       ('PROV-005', 'Maquinarias Gym Import', 'Roberto Silva', '042789012', 'importaciones@gymimport.com',
+        'Puerto Marítimo Zona Industrial', TRUE);
+
+
+-- Membresías activas
+INSERT INTO membresias (cliente_id, tipo_membresia_id, fecha_inicio, fecha_fin, precio_pagado, estado)
+VALUES (1, 2, '2025-11-01', '2025-11-30', 50.00, 'activa'),
+       (2, 3, '2025-10-15', '2026-01-15', 135.00, 'activa'),
+       (3, 5, '2025-09-01', '2026-08-31', 480.00, 'activa'),
+       (4, 2, '2025-11-05', '2025-12-05', 50.00, 'activa'),
+       (5, 1, '2025-11-10', '2025-12-10', 35.00, 'activa');
 
 
 -- ============================================
@@ -881,7 +908,7 @@ SELECT p.id,
            END                       AS estado_stock,
        (p.stock * p.precio_unitario) AS valor_inventario
 FROM productos p
-         INNER JOIN categorias_productos cp ON p.categoria_id = cp.id
+         INNER JOIN categorias cp ON p.categoria_id = cp.id
 WHERE p.activo = TRUE
 ORDER BY CASE
              WHEN p.stock = 0 THEN 1
@@ -984,7 +1011,7 @@ SELECT e.id,
        e.ubicacion,
        e.costo
 FROM equipos e
-         INNER JOIN categorias_equipos ce ON e.categoria_id = ce.id
+         INNER JOIN categorias ce ON e.categoria_id = ce.id
 ORDER BY e.estado,
          e.nombre;
 
@@ -1035,11 +1062,14 @@ ORDER BY FIELD(
          ),
          h.hora_inicio;
 
--- ============================================
+-- =======================================================================================
 -- PROCEDIMIENTOS ALMACENADOS
--- ============================================
+-- =======================================================================================
+
+
 -- SP: Crear Cliente
-DELIMITER / /
+
+DELIMITER //
 CREATE PROCEDURE sp_crear_cliente(
     IN p_nombres VARCHAR(100),
     IN p_apellidos VARCHAR(100),
@@ -1095,10 +1125,9 @@ BEGIN
            v_codigo                           AS codigo_cliente,
            'Cliente registrado correctamente' AS mensaje;
 
-END / / DELIMITER
+END //
 
 -- SP: Crear Membresía con Factura
-DELIMITER / /
 CREATE PROCEDURE sp_crear_membresia_con_factura(
     IN p_cliente_id INT,
     IN p_tipo_membresia_id INT,
@@ -1197,10 +1226,9 @@ BEGIN
            v_numero_factura                            AS numero_factura,
            'Membresía y factura creadas correctamente' AS mensaje;
 
-END / / DELIMITER
+END //
 
 -- SP: Registrar Pago
-DELIMITER / /
 CREATE PROCEDURE sp_registrar_pago(
     IN p_factura_id INT,
     IN p_monto DECIMAL(10, 2),
@@ -1261,10 +1289,9 @@ BEGIN
            v_nuevo_estado                  AS estado_factura,
            (v_total - v_pagado)            AS saldo_pendiente;
 
-END / / DELIMITER
+END //
 
 -- SP: Renovar Membresía
-DELIMITER / /
 CREATE PROCEDURE sp_renovar_membresia(
     IN p_membresia_id INT,
     IN p_empleado_id INT,
@@ -1299,10 +1326,9 @@ BEGIN
             p_factura_id
          );
 
-END / / DELIMITER
+END //
 
 -- SP: Vender Producto
-DELIMITER / /
 CREATE PROCEDURE sp_vender_producto(
     IN p_cliente_id INT,
     IN p_producto_id INT,
@@ -1407,10 +1433,9 @@ BEGIN
            v_numero_factura                 AS numero_factura,
            'Venta registrada correctamente' AS mensaje;
 
-END / / DELIMITER
+END //
 
 -- SP: Inscribir Cliente a Clase
-DELIMITER / /
 CREATE PROCEDURE sp_inscribir_clase(
     IN p_horario_id INT,
     IN p_cliente_id INT
@@ -1471,10 +1496,9 @@ BEGIN
 
     SELECT 'Inscripción exitosa' AS mensaje;
 
-END / / DELIMITER
+END //
 
 -- SP: Generar Nóminas del Mes
-DELIMITER / /
 CREATE PROCEDURE sp_generar_nominas_mes(
     IN p_mes INT,
     IN p_anio INT,
@@ -1551,11 +1575,10 @@ BEGIN
 
     SELECT CONCAT('Se generaron nóminas para ', p_mes, p_anio) AS mensaje;
 
-END / / DELIMITER
+END //
 
 
 -- SP: Aprobar Nómina
-DELIMITER / /
 CREATE PROCEDURE sp_aprobar_nomina(
     IN p_nomina_id INT,
     IN p_aprobada_por INT
@@ -1576,10 +1599,10 @@ BEGIN
 
     END IF;
 
-END / / DELIMITER
+END //
 
 -- SP: Pagar Nómina
-DELIMITER / /
+DELIMITER //
 CREATE PROCEDURE sp_pagar_nomina(
     IN p_nomina_id INT,
     IN p_fecha_pago DATE,
@@ -1602,7 +1625,7 @@ BEGIN
 
     END IF;
 
-END / / DELIMITER
+END //
 
 -- ============================================
 -- TRIGGERS
@@ -1629,10 +1652,13 @@ BEGIN
 
     END IF;
 
-END / / DELIMITER
+END //
+
+DELIMITER ;
 
 -- Trigger: Actualizar cupos después de inscripción
-DELIMITER / /
+DELIMITER //
+
 CREATE TRIGGER trg_actualizar_cupos_clase
     AFTER
         INSERT
@@ -1648,10 +1674,9 @@ BEGIN
 
     END IF;
 
-END / / DELIMITER
+END //
 
 -- Trigger: Restaurar cupos al cancelar inscripción
-DELIMITER / /
 CREATE TRIGGER trg_restaurar_cupos_clase
     AFTER
         UPDATE
@@ -1667,10 +1692,9 @@ BEGIN
 
     END IF;
 
-END / / DELIMITER
+END //
 
 -- Trigger: Verificar membresías vencidas
-DELIMITER / /
 CREATE TRIGGER trg_verificar_membresia_vencida
     BEFORE
         UPDATE
@@ -1684,4 +1708,6 @@ BEGIN
 
     END IF;
 
-END / /
+END //
+
+DELIMITER ;
