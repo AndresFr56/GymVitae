@@ -5,27 +5,22 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 @Entity
-@Table(name = "tipos_membresia", schema = "gym_system")
-public class TiposMembresia {
+@Table(name = "cargos", schema = "gym_system")
+public class Cargo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "nombre", nullable = false, length = 50)
+    @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
 
+    @Column(name = "salario_base", nullable = false, precision = 10, scale = 2)
+    private BigDecimal salarioBase;
+
+    @Lob
     @Column(name = "descripcion")
     private String descripcion;
-
-    @Column(name = "duracion_dias", nullable = false)
-    private Integer duracionDias;
-
-    @Column(name = "costo", nullable = false, precision = 10, scale = 2)
-    private BigDecimal costo;
-
-    @Column(name = "acceso_completo")
-    private Boolean accesoCompleto;
 
     @Column(name = "activo")
     private Boolean activo;
@@ -52,36 +47,20 @@ public class TiposMembresia {
         this.nombre = nombre;
     }
 
+    public BigDecimal getSalarioBase() {
+        return salarioBase;
+    }
+
+    public void setSalarioBase(BigDecimal salarioBase) {
+        this.salarioBase = salarioBase;
+    }
+
     public String getDescripcion() {
         return descripcion;
     }
 
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
-    }
-
-    public Integer getDuracionDias() {
-        return duracionDias;
-    }
-
-    public void setDuracionDias(Integer duracionDias) {
-        this.duracionDias = duracionDias;
-    }
-
-    public BigDecimal getCosto() {
-        return costo;
-    }
-
-    public void setCosto(BigDecimal costo) {
-        this.costo = costo;
-    }
-
-    public Boolean getAccesoCompleto() {
-        return accesoCompleto;
-    }
-
-    public void setAccesoCompleto(Boolean accesoCompleto) {
-        this.accesoCompleto = accesoCompleto;
     }
 
     public Boolean getActivo() {

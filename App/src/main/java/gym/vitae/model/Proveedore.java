@@ -1,31 +1,34 @@
 package gym.vitae.model;
 
 import javax.persistence.*;
-import java.math.BigDecimal;
 import java.time.Instant;
 
 @Entity
-@Table(name = "tipos_membresia", schema = "gym_system")
-public class TiposMembresia {
+@Table(name = "proveedores", schema = "gym_system")
+public class Proveedore {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "nombre", nullable = false, length = 50)
+    @Column(name = "codigo", nullable = false, length = 20)
+    private String codigo;
+
+    @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
 
-    @Column(name = "descripcion")
-    private String descripcion;
+    @Column(name = "contacto", length = 100)
+    private String contacto;
 
-    @Column(name = "duracion_dias", nullable = false)
-    private Integer duracionDias;
+    @Column(name = "telefono", length = 20)
+    private String telefono;
 
-    @Column(name = "costo", nullable = false, precision = 10, scale = 2)
-    private BigDecimal costo;
+    @Column(name = "email", length = 100)
+    private String email;
 
-    @Column(name = "acceso_completo")
-    private Boolean accesoCompleto;
+    @Lob
+    @Column(name = "direccion")
+    private String direccion;
 
     @Column(name = "activo")
     private Boolean activo;
@@ -44,6 +47,14 @@ public class TiposMembresia {
         this.id = id;
     }
 
+    public String getCodigo() {
+        return codigo;
+    }
+
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
+    }
+
     public String getNombre() {
         return nombre;
     }
@@ -52,36 +63,36 @@ public class TiposMembresia {
         this.nombre = nombre;
     }
 
-    public String getDescripcion() {
-        return descripcion;
+    public String getContacto() {
+        return contacto;
     }
 
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
+    public void setContacto(String contacto) {
+        this.contacto = contacto;
     }
 
-    public Integer getDuracionDias() {
-        return duracionDias;
+    public String getTelefono() {
+        return telefono;
     }
 
-    public void setDuracionDias(Integer duracionDias) {
-        this.duracionDias = duracionDias;
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
     }
 
-    public BigDecimal getCosto() {
-        return costo;
+    public String getEmail() {
+        return email;
     }
 
-    public void setCosto(BigDecimal costo) {
-        this.costo = costo;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public Boolean getAccesoCompleto() {
-        return accesoCompleto;
+    public String getDireccion() {
+        return direccion;
     }
 
-    public void setAccesoCompleto(Boolean accesoCompleto) {
-        this.accesoCompleto = accesoCompleto;
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
     }
 
     public Boolean getActivo() {

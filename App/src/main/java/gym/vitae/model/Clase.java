@@ -1,34 +1,35 @@
 package gym.vitae.model;
 
 import javax.persistence.*;
-import java.math.BigDecimal;
 import java.time.Instant;
 
 @Entity
-@Table(name = "tipos_membresia", schema = "gym_system")
-public class TiposMembresia {
+@Table(name = "clases", schema = "gym_system")
+public class Clase {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "nombre", nullable = false, length = 50)
+    @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
 
+    @Lob
     @Column(name = "descripcion")
     private String descripcion;
 
-    @Column(name = "duracion_dias", nullable = false)
-    private Integer duracionDias;
+    @Column(name = "duracion_minutos", nullable = false)
+    private Integer duracionMinutos;
 
-    @Column(name = "costo", nullable = false, precision = 10, scale = 2)
-    private BigDecimal costo;
+    @Column(name = "capacidad_maxima", nullable = false)
+    private Integer capacidadMaxima;
 
-    @Column(name = "acceso_completo")
-    private Boolean accesoCompleto;
+    @Lob
+    @Column(name = "nivel")
+    private String nivel;
 
-    @Column(name = "activo")
-    private Boolean activo;
+    @Column(name = "activa")
+    private Boolean activa;
 
     @Column(name = "created_at")
     private Instant createdAt;
@@ -60,36 +61,36 @@ public class TiposMembresia {
         this.descripcion = descripcion;
     }
 
-    public Integer getDuracionDias() {
-        return duracionDias;
+    public Integer getDuracionMinutos() {
+        return duracionMinutos;
     }
 
-    public void setDuracionDias(Integer duracionDias) {
-        this.duracionDias = duracionDias;
+    public void setDuracionMinutos(Integer duracionMinutos) {
+        this.duracionMinutos = duracionMinutos;
     }
 
-    public BigDecimal getCosto() {
-        return costo;
+    public Integer getCapacidadMaxima() {
+        return capacidadMaxima;
     }
 
-    public void setCosto(BigDecimal costo) {
-        this.costo = costo;
+    public void setCapacidadMaxima(Integer capacidadMaxima) {
+        this.capacidadMaxima = capacidadMaxima;
     }
 
-    public Boolean getAccesoCompleto() {
-        return accesoCompleto;
+    public String getNivel() {
+        return nivel;
     }
 
-    public void setAccesoCompleto(Boolean accesoCompleto) {
-        this.accesoCompleto = accesoCompleto;
+    public void setNivel(String nivel) {
+        this.nivel = nivel;
     }
 
-    public Boolean getActivo() {
-        return activo;
+    public Boolean getActiva() {
+        return activa;
     }
 
-    public void setActivo(Boolean activo) {
-        this.activo = activo;
+    public void setActiva(Boolean activa) {
+        this.activa = activa;
     }
 
     public Instant getCreatedAt() {
