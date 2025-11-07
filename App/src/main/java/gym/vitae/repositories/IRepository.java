@@ -1,81 +1,44 @@
 package gym.vitae.repositories;
-import java.sql.SQLException;
+
 import java.util.List;
 import java.util.Optional;
 
 /**
- * @param <T> Generico que representa Tipo de entidad que maneja el repositorio
+ * Lightweight repository contract for model-specific repositories.
+ *
+ * Notes:
+ * - Implementations are expected to use JPA/Hibernate (EntityManager) or any other
+ *   persistence mechanism. No checked SQL exceptions are declared to keep the API
+ *   friendly for JPA usage.
+ * - The delete(int id) method is intentionally left to concrete implementations.
+ *   Per project convention, physical deletes should be avoided; repositories may
+ *   implement soft-delete behavior if required.
+ *
+ * @param <T> entity type
  */
 public interface IRepository<T> {
-  /**
-     * Guarda una nueva entidad en la base de datos.
-     *
-     * @param entity Entidad a guardar
-     * @return Entidad guardada con su ID generado
-     * @throws SQLException Si ocurre un error en la operación de base de datos
-     */
-    T save(T entity) throws SQLException;
+
+    T save(T entity);
+
+    boolean update(T entity);
 
     /**
-     * Actualiza una entidad existente en la base de datos.
+     * Delete should be implemented by the concrete repository. By default
+     * repositories can choose to make this a no-op (physical deletes aren't
+     * performed in this project).
      *
-     * @param entity Entidad con los datos actualizados
-     * @return true si la actualización fue exitosa, false en caso contrario
-     * @throws SQLException Si ocurre un error en la operación de base de datos
+     * @param id identifier to delete
      */
-    boolean update(T entity) throws SQLException;
+    void delete(int id);
 
-    /**
-     * Elimina una entidad de la base de datos por su ID.
-     * Este método realiza una eliminación física.
-     *
-     * @param id Identificador de la entidad a eliminar
-     * @return true si la eliminación fue exitosa, false en caso contrario
-     * @throws SQLException Si ocurre un error en la operación de base de datos
-     */
-    boolean delete(int id) throws SQLException;
+    Optional<T> findById(int id);
 
-    /**
-     * Busca una entidad por su ID.
-     *
-     * @param id Identificador de la entidad a buscar
-     * @return Optional conteniendo la entidad si existe, Optional.empty() si no existe
-     * @throws SQLException Si ocurre un error en la operación de base de datos
-     */
-    Optional<T> findById(int id) throws SQLException;
+    List<T> findAll();
 
-    /**
-     * Obtiene todas las entidades de la tabla.
-     *
-     * @return Lista con todas las entidades. Lista vacía si no hay registros
-     * @throws SQLException Si ocurre un error en la operación de base de datos
-     */
-    List<T> findAll() throws SQLException;
+    List<T> findAll(int offset, int limit);
 
-    /**
-     * Cuenta el número total de registros en la tabla.
-     *
-     * @return Número total de registros
-     * @throws SQLException Si ocurre un error en la operación de base de datos
-     */
-    long count() throws SQLException;
+    long count();
 
-    /**
-     * Verifica si existe una entidad con el ID especificado.
-     *
-     * @param id Identificador a verificar
-     * @return true si existe, false en caso contrario
-     * @throws SQLException Si ocurre un error en la operación de base de datos
-     */
-    boolean existsById(int id) throws SQLException;
+    boolean existsById(int id);
 
-    /**
-     * Obtiene registros con paginación.
-     *
-     * @param offset Número de registros a saltar
-     * @param limit Número máximo de registros a retornar
-     * @return Lista paginada de entidades
-     * @throws SQLException Si ocurre un error en la operación de base de datos
-     */
-    List<T> findAll(int offset, int limit) throws SQLException;
 }
