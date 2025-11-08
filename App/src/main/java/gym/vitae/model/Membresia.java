@@ -21,6 +21,10 @@ public class Membresia {
     @JoinColumn(name = "tipo_membresia_id", nullable = false)
     private TiposMembresia tipoMembresia;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "factura_id", nullable = false)
+    private Factura factura;
+
     @Column(name = "fecha_inicio", nullable = false)
     private LocalDate fechaInicio;
 
@@ -66,6 +70,14 @@ public class Membresia {
 
     public void setTipoMembresia(TiposMembresia tipoMembresia) {
         this.tipoMembresia = tipoMembresia;
+    }
+
+    public Factura getFactura() {
+        return factura;
+    }
+
+    public void setFactura(Factura factura) {
+        this.factura = factura;
     }
 
     public LocalDate getFechaInicio() {
