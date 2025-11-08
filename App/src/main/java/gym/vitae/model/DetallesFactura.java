@@ -29,9 +29,16 @@ public class DetallesFactura {
     @Column(name = "subtotal", nullable = false, precision = 10, scale = 2)
     private BigDecimal subtotal;
 
+    @Column(name = "aplica_iva")
+    private Boolean aplicaIva;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "membresia_id")
-    private Membresia membresia;
+    @JoinColumn(name = "iva_id")
+    private Iva iva;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tipo_membresia_id")
+    private TiposMembresia tipoMembresia;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "producto_id")
@@ -84,12 +91,28 @@ public class DetallesFactura {
         this.subtotal = subtotal;
     }
 
-    public Membresia getMembresia() {
-        return membresia;
+    public Boolean getAplicaIva() {
+        return aplicaIva;
     }
 
-    public void setMembresia(Membresia membresia) {
-        this.membresia = membresia;
+    public void setAplicaIva(Boolean aplicaIva) {
+        this.aplicaIva = aplicaIva;
+    }
+
+    public Iva getIva() {
+        return iva;
+    }
+
+    public void setIva(Iva iva) {
+        this.iva = iva;
+    }
+
+    public TiposMembresia getTipoMembresia() {
+        return tipoMembresia;
+    }
+
+    public void setTipoMembresia(TiposMembresia tipoMembresia) {
+        this.tipoMembresia = tipoMembresia;
     }
 
     public Producto getProducto() {
