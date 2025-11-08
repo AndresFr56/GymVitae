@@ -32,12 +32,6 @@ public class Nomina {
     @Column(name = "deducciones", precision = 10, scale = 2)
     private BigDecimal deducciones;
 
-    @Column(name = "horas_extra", precision = 10, scale = 2)
-    private BigDecimal horasExtra;
-
-    @Column(name = "valor_hora_extra", precision = 10, scale = 2)
-    private BigDecimal valorHoraExtra;
-
     @Column(name = "total_pagar", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalPagar;
 
@@ -124,22 +118,6 @@ public class Nomina {
 
     public void setDeducciones(BigDecimal deducciones) {
         this.deducciones = deducciones;
-    }
-
-    public BigDecimal getHorasExtra() {
-        return horasExtra;
-    }
-
-    public void setHorasExtra(BigDecimal horasExtra) {
-        this.horasExtra = horasExtra;
-    }
-
-    public BigDecimal getValorHoraExtra() {
-        return valorHoraExtra;
-    }
-
-    public void setValorHoraExtra(BigDecimal valorHoraExtra) {
-        this.valorHoraExtra = valorHoraExtra;
     }
 
     public BigDecimal getTotalPagar() {
