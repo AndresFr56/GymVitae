@@ -1,4 +1,18 @@
-package gym.vitae.repositories;
+package gym.vitae.controller;
 
-public class MembresiasRepository {
+import gym.vitae.repositories.MembresiaRepository;
+
+public class MembresiasController extends BaseController {
+
+	private final MembresiaRepository repository;
+
+	public MembresiasController() {
+		super();
+		this.repository = getRepository(MembresiaRepository.class);
+	}
+
+    MembresiasController (MembresiaRepository repository) {
+        super(null);
+        this.repository = repository;
+    }
 }

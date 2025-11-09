@@ -1,4 +1,19 @@
-package gym.vitae.repositories;
+package gym.vitae.controller;
 
-public class ProveedoresRepository {
+import gym.vitae.repositories.ProveedoreRepository;
+
+public class ProveedoresController extends BaseController {
+
+	private final ProveedoreRepository repository;
+
+	public ProveedoresController() {
+		super();
+		this.repository = getRepository(ProveedoreRepository.class);
+	}
+
+    ProveedoresController(ProveedoreRepository repository) {
+        super(null);
+        this.repository = repository;
+    }
+
 }
