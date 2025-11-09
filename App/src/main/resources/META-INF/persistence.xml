@@ -1,15 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <persistence version="2.2" xmlns="http://xmlns.jcp.org/xml/ns/persistence">
-  <persistence-unit name="gym_vitaePU" transaction-type="RESOURCE_LOCAL">
-    <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-    <properties>
-      <property name="javax.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
-      <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/gym_system"/>
-      <property name="javax.persistence.jdbc.user" value="gym_admin"/>
-      <property name="javax.persistence.jdbc.password" value="gym_pass_2025"/>
-      <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL8Dialect"/>
-      <property name="hibernate.hbm2ddl.auto" value="validate"/>
-      <property name="hibernate.show_sql" value="true"/>
-    </properties>
-  </persistence-unit>
+    <persistence-unit name="gym_vitaePU" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        <class>gym.vitae.model.Cargo</class>
+        <class>gym.vitae.model.Empleado</class>
+        <class>gym.vitae.model.Nomina</class>
+        <class>gym.vitae.model.Cliente</class>
+        <class>gym.vitae.model.Beneficio</class>
+        <class>gym.vitae.model.TiposMembresia</class>
+        <class>gym.vitae.model.MembresiaBeneficio</class>
+        <class>gym.vitae.model.Membresia</class>
+        <class>gym.vitae.model.Iva</class>
+        <class>gym.vitae.model.Factura</class>
+        <class>gym.vitae.model.DetallesFactura</class>
+        <class>gym.vitae.model.Pago</class>
+        <class>gym.vitae.model.Proveedore</class>
+        <class>gym.vitae.model.Categoria</class>
+        <class>gym.vitae.model.Producto</class>
+        <class>gym.vitae.model.Equipo</class>
+        <class>gym.vitae.model.MovimientosInventario</class>
+        <class>gym.vitae.model.Clase</class>
+        <class>gym.vitae.model.Horario</class>
+        <class>gym.vitae.model.InscripcionesClase</class>
+
+        <properties>
+            <property name="javax.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/gym_system"/>
+            <property name="javax.persistence.jdbc.user" value="gym_admin"/>
+            <property name="javax.persistence.jdbc.password" value="gym_pass_2025"/>
+            <!-- Configuración de Hibernate -->
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL8Dialect"/>
+
+            <!-- IMPORTANTE: Cambiar de "validate" a "none" o "update" -->
+            <!-- validate = solo valida el esquema (causa el error) -->
+            <!-- none = no hace nada con el esquema -->
+            <!-- update = actualiza el esquema si es necesario -->
+            <!-- create = recrea el esquema (CUIDADO: borra datos) -->
+            <property name="hibernate.hbm2ddl.auto" value="none"/>
+
+            <!-- Mostrar SQL en consola (útil para desarrollo) -->
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+
+            <!-- Pool de conexiones -->
+            <property name="hibernate.c3p0.min_size" value="5"/>
+            <property name="hibernate.c3p0.max_size" value="20"/>
+            <property name="hibernate.c3p0.timeout" value="300"/>
+            <property name="hibernate.c3p0.max_statements" value="50"/>
+            <property name="hibernate.c3p0.idle_test_period" value="3000"/>
+
+        </properties>
+    </persistence-unit>
 </persistence>
