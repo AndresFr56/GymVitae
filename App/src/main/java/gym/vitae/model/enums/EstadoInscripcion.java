@@ -1,8 +1,8 @@
 package gym.vitae.model.enums;
 
 public enum EstadoInscripcion {
-    ACTIVA,
-    COMPLETADA,
-    CANCELADA,
-    AUSENTE;
+  ACTIVA,
+  COMPLETADA,
+  CANCELADA,
+  AUSENTE
 }

@@ -4,16 +4,15 @@ import gym.vitae.repositories.ClaseRepository;
 
 public class ClasesController extends BaseController {
 
-	private final ClaseRepository repository;
+  private final ClaseRepository repository;
 
-	public ClasesController() {
-		super();
-		this.repository = getRepository(ClaseRepository.class);
-	}
+  public ClasesController() {
+    super();
+    this.repository = getRepository(ClaseRepository.class);
+  }
 
-    ClasesController(ClaseRepository repository) {
-        super(null);
-        this.repository = repository;
-    }
-
+  ClasesController(ClaseRepository repository) {
+    super(null);
+    this.repository = repository;
+  }
 }

@@ -1,7 +1,7 @@
 package gym.vitae.model.enums;
 
 public enum EstadoEquipo {
-    OPERATIVO,
-    DANADO,
-    FUERA_SERVICIO;
+  OPERATIVO,
+  DANADO,
+  FUERA_SERVICIO
 }

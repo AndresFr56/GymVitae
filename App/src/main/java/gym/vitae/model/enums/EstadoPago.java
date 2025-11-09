@@ -1,8 +1,8 @@
 package gym.vitae.model.enums;
 
 public enum EstadoPago {
-    COMPLETADO,
-    PENDIENTE,
-    RECHAZADO,
-    ANULADO
+  COMPLETADO,
+  PENDIENTE,
+  RECHAZADO,
+  ANULADO
 }
