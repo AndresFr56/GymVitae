@@ -13,7 +13,6 @@ USE gym_system;
 -- ============================================
 -- CREATE TABLES
 -- ============================================
--- Tabla: Cargos
 DROP TABLE IF EXISTS `cargos`;
 
 CREATE TABLE `cargos`
@@ -27,7 +26,6 @@ CREATE TABLE `cargos`
     `updated_at`   TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB;
 
--- Tabla: Empleados
 DROP TABLE IF EXISTS `empleados`;
 
 CREATE TABLE `empleados`
@@ -38,19 +36,18 @@ CREATE TABLE `empleados`
     `nombres`         VARCHAR(100)                             NOT NULL,
     `apellidos`       VARCHAR(100)                             NOT NULL,
     `cedula`          VARCHAR(10) UNIQUE                       NOT NULL,
-    `genero`          ENUM ('Masculino', 'Femenino', 'Otro')   NOT NULL,
+    `genero`          ENUM ('MASCULINO', 'FEMENINO', 'OTRO')   NOT NULL,
     `telefono`        VARCHAR(10)                              NOT NULL,
     `direccion`       VARCHAR(100),
     `email`           VARCHAR(100) UNIQUE,
     `fecha_ingreso`   DATE                                     NOT NULL,
     `fecha_salida`    DATE,
-    `tipo_contrato`   ENUM ('Tiempo completo', 'Medio tiempo') NOT NULL,
-    `estado`          ENUM ('activo', 'inactivo', 'vacaciones') DEFAULT 'activo',
+    `tipo_contrato`   ENUM ('TIEMPO_COMPLETO', 'MEDIO_TIEMPO') NOT NULL,
+    `estado`          ENUM ('ACTIVO', 'INACTIVO', 'VACACIONES') DEFAULT 'ACTIVO',
     `created_at`      TIMESTAMP                                 DEFAULT CURRENT_TIMESTAMP,
     `updated_at`      TIMESTAMP                                 DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB;
 
--- Tabla: Nóminas
 DROP TABLE IF EXISTS `nominas`;
 
 CREATE TABLE `nominas`
@@ -67,7 +64,7 @@ CREATE TABLE `nominas`
     `deducciones`    DECIMAL(10, 2)                                      DEFAULT 0,
     `total_pagar`    DECIMAL(10, 2) NOT NULL,
     `fecha_pago`     DATE,
-    `estado`         ENUM ('pendiente', 'aprobada', 'pagada', 'anulada') DEFAULT 'pendiente',
+    `estado`         ENUM ('PENDIENTE', 'APROBADA', 'PAGADA', 'ANULADA') DEFAULT 'PENDIENTE',
     `observaciones`  TEXT,
     `generada_por`   INT,
     `aprobada_por`   INT,
@@ -76,7 +73,6 @@ CREATE TABLE `nominas`
     `updated_at`     TIMESTAMP                                           DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB;
 
--- Tabla: Clientes
 DROP TABLE IF EXISTS `clientes`;
 
 CREATE TABLE `clientes`
@@ -86,14 +82,14 @@ CREATE TABLE `clientes`
     `nombres`             VARCHAR(100)       NOT NULL,
     `apellidos`           VARCHAR(100)       NOT NULL,
     `cedula`              VARCHAR(10) UNIQUE NOT NULL,
-    `genero`              ENUM ('Masculino', 'Femenino', 'Otro'),
+    `genero`              ENUM ('MASCULINO', 'FEMENINO', 'OTRO'),
     `telefono`            VARCHAR(10)        NOT NULL,
     `direccion`           VARCHAR(100),
     `email`               VARCHAR(100),
     `fecha_nacimiento`    DATE,
     `contacto_emergencia` VARCHAR(100),
     `telefono_emergencia` VARCHAR(10),
-    `estado`              ENUM ('activo', 'suspendido') DEFAULT 'activo',
+    `estado`              ENUM ('ACTIVO', 'SUSPENDIDO') DEFAULT 'ACTIVO',
     `created_at`          TIMESTAMP                     DEFAULT CURRENT_TIMESTAMP,
     `updated_at`          TIMESTAMP                     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB;
@@ -138,7 +134,6 @@ CREATE TABLE `membresia_beneficios`
     `created_at`        TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE = InnoDB;
 
--- Tabla: Membresías
 DROP TABLE IF EXISTS `membresias`;
 
 CREATE TABLE `membresias`
@@ -150,7 +145,7 @@ CREATE TABLE `membresias`
     `fecha_inicio`      DATE           NOT NULL,
     `fecha_fin`         DATE           NOT NULL,
     `precio_pagado`     DECIMAL(10, 2) NOT NULL,
-    `estado`            ENUM ('activa', 'vencida', 'cancelada', 'suspendida') DEFAULT 'activa',
+    `estado`            ENUM ('ACTIVA', 'VENCIDA', 'CANCELADA', 'SUSPENDIDA') DEFAULT 'ACTIVA',
     `observaciones`     TEXT,
     `created_at`        TIMESTAMP                                             DEFAULT CURRENT_TIMESTAMP,
     `updated_at`        TIMESTAMP                                             DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -169,7 +164,6 @@ CREATE TABLE `iva`
     INDEX idx_activo (activo)
 ) ENGINE = InnoDB;
 
--- Tabla: Facturas
 DROP TABLE IF EXISTS `facturas`;
 
 CREATE TABLE `facturas`
@@ -179,9 +173,9 @@ CREATE TABLE `facturas`
     `cliente_id`              INT                                               NOT NULL,
     `empleado_responsable_id` INT                                               NOT NULL,
     `fecha_emision`           DATE                                              NOT NULL,
-    `tipo_venta`              ENUM ('Membresía', 'Servicio', 'Producto/Equipo') NOT NULL,
+    `tipo_venta`              ENUM ('MEMBRESIA', 'SERVICIO', 'PRODUCTO_EQUIPO') NOT NULL,
     `total`                   DECIMAL(10, 2)                                    NOT NULL,
-    `estado`                  ENUM ('pendiente', 'pagada', 'anulada') DEFAULT 'pendiente',
+    `estado`                  ENUM ('PENDIENTE', 'PAGADA', 'ANULADA') DEFAULT 'PENDIENTE',
     `observaciones`           TEXT,
     `created_at`              TIMESTAMP                               DEFAULT CURRENT_TIMESTAMP,
     `updated_at`              TIMESTAMP                               DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -205,7 +199,6 @@ CREATE TABLE `detalles_factura`
     `created_at`        TIMESTAMP               DEFAULT CURRENT_TIMESTAMP
 ) ENGINE = InnoDB;
 
--- Tabla: Pagos
 DROP TABLE IF EXISTS `pagos`;
 
 CREATE TABLE `pagos`
@@ -215,7 +208,7 @@ CREATE TABLE `pagos`
     `monto`         DECIMAL(10, 2) NOT NULL,
     `fecha_pago`    DATE           NOT NULL,
     `referencia`    VARCHAR(100),
-    `estado`        ENUM ('completado', 'pendiente', 'rechazado', 'anulado') DEFAULT 'completado',
+    `estado`        ENUM ('COMPLETADO', 'PENDIENTE', 'RECHAZADO', 'ANULADO') DEFAULT 'COMPLETADO',
     `observaciones` TEXT,
     `created_at`    TIMESTAMP                                                DEFAULT CURRENT_TIMESTAMP,
     `updated_at`    TIMESTAMP                                                DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -238,19 +231,18 @@ CREATE TABLE `proveedores`
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB;
 
--- Tabla: Categorías
 DROP TABLE IF EXISTS `categorias`;
 
 CREATE TABLE `categorias`
 (
     `id`          INT PRIMARY KEY AUTO_INCREMENT,
     `nombre`      VARCHAR(100)               NOT NULL,
-    `tipo`        ENUM ('Producto','Equipo') NOT NULL COMMENT 'Discriminador: Producto o Equipo',
+    `tipo`        ENUM ('PRODUCTO','EQUIPO') NOT NULL COMMENT 'Discriminador: PRODUCTO o EQUIPO',
     `subtipo`     VARCHAR(50),
     CHECK (
-        (tipo = 'Producto' AND subtipo IN ('Producto', 'Accesorio', 'Material de limpieza'))
+        (tipo = 'PRODUCTO' AND subtipo IN ('PRODUCTO', 'ACCESORIO', 'MATERIAL_DE_LIMPIEZA'))
             OR
-        (tipo = 'Equipo' AND subtipo IN ('Cardio', 'Pesas', 'Funcional'))
+        (tipo = 'EQUIPO' AND subtipo IN ('CARDIO', 'PESAS', 'FUNCIONAL'))
         ),
     `descripcion` TEXT,
     `activo`      BOOLEAN   DEFAULT true,
@@ -282,7 +274,6 @@ CREATE TABLE `productos`
     `updated_at`      TIMESTAMP   DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB;
 
--- Tabla: Equipos
 DROP TABLE IF EXISTS `equipos`;
 
 CREATE TABLE `equipos`
@@ -296,21 +287,20 @@ CREATE TABLE `equipos`
     `modelo`            VARCHAR(50),
     `fecha_adquisicion` DATE               NOT NULL,
     `costo`             DECIMAL(10, 2),
-    `estado`            ENUM ('operativo', 'dañado', 'fuera_servicio') DEFAULT 'operativo',
+    `estado`            ENUM ('OPERATIVO', 'DANADO', 'FUERA_SERVICIO') DEFAULT 'OPERATIVO',
     `ubicacion`         VARCHAR(100),
     `observaciones`     TEXT,
     `created_at`        TIMESTAMP                                      DEFAULT CURRENT_TIMESTAMP,
     `updated_at`        TIMESTAMP                                      DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB;
 
--- Tabla: Movimientos de Inventario
 DROP TABLE IF EXISTS `movimientos_inventario`;
 
 CREATE TABLE `movimientos_inventario`
 (
     `id`               INT PRIMARY KEY AUTO_INCREMENT,
     `producto_id`      INT                                           NOT NULL,
-    `tipo_movimiento`  ENUM ('entrada', 'salida', 'ajuste', 'venta') NOT NULL,
+    `tipo_movimiento`  ENUM ('ENTRADA', 'SALIDA', 'AJUSTE', 'VENTA') NOT NULL,
     `cantidad`         INT                                           NOT NULL,
     `precio_unitario`  DECIMAL(10, 2),
     `fecha_movimiento` DATE                                          NOT NULL,
@@ -319,7 +309,6 @@ CREATE TABLE `movimientos_inventario`
     `created_at`       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE = InnoDB;
 
--- Tabla: Clases
 DROP TABLE IF EXISTS `clases`;
 
 CREATE TABLE `clases`
@@ -330,17 +319,16 @@ CREATE TABLE `clases`
     `duracion_minutos` INT          NOT NULL,
     `capacidad_maxima` INT          NOT NULL,
     `nivel`            ENUM (
-        'principiante',
-        'intermedio',
-        'avanzado',
-        'todos'
-        )                        DEFAULT 'todos',
+        'PRINCIPIANTE',
+        'INTERMEDIO',
+        'AVANZADO',
+        'TODOS'
+        )                        DEFAULT 'TODOS',
     `activa`           BOOLEAN   DEFAULT true,
     `created_at`       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated_at`       TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB;
 
--- Tabla: Horarios
 DROP TABLE IF EXISTS `horarios`;
 
 CREATE TABLE `horarios`
@@ -349,13 +337,13 @@ CREATE TABLE `horarios`
     `clase_id`          INT  NOT NULL,
     `instructor_id`     INT  NOT NULL,
     `dia_semana`        ENUM (
-        'lunes',
-        'martes',
-        'miercoles',
-        'jueves',
-        'viernes',
-        'sabado',
-        'domingo'
+        'LUNES',
+        'MARTES',
+        'MIERCOLES',
+        'JUEVES',
+        'VIERNES',
+        'SABADO',
+        'DOMINGO'
         )                    NOT NULL,
     `hora_inicio`       TIME NOT NULL,
     `hora_fin`          TIME NOT NULL,
@@ -365,7 +353,6 @@ CREATE TABLE `horarios`
     `updated_at`        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB;
 
--- Tabla: Inscripciones a Clases
 DROP TABLE IF EXISTS `inscripciones_clases`;
 
 CREATE TABLE `inscripciones_clases`
@@ -374,7 +361,7 @@ CREATE TABLE `inscripciones_clases`
     `horario_id`        INT  NOT NULL,
     `cliente_id`        INT  NOT NULL,
     `fecha_inscripcion` DATE NOT NULL,
-    `estado`            ENUM ('activa', 'completada', 'cancelada', 'ausente') DEFAULT 'activa',
+    `estado`            ENUM ('ACTIVA', 'COMPLETADA', 'CANCELADA', 'AUSENTE') DEFAULT 'ACTIVA',
     `created_at`        TIMESTAMP                                             DEFAULT CURRENT_TIMESTAMP,
     `updated_at`        TIMESTAMP                                             DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB;
@@ -567,7 +554,7 @@ ALTER TABLE
 ALTER TABLE
     `membresias`
     ADD
-        FOREIGN KEY (factura_id) REFERENCES facturas(id);
+        FOREIGN KEY (factura_id) REFERENCES facturas (id);
 
 
 ALTER TABLE
@@ -695,16 +682,16 @@ VALUES ('Clases grupales',
 -- Empleados
 INSERT INTO empleados (cargo_id, codigo_empleado, nombres, apellidos, cedula, genero, telefono, direccion, email,
                        fecha_ingreso, tipo_contrato, estado)
-VALUES (1, 'EMP-2024000001', 'Carlos', 'Mendoza Silva', '0912345678', 'Masculino', '0987654321', 'Av. 9 de Octubre 123',
-        'carlos.mendoza@gymvitae.com', '2023-01-15', 'Tiempo completo', 'activo'),
-       (2, 'EMP-2024000002', 'María', 'González Pérez', '0923456789', 'Femenino', '0976543210', 'Cdla. Kennedy Mz 45',
-        'maria.gonzalez@gymvitae.com', '2023-03-20', 'Tiempo completo', 'activo'),
-       (3, 'EMP-2024000003', 'Ana', 'Torres Vega', '0945678901', 'Femenino', '0954321098', 'Samborondón Km 2.5',
-        'ana.torres@gymvitae.com', '2023-08-01', 'Tiempo completo', 'activo'),
-       (4, 'EMP-2024000004', 'José', 'Ramírez López', '0934567890', 'Masculino', '0965432109', 'Urdesa Norte 789',
-        'jose.ramirez@gymvitae.com', '2023-06-10', 'Medio tiempo', 'activo'),
-       (5, 'EMP-2024000005', 'Luis', 'Paredes Castro', '0956789012', 'Masculino', '0943210987', 'Alborada 7ma Etapa',
-        'luis.paredes@gymvitae.com', '2024-01-15', 'Medio tiempo', 'activo');
+VALUES (1, 'EMP-2024000001', 'Carlos', 'Mendoza Silva', '0912345678', 'MASCULINO', '0987654321', 'Av. 9 de Octubre 123',
+        'carlos.mendoza@gymvitae.com', '2023-01-15', 'TIEMPO_COMPLETO', 'ACTIVO'),
+       (2, 'EMP-2024000002', 'María', 'González Pérez', '0923456789', 'FEMENINO', '0976543210', 'Cdla. Kennedy Mz 45',
+        'maria.gonzalez@gymvitae.com', '2023-03-20', 'TIEMPO_COMPLETO', 'ACTIVO'),
+       (3, 'EMP-2024000003', 'Ana', 'Torres Vega', '0945678901', 'FEMENINO', '0954321098', 'Samborondón Km 2.5',
+        'ana.torres@gymvitae.com', '2023-08-01', 'TIEMPO_COMPLETO', 'ACTIVO'),
+       (4, 'EMP-2024000004', 'José', 'Ramírez López', '0934567890', 'MASCULINO', '0965432109', 'Urdesa Norte 789',
+        'jose.ramirez@gymvitae.com', '2023-06-10', 'MEDIO_TIEMPO', 'ACTIVO'),
+       (5, 'EMP-2024000005', 'Luis', 'Paredes Castro', '0956789012', 'MASCULINO', '0943210987', 'Alborada 7ma Etapa',
+        'luis.paredes@gymvitae.com', '2024-01-15', 'MEDIO_TIEMPO', 'ACTIVO');
 
 
 -- Tipos de Membresía
@@ -782,66 +769,66 @@ VALUES ('Spinning',
         'Clase de ciclismo indoor de alta intensidad',
         45,
         20,
-        'todos'),
+        'TODOS'),
        ('Yoga',
         'Clase de yoga para flexibilidad y relajación',
         60,
         15,
-        'todos'),
+        'TODOS'),
        ('CrossFit',
         'Entrenamiento funcional de alta intensidad',
         60,
         12,
-        'intermedio'),
+        'INTERMEDIO'),
        ('Pilates',
         'Fortalecimiento del core y postura',
         55,
         12,
-        'todos'),
-       ('Box', 'Entrenamiento de boxeo', 45, 15, 'todos'),
+        'TODOS'),
+       ('Box', 'Entrenamiento de boxeo', 45, 15, 'TODOS'),
        ('Funcional',
         'Entrenamiento funcional para todo el cuerpo',
         50,
         18,
-        'todos'),
+        'TODOS'),
        ('Aeróbicos',
         'Clase de ejercicios cardiovasculares',
         45,
         20,
-        'principiante');
+        'PRINCIPIANTE');
 
 INSERT INTO horarios (clase_id, instructor_id, dia_semana, hora_inicio, hora_fin, cupos_disponibles, activo)
-VALUES (1, 4, 'lunes', '06:00:00', '06:45:00', 20, TRUE),
-       (1, 4, 'miercoles', '06:00:00', '06:45:00', 20, TRUE),
-       (1, 4, 'viernes', '06:00:00', '06:45:00', 20, TRUE),
-       (2, 4, 'martes', '18:00:00', '19:00:00', 15, TRUE),
-       (2, 4, 'jueves', '18:00:00', '19:00:00', 15, TRUE),
-       (3, 4, 'lunes', '19:00:00', '19:50:00', 25, TRUE),
-       (3, 4, 'miercoles', '19:00:00', '19:50:00', 25, TRUE);
+VALUES (1, 4, 'LUNES', '06:00:00', '06:45:00', 20, TRUE),
+       (1, 4, 'MIERCOLES', '06:00:00', '06:45:00', 20, TRUE),
+       (1, 4, 'VIERNES', '06:00:00', '06:45:00', 20, TRUE),
+       (2, 4, 'MARTES', '18:00:00', '19:00:00', 15, TRUE),
+       (2, 4, 'JUEVES', '18:00:00', '19:00:00', 15, TRUE),
+       (3, 4, 'LUNES', '19:00:00', '19:50:00', 25, TRUE),
+       (3, 4, 'MIERCOLES', '19:00:00', '19:50:00', 25, TRUE);
 
 -- Clientes
 
 INSERT INTO clientes (codigo_cliente, nombres, apellidos, cedula, genero, telefono, direccion, email, fecha_nacimiento,
                       contacto_emergencia, telefono_emergencia, estado)
-VALUES ('CLI-2024000001', 'Pedro', 'Sánchez Ruiz', '0967890123', 'Masculino', '0932109876', 'Cdla. Guayacanes Mz 10',
-        'pedro.sanchez@email.com', '1990-05-15', 'Rosa Ruiz', '0921098765', 'activo'),
-       ('CLI-2024000002', 'Laura', 'Martínez Flores', '0978901234', 'Femenino', '0910987654', 'Urdesa Central 456',
-        'laura.martinez@email.com', '1985-08-22', 'Juan Martínez', '0909876543', 'activo'),
-       ('CLI-2024000003', 'Roberto', 'Díaz Moreno', '0989012345', 'Masculino', '0998765432', 'Alborada 10ma Etapa',
-        'roberto.diaz@email.com', '1992-11-30', 'Carmen Moreno', '0987654321', 'activo'),
-       ('CLI-2024000004', 'Sofía', 'Castro Ortiz', '0990123456', 'Femenino', '0976543210', 'Samborondón Km 5',
-        'sofia.castro@email.com', '1988-03-12', 'Miguel Castro', '0965432109', 'activo'),
-       ('CLI-2024000005', 'Miguel', 'Herrera Vásquez', '0901234567', 'Masculino', '0954321098', 'Kennedy Norte Mz 88',
-        'miguel.herrera@email.com', '1995-07-18', 'Elena Vásquez', '0943210987', 'activo');
+VALUES ('CLI-2024000001', 'Pedro', 'Sánchez Ruiz', '0967890123', 'MASCULINO', '0932109876', 'Cdla. Guayacanes Mz 10',
+        'pedro.sanchez@email.com', '1990-05-15', 'Rosa Ruiz', '0921098765', 'ACTIVO'),
+       ('CLI-2024000002', 'Laura', 'Martínez Flores', '0978901234', 'FEMENINO', '0910987654', 'Urdesa Central 456',
+        'laura.martinez@email.com', '1985-08-22', 'Juan Martínez', '0909876543', 'ACTIVO'),
+       ('CLI-2024000003', 'Roberto', 'Díaz Moreno', '0989012345', 'MASCULINO', '0998765432', 'Alborada 10ma Etapa',
+        'roberto.diaz@email.com', '1992-11-30', 'Carmen Moreno', '0987654321', 'ACTIVO'),
+       ('CLI-2024000004', 'Sofía', 'Castro Ortiz', '0990123456', 'FEMENINO', '0976543210', 'Samborondón Km 5',
+        'sofia.castro@email.com', '1988-03-12', 'Miguel Castro', '0965432109', 'ACTIVO'),
+       ('CLI-2024000005', 'Miguel', 'Herrera Vásquez', '0901234567', 'MASCULINO', '0954321098', 'Kennedy Norte Mz 88',
+        'miguel.herrera@email.com', '1995-07-18', 'Elena Vásquez', '0943210987', 'ACTIVO');
 
 
 -- Inscripciones a clases
 INSERT INTO inscripciones_clases (horario_id, cliente_id, fecha_inscripcion, estado)
-VALUES (1, 1, '2024-11-01', 'activa'),
-       (1, 3, '2024-11-01', 'activa'),
-       (4, 2, '2024-10-20', 'activa'),
-       (4, 4, '2024-11-05', 'activa'),
-       (6, 1, '2024-11-02', 'activa');
+VALUES (1, 1, '2024-11-01', 'ACTIVA'),
+       (1, 3, '2024-11-01', 'ACTIVA'),
+       (4, 2, '2024-10-20', 'ACTIVA'),
+       (4, 4, '2024-11-05', 'ACTIVA'),
+       (6, 1, '2024-11-02', 'ACTIVA');
 
 -- Proveedores
 INSERT INTO proveedores (codigo, nombre, contacto, telefono, email, direccion, activo)
@@ -859,11 +846,11 @@ VALUES ('PROV-001', 'Suplementos Ecuador S.A.', 'Carlos López', '042345678', 'v
 
 -- Membresías activas
 INSERT INTO membresias (cliente_id, tipo_membresia_id, fecha_inicio, fecha_fin, precio_pagado, estado)
-VALUES (1, 2, '2025-11-01', '2025-11-30', 50.00, 'activa'),
-       (2, 3, '2025-10-15', '2026-01-15', 135.00, 'activa'),
-       (3, 5, '2025-09-01', '2026-08-31', 480.00, 'activa'),
-       (4, 2, '2025-11-05', '2025-12-05', 50.00, 'activa'),
-       (5, 1, '2025-11-10', '2025-12-10', 35.00, 'activa');
+VALUES (1, 2, '2025-11-01', '2025-11-30', 50.00, 'ACTIVA'),
+       (2, 3, '2025-10-15', '2026-01-15', 135.00, 'ACTIVA'),
+       (3, 5, '2025-09-01', '2026-08-31', 480.00, 'ACTIVA'),
+       (4, 2, '2025-11-05', '2025-12-05', 50.00, 'ACTIVA'),
+       (5, 1, '2025-11-10', '2025-12-10', 35.00, 'ACTIVA');
 
 
 -- ============================================
@@ -886,7 +873,7 @@ SELECT e.id,
        e.estado
 FROM empleados e
          INNER JOIN cargos c ON e.cargo_id = c.id
-WHERE e.estado = 'activo';
+WHERE e.estado = 'ACTIVO';
 
 -- Vista: Clientes con Membresías Activas
 CREATE OR REPLACE VIEW v_clientes_membresias_activas AS
@@ -906,7 +893,7 @@ SELECT c.id                                AS cliente_id,
 FROM clientes c
          INNER JOIN membresias m ON c.id = m.cliente_id
          INNER JOIN tipos_membresia tm ON m.tipo_membresia_id = tm.id
-WHERE m.estado = 'activa'
+WHERE m.estado = 'ACTIVA'
 ORDER BY m.fecha_fin ASC;
 
 -- Vista: Membresías por Vencer (próximos 7 días)
@@ -921,7 +908,7 @@ SELECT c.id                                AS cliente_id,
 FROM clientes c
          INNER JOIN membresias m ON c.id = m.cliente_id
          INNER JOIN tipos_membresia tm ON m.tipo_membresia_id = tm.id
-WHERE m.estado = 'activa'
+WHERE m.estado = 'ACTIVA'
   AND m.fecha_fin BETWEEN CURDATE()
     AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
 ORDER BY m.fecha_fin ASC;
@@ -968,8 +955,8 @@ SELECT f.id,
 FROM facturas f
          INNER JOIN clientes c ON f.cliente_id = c.id
          LEFT JOIN pagos p ON f.id = p.factura_id
-    AND p.estado = 'completado'
-WHERE f.estado = 'pendiente'
+    AND p.estado = 'COMPLETADO'
+WHERE f.estado = 'PENDIENTE'
 GROUP BY f.id,
          f.numero_factura,
          cliente,
@@ -997,7 +984,7 @@ SELECT n.id,
 FROM nominas n
          INNER JOIN empleados e ON n.empleado_id = e.id
          INNER JOIN cargos c ON e.cargo_id = c.id
-WHERE n.estado IN ('pendiente', 'aprobada')
+WHERE n.estado IN ('PENDIENTE', 'APROBADA')
 ORDER BY n.anio DESC,
          n.mes DESC,
          e.apellidos;
@@ -1011,18 +998,18 @@ SELECT YEAR(f.fecha_emision)  AS anio,
        SUM(f.total)           AS total_vendido,
        SUM(
                CASE
-                   WHEN f.estado = 'pagada' THEN f.total
+                   WHEN f.estado = 'PAGADA' THEN f.total
                    ELSE 0
                    END
        )                      AS total_cobrado,
        SUM(
                CASE
-                   WHEN f.estado = 'pendiente' THEN f.total
+                   WHEN f.estado = 'PENDIENTE' THEN f.total
                    ELSE 0
                    END
        )                      AS total_pendiente
 FROM facturas f
-WHERE f.estado != 'anulada'
+WHERE f.estado != 'ANULADA'
 GROUP BY YEAR(f.fecha_emision),
          MONTH(f.fecha_emision),
          f.tipo_venta
@@ -1060,7 +1047,7 @@ FROM clases cl
          LEFT JOIN horarios h ON cl.id = h.clase_id
     AND h.activo = TRUE
          LEFT JOIN inscripciones_clases ic ON h.id = ic.horario_id
-    AND ic.estado = 'activa'
+    AND ic.estado = 'ACTIVA'
 WHERE cl.activa = TRUE
 GROUP BY cl.id,
          cl.nombre,
@@ -1085,13 +1072,13 @@ FROM horarios h
 WHERE h.activo = TRUE
 ORDER BY FIELD(
                  h.dia_semana,
-                 'lunes',
-                 'martes',
-                 'miercoles',
-                 'jueves',
-                 'viernes',
-                 'sabado',
-                 'domingo'
+                 'LUNES',
+                 'MARTES',
+                 'MIERCOLES',
+                 'JUEVES',
+                 'VIERNES',
+                 'SABADO',
+                 'DOMINGO'
          ),
          h.hora_inicio;
 
@@ -1107,7 +1094,7 @@ CREATE PROCEDURE sp_crear_cliente(
     IN p_nombres VARCHAR(100),
     IN p_apellidos VARCHAR(100),
     IN p_cedula VARCHAR(10),
-    IN p_genero ENUM ('Masculino', 'Femenino', 'Otro'),
+    IN p_genero ENUM ('MASCULINO', 'FEMENINO', 'OTRO'),
     IN p_telefono VARCHAR(10),
     IN p_direccion VARCHAR(100),
     IN p_email VARCHAR(100),
@@ -1235,9 +1222,9 @@ BEGIN
             p_cliente_id,
             p_empleado_id,
             CURDATE(),
-            'Membresía',
+            'MEMBRESIA',
             v_precio,
-            'pendiente');
+            'PENDIENTE');
 
     SET
         p_factura_id = LAST_INSERT_ID();
@@ -1285,7 +1272,7 @@ BEGIN
     INTO v_pagado
     FROM pagos
     WHERE factura_id = p_factura_id
-      AND estado = 'completado';
+      AND estado = 'COMPLETADO';
 
 -- Agregar el nuevo pago
     SET
@@ -1294,11 +1281,11 @@ BEGIN
 -- Determinar estado
     IF v_pagado >= v_total THEN
         SET
-            v_nuevo_estado = 'pagada';
+            v_nuevo_estado = 'PAGADA';
 
     ELSE
         SET
-            v_nuevo_estado = 'pendiente';
+            v_nuevo_estado = 'PENDIENTE';
 
     END IF;
 
@@ -1347,7 +1334,7 @@ BEGIN
 -- Marcar membresía anterior como vencida
     UPDATE
         membresias
-    SET estado = 'vencida'
+    SET estado = 'VENCIDA'
     WHERE id = p_membresia_id;
 
 -- Crear nueva membresía con factura
@@ -1427,9 +1414,9 @@ BEGIN
             p_cliente_id,
             p_empleado_id,
             CURDATE(),
-            'ProductoEquipo',
+            'PRODUCTO_EQUIPO',
             v_subtotal,
-            'pendiente');
+            'PENDIENTE');
 
     SET
         p_factura_id = LAST_INSERT_ID();
@@ -1455,7 +1442,7 @@ BEGIN
                                         motivo,
                                         usuario_id)
     VALUES (p_producto_id,
-            'venta',
+            'VENTA',
             p_cantidad,
             v_precio,
             CURDATE(),
@@ -1483,7 +1470,7 @@ BEGIN
     INTO v_tiene_membresia
     FROM membresias
     WHERE cliente_id = p_cliente_id
-      AND estado = 'activa'
+      AND estado = 'ACTIVA'
       AND fecha_fin >= CURDATE();
 
     IF v_tiene_membresia = 0 THEN
@@ -1512,7 +1499,7 @@ BEGIN
                FROM inscripciones_clases
                WHERE horario_id = p_horario_id
                  AND cliente_id = p_cliente_id
-                 AND estado = 'activa') THEN
+                 AND estado = 'ACTIVA') THEN
         SIGNAL SQLSTATE '45000'
             SET
                 MESSAGE_TEXT = 'El cliente ya está inscrito en este horario';
@@ -1551,7 +1538,7 @@ BEGIN
                c.salario_base
         FROM empleados e
                  INNER JOIN cargos c ON e.cargo_id = c.id
-        WHERE e.estado = 'activo'
+        WHERE e.estado = 'ACTIVO'
           AND NOT EXISTS (SELECT 1
                           FROM nominas n
                           WHERE n.empleado_id = e.id
@@ -1596,7 +1583,7 @@ BEGIN
                 0,
                 0,
                 v_total,
-                'pendiente',
+                'PENDIENTE',
                 p_generada_por);
 
     END LOOP;
@@ -1616,10 +1603,10 @@ CREATE PROCEDURE sp_aprobar_nomina(
 BEGIN
     UPDATE
         nominas
-    SET estado       = 'aprobada',
+    SET estado       = 'APROBADA',
         aprobada_por = p_aprobada_por
     WHERE id = p_nomina_id
-      AND estado = 'pendiente';
+      AND estado = 'PENDIENTE';
 
     IF ROW_COUNT() > 0 THEN
         SELECT 'Nómina aprobada correctamente' AS mensaje;
@@ -1641,11 +1628,11 @@ CREATE PROCEDURE sp_pagar_nomina(
 BEGIN
     UPDATE
         nominas
-    SET estado     = 'pagada',
+    SET estado     = 'PAGADA',
         fecha_pago = p_fecha_pago,
         pagada_por = p_pagada_por
     WHERE id = p_nomina_id
-      AND estado = 'aprobada';
+      AND estado = 'APROBADA';
 
     IF ROW_COUNT() > 0 THEN
         SELECT 'Pago de nómina registrado correctamente' AS mensaje;
@@ -1668,13 +1655,12 @@ CREATE TRIGGER trg_actualizar_stock_producto
     ON movimientos_inventario
     FOR EACH ROW
 BEGIN
-    IF NEW.tipo_movimiento IN ('entrada', 'ajuste') THEN
+    IF NEW.tipo_movimiento IN ('ENTRADA', 'AJUSTE') THEN
         UPDATE
             productos
         SET stock = stock + NEW.cantidad
         WHERE id = NEW.producto_id;
-
-    ELSEIF NEW.tipo_movimiento IN ('salida', 'venta') THEN
+    ELSEIF NEW.tipo_movimiento IN ('SALIDA', 'VENTA') THEN
         UPDATE
             productos
         SET stock = stock - NEW.cantidad
@@ -1695,7 +1681,7 @@ CREATE TRIGGER trg_actualizar_cupos_clase
     ON inscripciones_clases
     FOR EACH ROW
 BEGIN
-    IF NEW.estado = 'activa' THEN
+    IF NEW.estado = 'ACTIVA' THEN
         UPDATE
             horarios
         SET cupos_disponibles = cupos_disponibles - 1
@@ -1713,8 +1699,8 @@ CREATE TRIGGER trg_restaurar_cupos_clase
     ON inscripciones_clases
     FOR EACH ROW
 BEGIN
-    IF OLD.estado = 'activa'
-        AND NEW.estado = 'cancelada' THEN
+    IF OLD.estado = 'ACTIVA'
+        AND NEW.estado = 'CANCELADA' THEN
         UPDATE
             horarios
         SET cupos_disponibles = cupos_disponibles + 1
@@ -1732,9 +1718,9 @@ CREATE TRIGGER trg_verificar_membresia_vencida
     FOR EACH ROW
 BEGIN
     IF NEW.fecha_fin < CURDATE()
-        AND NEW.estado = 'activa' THEN
+        AND NEW.estado = 'ACTIVA' THEN
         SET
-            NEW.estado = 'vencida';
+            NEW.estado = 'VENCIDA';
 
     END IF;
 
