@@ -5,7 +5,6 @@ import java.util.Optional;
 
 /**
  * Lightweight repository contract for model-specific repositories.
- *
  * Notes:
  * - Implementations are expected to use JPA/Hibernate (EntityManager) or any other
  *   persistence mechanism. No checked SQL exceptions are declared to keep the API
@@ -22,13 +21,6 @@ public interface IRepository<T> {
 
     boolean update(T entity);
 
-    /**
-     * Delete should be implemented by the concrete repository. By default
-     * repositories can choose to make this a no-op (physical deletes aren't
-     * performed in this project).
-     *
-     * @param id identifier to delete
-     */
     void delete(int id);
 
     Optional<T> findById(int id);
