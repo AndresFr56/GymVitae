@@ -1,170 +1,234 @@
 package gym.vitae.model;
 
-import javax.persistence.*;
+import gym.vitae.model.enums.EstadoEquipo;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "equipos", schema = "gym_system")
+@Table(
+    name = "equipos",
+    uniqueConstraints = {@UniqueConstraint(columnNames = "codigo")},
+    indexes = {
+      @Index(name = "idx_codigo", columnList = "codigo"),
+      @Index(name = "idx_nombre", columnList = "nombre"),
+      @Index(name = "idx_estado", columnList = "estado")
+    })
 public class Equipo {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "categoria_id", nullable = false)
-    private Categoria categoria;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
-    @Column(name = "codigo", nullable = false, length = 50)
-    private String codigo;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "categoria_id", nullable = false)
+  private Categoria categoria;
 
-    @Column(name = "nombre", nullable = false, length = 100)
-    private String nombre;
+  @Column(name = "codigo", nullable = false, unique = true, length = 50)
+  private String codigo;
 
-    @Column(name = "descripcion")
-    private String descripcion;
+  @Column(name = "nombre", nullable = false, length = 100)
+  private String nombre;
 
-    @Column(name = "marca", length = 50)
-    private String marca;
+  @Column(name = "descripcion", length = 255)
+  private String descripcion;
 
-    @Column(name = "modelo", length = 50)
-    private String modelo;
+  @Column(name = "marca", length = 50)
+  private String marca;
 
-    @Column(name = "fecha_adquisicion", nullable = false)
-    private LocalDate fechaAdquisicion;
+  @Column(name = "modelo", length = 50)
+  private String modelo;
 
-    @Column(name = "costo", precision = 10, scale = 2)
-    private BigDecimal costo;
+  @Column(name = "fecha_adquisicion", nullable = false)
+  private LocalDate fechaAdquisicion;
 
-    @Lob
-    @Column(name = "estado")
-    private String estado;
+  @Column(name = "costo", precision = 10, scale = 2)
+  private BigDecimal costo;
 
-    @Column(name = "ubicacion", length = 100)
-    private String ubicacion;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "estado", length = 20)
+  private EstadoEquipo estado = EstadoEquipo.OPERATIVO;
 
-    @Lob
-    @Column(name = "observaciones")
-    private String observaciones;
+  @Column(name = "ubicacion", length = 100)
+  private String ubicacion;
 
-    @Column(name = "created_at")
-    private Instant createdAt;
+  @Lob
+  @Column(name = "observaciones", columnDefinition = "TEXT")
+  private String observaciones;
 
-    @Column(name = "updated_at")
-    private Instant updatedAt;
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private Instant createdAt;
 
-    public Integer getId() {
-        return id;
-    }
+  @Column(name = "updated_at")
+  private Instant updatedAt;
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+  @OneToMany(mappedBy = "equipo", cascade = CascadeType.ALL)
+  private Set<DetallesFactura> detallesFactura = new HashSet<>();
 
-    public Categoria getCategoria() {
-        return categoria;
-    }
+  // Constructores
+  public Equipo() {}
 
-    public void setCategoria(Categoria categoria) {
-        this.categoria = categoria;
-    }
+  public Equipo(Categoria categoria, String codigo, String nombre, LocalDate fechaAdquisicion) {
+    this.categoria = categoria;
+    this.codigo = codigo;
+    this.nombre = nombre;
+    this.fechaAdquisicion = fechaAdquisicion;
+  }
 
-    public String getCodigo() {
-        return codigo;
-    }
+  @PrePersist
+  protected void onCreate() {
+    createdAt = Instant.now();
+    updatedAt = Instant.now();
+  }
 
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
-    }
+  @PreUpdate
+  protected void onUpdate() {
+    updatedAt = Instant.now();
+  }
 
-    public String getNombre() {
-        return nombre;
-    }
+  // Getters y Setters
+  public Integer getId() {
+    return id;
+  }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
+  public void setId(Integer id) {
+    this.id = id;
+  }
 
-    public String getDescripcion() {
-        return descripcion;
-    }
+  public Categoria getCategoria() {
+    return categoria;
+  }
 
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
+  public void setCategoria(Categoria categoria) {
+    this.categoria = categoria;
+  }
 
-    public String getMarca() {
-        return marca;
-    }
+  public String getCodigo() {
+    return codigo;
+  }
 
-    public void setMarca(String marca) {
-        this.marca = marca;
-    }
+  public void setCodigo(String codigo) {
+    this.codigo = codigo;
+  }
 
-    public String getModelo() {
-        return modelo;
-    }
+  public String getNombre() {
+    return nombre;
+  }
 
-    public void setModelo(String modelo) {
-        this.modelo = modelo;
-    }
+  public void setNombre(String nombre) {
+    this.nombre = nombre;
+  }
 
-    public LocalDate getFechaAdquisicion() {
-        return fechaAdquisicion;
-    }
+  public String getDescripcion() {
+    return descripcion;
+  }
 
-    public void setFechaAdquisicion(LocalDate fechaAdquisicion) {
-        this.fechaAdquisicion = fechaAdquisicion;
-    }
+  public void setDescripcion(String descripcion) {
+    this.descripcion = descripcion;
+  }
 
-    public BigDecimal getCosto() {
-        return costo;
-    }
+  public String getMarca() {
+    return marca;
+  }
 
-    public void setCosto(BigDecimal costo) {
-        this.costo = costo;
-    }
+  public void setMarca(String marca) {
+    this.marca = marca;
+  }
 
-    public String getEstado() {
-        return estado;
-    }
+  public String getModelo() {
+    return modelo;
+  }
 
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
+  public void setModelo(String modelo) {
+    this.modelo = modelo;
+  }
 
-    public String getUbicacion() {
-        return ubicacion;
-    }
+  public LocalDate getFechaAdquisicion() {
+    return fechaAdquisicion;
+  }
 
-    public void setUbicacion(String ubicacion) {
-        this.ubicacion = ubicacion;
-    }
+  public void setFechaAdquisicion(LocalDate fechaAdquisicion) {
+    this.fechaAdquisicion = fechaAdquisicion;
+  }
 
-    public String getObservaciones() {
-        return observaciones;
-    }
+  public BigDecimal getCosto() {
+    return costo;
+  }
 
-    public void setObservaciones(String observaciones) {
-        this.observaciones = observaciones;
-    }
+  public void setCosto(BigDecimal costo) {
+    this.costo = costo;
+  }
 
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
+  public EstadoEquipo getEstado() {
+    return estado;
+  }
 
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
+  public void setEstado(EstadoEquipo estado) {
+    this.estado = estado;
+  }
 
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
+  public String getUbicacion() {
+    return ubicacion;
+  }
 
-    public void setUpdatedAt(Instant updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+  public void setUbicacion(String ubicacion) {
+    this.ubicacion = ubicacion;
+  }
 
+  public String getObservaciones() {
+    return observaciones;
+  }
+
+  public void setObservaciones(String observaciones) {
+    this.observaciones = observaciones;
+  }
+
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
+
+  public Instant getUpdatedAt() {
+    return updatedAt;
+  }
+
+  public Set<DetallesFactura> getDetallesFactura() {
+    return detallesFactura;
+  }
+
+  public void setDetallesFactura(Set<DetallesFactura> detallesFactura) {
+    this.detallesFactura = detallesFactura;
+  }
+
+  @Override
+  public String toString() {
+    return "Equipo{id="
+        + id
+        + ", codigo='"
+        + codigo
+        + "', nombre='"
+        + nombre
+        + "', estado="
+        + estado
+        + "}";
+  }
 }

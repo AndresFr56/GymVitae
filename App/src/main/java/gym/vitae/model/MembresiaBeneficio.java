@@ -1,62 +1,87 @@
 package gym.vitae.model;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
-import javax.persistence.*;
 import java.time.Instant;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "membresia_beneficios", schema = "gym_system")
+@Table(
+    name = "membresia_beneficios",
+    uniqueConstraints = {
+      @UniqueConstraint(
+          name = "unique_membresia_beneficio",
+          columnNames = {"tipo_membresia_id", "beneficio_id"})
+    })
 public class MembresiaBeneficio {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "tipo_membresia_id", nullable = false)
-    private TiposMembresia tipoMembresia;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "beneficio_id", nullable = false)
-    private Beneficio beneficio;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "tipo_membresia_id", nullable = false)
+  private TiposMembresia tipoMembresia;
 
-    @Column(name = "created_at")
-    private Instant createdAt;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "beneficio_id", nullable = false)
+  private Beneficio beneficio;
 
-    public Integer getId() {
-        return id;
-    }
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private Instant createdAt;
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+  // Constructores
+  public MembresiaBeneficio() {}
 
-    public TiposMembresia getTipoMembresia() {
-        return tipoMembresia;
-    }
+  public MembresiaBeneficio(TiposMembresia tipoMembresia, Beneficio beneficio) {
+    this.tipoMembresia = tipoMembresia;
+    this.beneficio = beneficio;
+  }
 
-    public void setTipoMembresia(TiposMembresia tipoMembresia) {
-        this.tipoMembresia = tipoMembresia;
-    }
+  @PrePersist
+  protected void onCreate() {
+    createdAt = Instant.now();
+  }
 
-    public Beneficio getBeneficio() {
-        return beneficio;
-    }
+  // Getters y Setters
+  public Integer getId() {
+    return id;
+  }
 
-    public void setBeneficio(Beneficio beneficio) {
-        this.beneficio = beneficio;
-    }
+  public void setId(Integer id) {
+    this.id = id;
+  }
 
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
+  public TiposMembresia getTipoMembresia() {
+    return tipoMembresia;
+  }
 
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
+  public void setTipoMembresia(TiposMembresia tipoMembresia) {
+    this.tipoMembresia = tipoMembresia;
+  }
 
+  public Beneficio getBeneficio() {
+    return beneficio;
+  }
+
+  public void setBeneficio(Beneficio beneficio) {
+    this.beneficio = beneficio;
+  }
+
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
+
+  @Override
+  public String toString() {
+    return "MembresiaBeneficio{id=" + id + "}";
+  }
 }

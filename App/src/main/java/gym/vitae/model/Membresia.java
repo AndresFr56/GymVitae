@@ -1,139 +1,187 @@
 package gym.vitae.model;
 
-import javax.persistence.*;
+import gym.vitae.model.enums.EstadoMembresia;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.Table;
 
 @Entity
-@Table(name = "membresias", schema = "gym_system")
+@Table(
+    name = "membresias",
+    indexes = {
+      @Index(name = "idx_cliente", columnList = "cliente_id"),
+      @Index(name = "idx_estado", columnList = "estado"),
+      @Index(name = "idx_fechas", columnList = "fecha_inicio,fecha_fin"),
+      @Index(name = "idx_membresias_vigentes", columnList = "fecha_fin,estado")
+    })
 public class Membresia {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "cliente_id", nullable = false)
-    private Cliente cliente;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "tipo_membresia_id", nullable = false)
-    private TiposMembresia tipoMembresia;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "cliente_id", nullable = false)
+  private Cliente cliente;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "factura_id", nullable = false)
-    private Factura factura;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "tipo_membresia_id", nullable = false)
+  private TiposMembresia tipoMembresia;
 
-    @Column(name = "fecha_inicio", nullable = false)
-    private LocalDate fechaInicio;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "factura_id", nullable = false)
+  private Factura factura;
 
-    @Column(name = "fecha_fin", nullable = false)
-    private LocalDate fechaFin;
+  @Column(name = "fecha_inicio", nullable = false)
+  private LocalDate fechaInicio;
 
-    @Column(name = "precio_pagado", nullable = false, precision = 10, scale = 2)
-    private BigDecimal precioPagado;
+  @Column(name = "fecha_fin", nullable = false)
+  private LocalDate fechaFin;
 
-    @Lob
-    @Column(name = "estado")
-    private String estado;
+  @Column(name = "precio_pagado", nullable = false, precision = 10, scale = 2)
+  private BigDecimal precioPagado;
 
-    @Lob
-    @Column(name = "observaciones")
-    private String observaciones;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "estado", length = 20)
+  private EstadoMembresia estado = EstadoMembresia.ACTIVA;
 
-    @Column(name = "created_at")
-    private Instant createdAt;
+  @Lob
+  @Column(name = "observaciones", columnDefinition = "TEXT")
+  private String observaciones;
 
-    @Column(name = "updated_at")
-    private Instant updatedAt;
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private Instant createdAt;
 
-    public Integer getId() {
-        return id;
-    }
+  @Column(name = "updated_at")
+  private Instant updatedAt;
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+  // Constructores
+  public Membresia() {}
 
-    public Cliente getCliente() {
-        return cliente;
-    }
+  public Membresia(
+      Cliente cliente,
+      TiposMembresia tipoMembresia,
+      Factura factura,
+      LocalDate fechaInicio,
+      LocalDate fechaFin,
+      BigDecimal precioPagado) {
+    this.cliente = cliente;
+    this.tipoMembresia = tipoMembresia;
+    this.factura = factura;
+    this.fechaInicio = fechaInicio;
+    this.fechaFin = fechaFin;
+    this.precioPagado = precioPagado;
+  }
 
-    public void setCliente(Cliente cliente) {
-        this.cliente = cliente;
-    }
+  @PrePersist
+  protected void onCreate() {
+    createdAt = Instant.now();
+    updatedAt = Instant.now();
+  }
 
-    public TiposMembresia getTipoMembresia() {
-        return tipoMembresia;
-    }
+  @PreUpdate
+  protected void onUpdate() {
+    updatedAt = Instant.now();
+  }
 
-    public void setTipoMembresia(TiposMembresia tipoMembresia) {
-        this.tipoMembresia = tipoMembresia;
-    }
+  // Getters y Setters
+  public Integer getId() {
+    return id;
+  }
 
-    public Factura getFactura() {
-        return factura;
-    }
+  public void setId(Integer id) {
+    this.id = id;
+  }
 
-    public void setFactura(Factura factura) {
-        this.factura = factura;
-    }
+  public Cliente getCliente() {
+    return cliente;
+  }
 
-    public LocalDate getFechaInicio() {
-        return fechaInicio;
-    }
+  public void setCliente(Cliente cliente) {
+    this.cliente = cliente;
+  }
 
-    public void setFechaInicio(LocalDate fechaInicio) {
-        this.fechaInicio = fechaInicio;
-    }
+  public TiposMembresia getTipoMembresia() {
+    return tipoMembresia;
+  }
 
-    public LocalDate getFechaFin() {
-        return fechaFin;
-    }
+  public void setTipoMembresia(TiposMembresia tipoMembresia) {
+    this.tipoMembresia = tipoMembresia;
+  }
 
-    public void setFechaFin(LocalDate fechaFin) {
-        this.fechaFin = fechaFin;
-    }
+  public Factura getFactura() {
+    return factura;
+  }
 
-    public BigDecimal getPrecioPagado() {
-        return precioPagado;
-    }
+  public void setFactura(Factura factura) {
+    this.factura = factura;
+  }
 
-    public void setPrecioPagado(BigDecimal precioPagado) {
-        this.precioPagado = precioPagado;
-    }
+  public LocalDate getFechaInicio() {
+    return fechaInicio;
+  }
 
-    public String getEstado() {
-        return estado;
-    }
+  public void setFechaInicio(LocalDate fechaInicio) {
+    this.fechaInicio = fechaInicio;
+  }
 
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
+  public LocalDate getFechaFin() {
+    return fechaFin;
+  }
 
-    public String getObservaciones() {
-        return observaciones;
-    }
+  public void setFechaFin(LocalDate fechaFin) {
+    this.fechaFin = fechaFin;
+  }
 
-    public void setObservaciones(String observaciones) {
-        this.observaciones = observaciones;
-    }
+  public BigDecimal getPrecioPagado() {
+    return precioPagado;
+  }
 
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
+  public void setPrecioPagado(BigDecimal precioPagado) {
+    this.precioPagado = precioPagado;
+  }
 
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
+  public EstadoMembresia getEstado() {
+    return estado;
+  }
 
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
+  public void setEstado(EstadoMembresia estado) {
+    this.estado = estado;
+  }
 
-    public void setUpdatedAt(Instant updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+  public String getObservaciones() {
+    return observaciones;
+  }
 
+  public void setObservaciones(String observaciones) {
+    this.observaciones = observaciones;
+  }
+
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
+
+  public Instant getUpdatedAt() {
+    return updatedAt;
+  }
+
+  @Override
+  public String toString() {
+    return "Membresia{id=" + id + ", fechaInicio=" + fechaInicio + ", fechaFin=" + fechaFin + "}";
+  }
 }

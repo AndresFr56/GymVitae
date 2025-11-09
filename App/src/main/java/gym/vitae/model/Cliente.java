@@ -1,179 +1,267 @@
 package gym.vitae.model;
 
-import javax.persistence.*;
+import gym.vitae.model.enums.EstadoCliente;
+import gym.vitae.model.enums.Genero;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "clientes", schema = "gym_system")
+@Table(
+    name = "clientes",
+    uniqueConstraints = {
+      @UniqueConstraint(columnNames = "codigo_cliente"),
+      @UniqueConstraint(columnNames = "cedula")
+    },
+    indexes = {
+      @Index(name = "idx_codigo", columnList = "codigo_cliente"),
+      @Index(name = "idx_cedula", columnList = "cedula"),
+      @Index(name = "idx_nombres", columnList = "nombres,apellidos"),
+      @Index(name = "idx_estado", columnList = "estado")
+    })
 public class Cliente {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Integer id;
 
-    @Column(name = "codigo_cliente", nullable = false, length = 20)
-    private String codigoCliente;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
-    @Column(name = "nombres", nullable = false, length = 100)
-    private String nombres;
+  @Column(name = "codigo_cliente", nullable = false, unique = true, length = 20)
+  private String codigoCliente;
 
-    @Column(name = "apellidos", nullable = false, length = 100)
-    private String apellidos;
+  @Column(name = "nombres", nullable = false, length = 100)
+  private String nombres;
 
-    @Column(name = "cedula", nullable = false, length = 10)
-    private String cedula;
+  @Column(name = "apellidos", nullable = false, length = 100)
+  private String apellidos;
 
-    @Lob
-    @Column(name = "genero")
-    private String genero;
+  @Column(name = "cedula", nullable = false, unique = true, length = 10)
+  private String cedula;
 
-    @Column(name = "telefono", nullable = false, length = 10)
-    private String telefono;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "genero", length = 20)
+  private Genero genero;
 
-    @Column(name = "direccion", length = 100)
-    private String direccion;
+  @Column(name = "telefono", nullable = false, length = 10)
+  private String telefono;
 
-    @Column(name = "email", length = 100)
-    private String email;
+  @Column(name = "direccion", length = 100)
+  private String direccion;
 
-    @Column(name = "fecha_nacimiento")
-    private LocalDate fechaNacimiento;
+  @Column(name = "email", length = 100)
+  private String email;
 
-    @Column(name = "contacto_emergencia", length = 100)
-    private String contactoEmergencia;
+  @Column(name = "fecha_nacimiento")
+  private LocalDate fechaNacimiento;
 
-    @Column(name = "telefono_emergencia", length = 10)
-    private String telefonoEmergencia;
+  @Column(name = "contacto_emergencia", length = 100)
+  private String contactoEmergencia;
 
-    @Lob
-    @Column(name = "estado")
-    private String estado;
+  @Column(name = "telefono_emergencia", length = 10)
+  private String telefonoEmergencia;
 
-    @Column(name = "created_at")
-    private Instant createdAt;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "estado", length = 20)
+  private EstadoCliente estado = EstadoCliente.ACTIVO;
 
-    @Column(name = "updated_at")
-    private Instant updatedAt;
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private Instant createdAt;
 
-    public Integer getId() {
-        return id;
-    }
+  @Column(name = "updated_at")
+  private Instant updatedAt;
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+  @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
+  private Set<Membresia> membresias = new HashSet<>();
 
-    public String getCodigoCliente() {
-        return codigoCliente;
-    }
+  @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
+  private Set<Factura> facturas = new HashSet<>();
 
-    public void setCodigoCliente(String codigoCliente) {
-        this.codigoCliente = codigoCliente;
-    }
+  @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
+  private Set<InscripcionesClase> inscripciones = new HashSet<>();
 
-    public String getNombres() {
-        return nombres;
-    }
+  public Cliente() {}
 
-    public void setNombres(String nombres) {
-        this.nombres = nombres;
-    }
+  public Cliente(
+      String codigoCliente, String nombres, String apellidos, String cedula, String telefono) {
+    this.codigoCliente = codigoCliente;
+    this.nombres = nombres;
+    this.apellidos = apellidos;
+    this.cedula = cedula;
+    this.telefono = telefono;
+  }
 
-    public String getApellidos() {
-        return apellidos;
-    }
+  @PrePersist
+  protected void onCreate() {
+    createdAt = Instant.now();
+    updatedAt = Instant.now();
+  }
 
-    public void setApellidos(String apellidos) {
-        this.apellidos = apellidos;
-    }
+  @PreUpdate
+  protected void onUpdate() {
+    updatedAt = Instant.now();
+  }
 
-    public String getCedula() {
-        return cedula;
-    }
+  // Getters y Setters
+  public Integer getId() {
+    return id;
+  }
 
-    public void setCedula(String cedula) {
-        this.cedula = cedula;
-    }
+  public void setId(Integer id) {
+    this.id = id;
+  }
 
-    public String getGenero() {
-        return genero;
-    }
+  public String getCodigoCliente() {
+    return codigoCliente;
+  }
 
-    public void setGenero(String genero) {
-        this.genero = genero;
-    }
+  public void setCodigoCliente(String codigoCliente) {
+    this.codigoCliente = codigoCliente;
+  }
 
-    public String getTelefono() {
-        return telefono;
-    }
+  public String getNombres() {
+    return nombres;
+  }
 
-    public void setTelefono(String telefono) {
-        this.telefono = telefono;
-    }
+  public void setNombres(String nombres) {
+    this.nombres = nombres;
+  }
 
-    public String getDireccion() {
-        return direccion;
-    }
+  public String getApellidos() {
+    return apellidos;
+  }
 
-    public void setDireccion(String direccion) {
-        this.direccion = direccion;
-    }
+  public void setApellidos(String apellidos) {
+    this.apellidos = apellidos;
+  }
 
-    public String getEmail() {
-        return email;
-    }
+  public String getCedula() {
+    return cedula;
+  }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+  public void setCedula(String cedula) {
+    this.cedula = cedula;
+  }
 
-    public LocalDate getFechaNacimiento() {
-        return fechaNacimiento;
-    }
+  public Genero getGenero() {
+    return genero;
+  }
 
-    public void setFechaNacimiento(LocalDate fechaNacimiento) {
-        this.fechaNacimiento = fechaNacimiento;
-    }
+  public void setGenero(Genero genero) {
+    this.genero = genero;
+  }
 
-    public String getContactoEmergencia() {
-        return contactoEmergencia;
-    }
+  public String getTelefono() {
+    return telefono;
+  }
 
-    public void setContactoEmergencia(String contactoEmergencia) {
-        this.contactoEmergencia = contactoEmergencia;
-    }
+  public void setTelefono(String telefono) {
+    this.telefono = telefono;
+  }
 
-    public String getTelefonoEmergencia() {
-        return telefonoEmergencia;
-    }
+  public String getDireccion() {
+    return direccion;
+  }
 
-    public void setTelefonoEmergencia(String telefonoEmergencia) {
-        this.telefonoEmergencia = telefonoEmergencia;
-    }
+  public void setDireccion(String direccion) {
+    this.direccion = direccion;
+  }
 
-    public String getEstado() {
-        return estado;
-    }
+  public String getEmail() {
+    return email;
+  }
 
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
+  public void setEmail(String email) {
+    this.email = email;
+  }
 
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
+  public LocalDate getFechaNacimiento() {
+    return fechaNacimiento;
+  }
 
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
+  public void setFechaNacimiento(LocalDate fechaNacimiento) {
+    this.fechaNacimiento = fechaNacimiento;
+  }
 
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
+  public String getContactoEmergencia() {
+    return contactoEmergencia;
+  }
 
-    public void setUpdatedAt(Instant updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+  public void setContactoEmergencia(String contactoEmergencia) {
+    this.contactoEmergencia = contactoEmergencia;
+  }
 
+  public String getTelefonoEmergencia() {
+    return telefonoEmergencia;
+  }
+
+  public void setTelefonoEmergencia(String telefonoEmergencia) {
+    this.telefonoEmergencia = telefonoEmergencia;
+  }
+
+  public EstadoCliente getEstado() {
+    return estado;
+  }
+
+  public void setEstado(EstadoCliente estado) {
+    this.estado = estado;
+  }
+
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
+
+  public Instant getUpdatedAt() {
+    return updatedAt;
+  }
+
+  public Set<Membresia> getMembresias() {
+    return membresias;
+  }
+
+  public void setMembresias(Set<Membresia> membresias) {
+    this.membresias = membresias;
+  }
+
+  public Set<Factura> getFacturas() {
+    return facturas;
+  }
+
+  public void setFacturas(Set<Factura> facturas) {
+    this.facturas = facturas;
+  }
+
+  public Set<InscripcionesClase> getInscripciones() {
+    return inscripciones;
+  }
+
+  public void setInscripciones(Set<InscripcionesClase> inscripciones) {
+    this.inscripciones = inscripciones;
+  }
+
+  @Override
+  public String toString() {
+    return "Cliente{id="
+        + id
+        + ", codigo='"
+        + codigoCliente
+        + "', nombre='"
+        + nombres
+        + " "
+        + apellidos
+        + "'}";
+  }
 }

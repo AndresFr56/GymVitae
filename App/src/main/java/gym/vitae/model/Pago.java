@@ -1,115 +1,153 @@
 package gym.vitae.model;
 
-import javax.persistence.*;
+import gym.vitae.model.enums.EstadoPago;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.Table;
 
 @Entity
-@Table(name = "pagos", schema = "gym_system")
+@Table(
+    name = "pagos",
+    indexes = {
+      @Index(name = "idx_factura", columnList = "factura_id"),
+      @Index(name = "idx_fecha", columnList = "fecha_pago"),
+      @Index(name = "idx_estado", columnList = "estado")
+    })
 public class Pago {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "factura_id", nullable = false)
-    private Factura factura;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
-    @Column(name = "monto", nullable = false, precision = 10, scale = 2)
-    private BigDecimal monto;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "factura_id", nullable = false)
+  private Factura factura;
 
-    @Column(name = "fecha_pago", nullable = false)
-    private LocalDate fechaPago;
+  @Column(name = "monto", nullable = false, precision = 10, scale = 2)
+  private BigDecimal monto;
 
-    @Column(name = "referencia", length = 100)
-    private String referencia;
+  @Column(name = "fecha_pago", nullable = false)
+  private LocalDate fechaPago;
 
-    @Lob
-    @Column(name = "estado")
-    private String estado;
+  @Column(name = "referencia", length = 100)
+  private String referencia;
 
-    @Lob
-    @Column(name = "observaciones")
-    private String observaciones;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "estado", length = 20)
+  private EstadoPago estado = EstadoPago.COMPLETADO;
 
-    @Column(name = "created_at")
-    private Instant createdAt;
+  @Lob
+  @Column(name = "observaciones", columnDefinition = "TEXT")
+  private String observaciones;
 
-    @Column(name = "updated_at")
-    private Instant updatedAt;
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private Instant createdAt;
 
-    public Integer getId() {
-        return id;
-    }
+  @Column(name = "updated_at")
+  private Instant updatedAt;
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+  // Constructores
+  public Pago() {}
 
-    public Factura getFactura() {
-        return factura;
-    }
+  public Pago(Factura factura, BigDecimal monto, LocalDate fechaPago) {
+    this.factura = factura;
+    this.monto = monto;
+    this.fechaPago = fechaPago;
+  }
 
-    public void setFactura(Factura factura) {
-        this.factura = factura;
-    }
+  @PrePersist
+  protected void onCreate() {
+    createdAt = Instant.now();
+    updatedAt = Instant.now();
+  }
 
-    public BigDecimal getMonto() {
-        return monto;
-    }
+  @PreUpdate
+  protected void onUpdate() {
+    updatedAt = Instant.now();
+  }
 
-    public void setMonto(BigDecimal monto) {
-        this.monto = monto;
-    }
+  // Getters y Setters
+  public Integer getId() {
+    return id;
+  }
 
-    public LocalDate getFechaPago() {
-        return fechaPago;
-    }
+  public void setId(Integer id) {
+    this.id = id;
+  }
 
-    public void setFechaPago(LocalDate fechaPago) {
-        this.fechaPago = fechaPago;
-    }
+  public Factura getFactura() {
+    return factura;
+  }
 
-    public String getReferencia() {
-        return referencia;
-    }
+  public void setFactura(Factura factura) {
+    this.factura = factura;
+  }
 
-    public void setReferencia(String referencia) {
-        this.referencia = referencia;
-    }
+  public BigDecimal getMonto() {
+    return monto;
+  }
 
-    public String getEstado() {
-        return estado;
-    }
+  public void setMonto(BigDecimal monto) {
+    this.monto = monto;
+  }
 
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
+  public LocalDate getFechaPago() {
+    return fechaPago;
+  }
 
-    public String getObservaciones() {
-        return observaciones;
-    }
+  public void setFechaPago(LocalDate fechaPago) {
+    this.fechaPago = fechaPago;
+  }
 
-    public void setObservaciones(String observaciones) {
-        this.observaciones = observaciones;
-    }
+  public String getReferencia() {
+    return referencia;
+  }
 
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
+  public void setReferencia(String referencia) {
+    this.referencia = referencia;
+  }
 
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
+  public EstadoPago getEstado() {
+    return estado;
+  }
 
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
+  public void setEstado(EstadoPago estado) {
+    this.estado = estado;
+  }
 
-    public void setUpdatedAt(Instant updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+  public String getObservaciones() {
+    return observaciones;
+  }
 
+  public void setObservaciones(String observaciones) {
+    this.observaciones = observaciones;
+  }
+
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
+
+  public Instant getUpdatedAt() {
+    return updatedAt;
+  }
+
+  @Override
+  public String toString() {
+    return "Pago{id=" + id + ", monto=" + monto + ", fecha=" + fechaPago + "}";
+  }
 }

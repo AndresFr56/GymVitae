@@ -1,158 +1,231 @@
 package gym.vitae.model;
 
-import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "productos", schema = "gym_system")
+@Table(
+    name = "productos",
+    uniqueConstraints = {@UniqueConstraint(columnNames = "codigo")},
+    indexes = {
+      @Index(name = "idx_codigo", columnList = "codigo"),
+      @Index(name = "idx_nombre", columnList = "nombre"),
+      @Index(name = "idx_activo", columnList = "activo"),
+      @Index(name = "idx_stock", columnList = "stock"),
+      @Index(name = "idx_productos_stock_critico", columnList = "stock")
+    })
 public class Producto {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "categoria_id", nullable = false)
-    private Categoria categoria;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "proveedor_id")
-    private Proveedore proveedor;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "categoria_id", nullable = false)
+  private Categoria categoria;
 
-    @Column(name = "codigo", nullable = false, length = 50)
-    private String codigo;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "proveedor_id")
+  private Proveedore proveedor;
 
-    @Column(name = "nombre", nullable = false, length = 100)
-    private String nombre;
+  @Column(name = "codigo", nullable = false, unique = true, length = 50)
+  private String codigo;
 
-    @Column(name = "descripcion")
-    private String descripcion;
+  @Column(name = "nombre", nullable = false, length = 100)
+  private String nombre;
 
-    @Column(name = "precio_unitario", nullable = false, precision = 10, scale = 2)
-    private BigDecimal precioUnitario;
+  @Column(name = "descripcion", length = 255)
+  private String descripcion;
 
-    @Column(name = "stock")
-    private Integer stock;
+  @Column(name = "precio_unitario", nullable = false, precision = 10, scale = 2)
+  private BigDecimal precioUnitario;
 
-    @Column(name = "unidad_medida", length = 20)
-    private String unidadMedida;
+  @Column(name = "stock")
+  private Integer stock = 0;
 
-    @Column(name = "fecha_ingreso")
-    private LocalDate fechaIngreso;
+  @Column(name = "unidad_medida", length = 20)
+  private String unidadMedida = "unidad";
 
-    @Column(name = "activo")
-    private Boolean activo;
+  @Column(name = "fecha_ingreso")
+  private LocalDate fechaIngreso;
 
-    @Column(name = "created_at")
-    private Instant createdAt;
+  @Column(name = "activo")
+  private Boolean activo = true;
 
-    @Column(name = "updated_at")
-    private Instant updatedAt;
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private Instant createdAt;
 
-    public Integer getId() {
-        return id;
-    }
+  @Column(name = "updated_at")
+  private Instant updatedAt;
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+  @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL)
+  private Set<MovimientosInventario> movimientos = new HashSet<>();
 
-    public Categoria getCategoria() {
-        return categoria;
-    }
+  @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL)
+  private Set<DetallesFactura> detallesFactura = new HashSet<>();
 
-    public void setCategoria(Categoria categoria) {
-        this.categoria = categoria;
-    }
+  // Constructores
+  public Producto() {}
 
-    public Proveedore getProveedor() {
-        return proveedor;
-    }
+  public Producto(Categoria categoria, String codigo, String nombre, BigDecimal precioUnitario) {
+    this.categoria = categoria;
+    this.codigo = codigo;
+    this.nombre = nombre;
+    this.precioUnitario = precioUnitario;
+  }
 
-    public void setProveedor(Proveedore proveedor) {
-        this.proveedor = proveedor;
-    }
+  @PrePersist
+  protected void onCreate() {
+    createdAt = Instant.now();
+    updatedAt = Instant.now();
+  }
 
-    public String getCodigo() {
-        return codigo;
-    }
+  @PreUpdate
+  protected void onUpdate() {
+    updatedAt = Instant.now();
+  }
 
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
-    }
+  // Getters y Setters
+  public Integer getId() {
+    return id;
+  }
 
-    public String getNombre() {
-        return nombre;
-    }
+  public void setId(Integer id) {
+    this.id = id;
+  }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
+  public Categoria getCategoria() {
+    return categoria;
+  }
 
-    public String getDescripcion() {
-        return descripcion;
-    }
+  public void setCategoria(Categoria categoria) {
+    this.categoria = categoria;
+  }
 
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
+  public Proveedore getProveedor() {
+    return proveedor;
+  }
 
-    public BigDecimal getPrecioUnitario() {
-        return precioUnitario;
-    }
+  public void setProveedor(Proveedore proveedor) {
+    this.proveedor = proveedor;
+  }
 
-    public void setPrecioUnitario(BigDecimal precioUnitario) {
-        this.precioUnitario = precioUnitario;
-    }
+  public String getCodigo() {
+    return codigo;
+  }
 
-    public Integer getStock() {
-        return stock;
-    }
+  public void setCodigo(String codigo) {
+    this.codigo = codigo;
+  }
 
-    public void setStock(Integer stock) {
-        this.stock = stock;
-    }
+  public String getNombre() {
+    return nombre;
+  }
 
-    public String getUnidadMedida() {
-        return unidadMedida;
-    }
+  public void setNombre(String nombre) {
+    this.nombre = nombre;
+  }
 
-    public void setUnidadMedida(String unidadMedida) {
-        this.unidadMedida = unidadMedida;
-    }
+  public String getDescripcion() {
+    return descripcion;
+  }
 
-    public LocalDate getFechaIngreso() {
-        return fechaIngreso;
-    }
+  public void setDescripcion(String descripcion) {
+    this.descripcion = descripcion;
+  }
 
-    public void setFechaIngreso(LocalDate fechaIngreso) {
-        this.fechaIngreso = fechaIngreso;
-    }
+  public BigDecimal getPrecioUnitario() {
+    return precioUnitario;
+  }
 
-    public Boolean getActivo() {
-        return activo;
-    }
+  public void setPrecioUnitario(BigDecimal precioUnitario) {
+    this.precioUnitario = precioUnitario;
+  }
 
-    public void setActivo(Boolean activo) {
-        this.activo = activo;
-    }
+  public Integer getStock() {
+    return stock;
+  }
 
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
+  public void setStock(Integer stock) {
+    this.stock = stock;
+  }
 
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
+  public String getUnidadMedida() {
+    return unidadMedida;
+  }
 
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
+  public void setUnidadMedida(String unidadMedida) {
+    this.unidadMedida = unidadMedida;
+  }
 
-    public void setUpdatedAt(Instant updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+  public LocalDate getFechaIngreso() {
+    return fechaIngreso;
+  }
 
+  public void setFechaIngreso(LocalDate fechaIngreso) {
+    this.fechaIngreso = fechaIngreso;
+  }
+
+  public Boolean getActivo() {
+    return activo;
+  }
+
+  public void setActivo(Boolean activo) {
+    this.activo = activo;
+  }
+
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
+
+  public Instant getUpdatedAt() {
+    return updatedAt;
+  }
+
+  public Set<MovimientosInventario> getMovimientos() {
+    return movimientos;
+  }
+
+  public void setMovimientos(Set<MovimientosInventario> movimientos) {
+    this.movimientos = movimientos;
+  }
+
+  public Set<DetallesFactura> getDetallesFactura() {
+    return detallesFactura;
+  }
+
+  public void setDetallesFactura(Set<DetallesFactura> detallesFactura) {
+    this.detallesFactura = detallesFactura;
+  }
+
+  @Override
+  public String toString() {
+    return "Producto{id="
+        + id
+        + ", codigo='"
+        + codigo
+        + "', nombre='"
+        + nombre
+        + "', stock="
+        + stock
+        + "}";
+  }
 }

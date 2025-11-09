@@ -1,115 +1,162 @@
 package gym.vitae.model;
 
-import javax.persistence.*;
+import gym.vitae.model.enums.TipoMovimiento;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.Table;
 
 @Entity
-@Table(name = "movimientos_inventario", schema = "gym_system")
+@Table(
+    name = "movimientos_inventario",
+    indexes = {
+      @Index(name = "idx_producto", columnList = "producto_id"),
+      @Index(name = "idx_fecha", columnList = "fecha_movimiento"),
+      @Index(name = "idx_tipo", columnList = "tipo_movimiento")
+    })
 public class MovimientosInventario {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "producto_id", nullable = false)
-    private Producto producto;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
-    @Lob
-    @Column(name = "tipo_movimiento", nullable = false)
-    private String tipoMovimiento;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "producto_id", nullable = false)
+  private Producto producto;
 
-    @Column(name = "cantidad", nullable = false)
-    private Integer cantidad;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "tipo_movimiento", nullable = false, length = 20)
+  private TipoMovimiento tipoMovimiento;
 
-    @Column(name = "precio_unitario", precision = 10, scale = 2)
-    private BigDecimal precioUnitario;
+  @Column(name = "cantidad", nullable = false)
+  private Integer cantidad;
 
-    @Column(name = "fecha_movimiento", nullable = false)
-    private LocalDate fechaMovimiento;
+  @Column(name = "precio_unitario", precision = 10, scale = 2)
+  private BigDecimal precioUnitario;
 
-    @Column(name = "motivo", length = 200)
-    private String motivo;
+  @Column(name = "fecha_movimiento", nullable = false)
+  private LocalDate fechaMovimiento;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id")
-    private Empleado usuario;
+  @Column(name = "motivo", length = 200)
+  private String motivo;
 
-    @Column(name = "created_at")
-    private Instant createdAt;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "usuario_id")
+  private Empleado usuario;
 
-    public Integer getId() {
-        return id;
-    }
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private Instant createdAt;
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+  // Constructores
+  public MovimientosInventario() {}
 
-    public Producto getProducto() {
-        return producto;
-    }
+  public MovimientosInventario(
+      Producto producto,
+      TipoMovimiento tipoMovimiento,
+      Integer cantidad,
+      LocalDate fechaMovimiento) {
+    this.producto = producto;
+    this.tipoMovimiento = tipoMovimiento;
+    this.cantidad = cantidad;
+    this.fechaMovimiento = fechaMovimiento;
+  }
 
-    public void setProducto(Producto producto) {
-        this.producto = producto;
-    }
+  @PrePersist
+  protected void onCreate() {
+    createdAt = Instant.now();
+  }
 
-    public String getTipoMovimiento() {
-        return tipoMovimiento;
-    }
+  // Getters y Setters
+  public Integer getId() {
+    return id;
+  }
 
-    public void setTipoMovimiento(String tipoMovimiento) {
-        this.tipoMovimiento = tipoMovimiento;
-    }
+  public void setId(Integer id) {
+    this.id = id;
+  }
 
-    public Integer getCantidad() {
-        return cantidad;
-    }
+  public Producto getProducto() {
+    return producto;
+  }
 
-    public void setCantidad(Integer cantidad) {
-        this.cantidad = cantidad;
-    }
+  public void setProducto(Producto producto) {
+    this.producto = producto;
+  }
 
-    public BigDecimal getPrecioUnitario() {
-        return precioUnitario;
-    }
+  public TipoMovimiento getTipoMovimiento() {
+    return tipoMovimiento;
+  }
 
-    public void setPrecioUnitario(BigDecimal precioUnitario) {
-        this.precioUnitario = precioUnitario;
-    }
+  public void setTipoMovimiento(TipoMovimiento tipoMovimiento) {
+    this.tipoMovimiento = tipoMovimiento;
+  }
 
-    public LocalDate getFechaMovimiento() {
-        return fechaMovimiento;
-    }
+  public Integer getCantidad() {
+    return cantidad;
+  }
 
-    public void setFechaMovimiento(LocalDate fechaMovimiento) {
-        this.fechaMovimiento = fechaMovimiento;
-    }
+  public void setCantidad(Integer cantidad) {
+    this.cantidad = cantidad;
+  }
 
-    public String getMotivo() {
-        return motivo;
-    }
+  public BigDecimal getPrecioUnitario() {
+    return precioUnitario;
+  }
 
-    public void setMotivo(String motivo) {
-        this.motivo = motivo;
-    }
+  public void setPrecioUnitario(BigDecimal precioUnitario) {
+    this.precioUnitario = precioUnitario;
+  }
 
-    public Empleado getUsuario() {
-        return usuario;
-    }
+  public LocalDate getFechaMovimiento() {
+    return fechaMovimiento;
+  }
 
-    public void setUsuario(Empleado usuario) {
-        this.usuario = usuario;
-    }
+  public void setFechaMovimiento(LocalDate fechaMovimiento) {
+    this.fechaMovimiento = fechaMovimiento;
+  }
 
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
+  public String getMotivo() {
+    return motivo;
+  }
 
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
+  public void setMotivo(String motivo) {
+    this.motivo = motivo;
+  }
 
+  public Empleado getUsuario() {
+    return usuario;
+  }
+
+  public void setUsuario(Empleado usuario) {
+    this.usuario = usuario;
+  }
+
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
+
+  @Override
+  public String toString() {
+    return "MovimientoInventario{id="
+        + id
+        + ", tipo="
+        + tipoMovimiento
+        + ", cantidad="
+        + cantidad
+        + ", fecha="
+        + fechaMovimiento
+        + "}";
+  }
 }

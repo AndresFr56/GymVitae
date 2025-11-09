@@ -1,112 +1,161 @@
 package gym.vitae.model;
 
-import javax.persistence.*;
+import gym.vitae.model.enums.NivelClase;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.Lob;
+import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.Table;
 
 @Entity
-@Table(name = "clases", schema = "gym_system")
+@Table(
+    name = "clases",
+    indexes = {
+      @Index(name = "idx_nombre", columnList = "nombre"),
+      @Index(name = "idx_activa", columnList = "activa")
+    })
 public class Clase {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Integer id;
 
-    @Column(name = "nombre", nullable = false, length = 100)
-    private String nombre;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
-    @Lob
-    @Column(name = "descripcion")
-    private String descripcion;
+  @Column(name = "nombre", nullable = false, length = 100)
+  private String nombre;
 
-    @Column(name = "duracion_minutos", nullable = false)
-    private Integer duracionMinutos;
+  @Lob
+  @Column(name = "descripcion", columnDefinition = "TEXT")
+  private String descripcion;
 
-    @Column(name = "capacidad_maxima", nullable = false)
-    private Integer capacidadMaxima;
+  @Column(name = "duracion_minutos", nullable = false)
+  private Integer duracionMinutos;
 
-    @Lob
-    @Column(name = "nivel")
-    private String nivel;
+  @Column(name = "capacidad_maxima", nullable = false)
+  private Integer capacidadMaxima;
 
-    @Column(name = "activa")
-    private Boolean activa;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "nivel", length = 20)
+  private NivelClase nivel = NivelClase.TODOS;
 
-    @Column(name = "created_at")
-    private Instant createdAt;
+  @Column(name = "activa")
+  private Boolean activa = true;
 
-    @Column(name = "updated_at")
-    private Instant updatedAt;
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private Instant createdAt;
 
-    public Integer getId() {
-        return id;
-    }
+  @Column(name = "updated_at")
+  private Instant updatedAt;
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+  @OneToMany(mappedBy = "clase", cascade = CascadeType.ALL)
+  private Set<Horario> horarios = new HashSet<>();
 
-    public String getNombre() {
-        return nombre;
-    }
+  // Constructores
+  public Clase() {}
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
+  public Clase(String nombre, Integer duracionMinutos, Integer capacidadMaxima) {
+    this.nombre = nombre;
+    this.duracionMinutos = duracionMinutos;
+    this.capacidadMaxima = capacidadMaxima;
+  }
 
-    public String getDescripcion() {
-        return descripcion;
-    }
+  @PrePersist
+  protected void onCreate() {
+    createdAt = Instant.now();
+    updatedAt = Instant.now();
+  }
 
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
+  @PreUpdate
+  protected void onUpdate() {
+    updatedAt = Instant.now();
+  }
 
-    public Integer getDuracionMinutos() {
-        return duracionMinutos;
-    }
+  // Getters y Setters
+  public Integer getId() {
+    return id;
+  }
 
-    public void setDuracionMinutos(Integer duracionMinutos) {
-        this.duracionMinutos = duracionMinutos;
-    }
+  public void setId(Integer id) {
+    this.id = id;
+  }
 
-    public Integer getCapacidadMaxima() {
-        return capacidadMaxima;
-    }
+  public String getNombre() {
+    return nombre;
+  }
 
-    public void setCapacidadMaxima(Integer capacidadMaxima) {
-        this.capacidadMaxima = capacidadMaxima;
-    }
+  public void setNombre(String nombre) {
+    this.nombre = nombre;
+  }
 
-    public String getNivel() {
-        return nivel;
-    }
+  public String getDescripcion() {
+    return descripcion;
+  }
 
-    public void setNivel(String nivel) {
-        this.nivel = nivel;
-    }
+  public void setDescripcion(String descripcion) {
+    this.descripcion = descripcion;
+  }
 
-    public Boolean getActiva() {
-        return activa;
-    }
+  public Integer getDuracionMinutos() {
+    return duracionMinutos;
+  }
 
-    public void setActiva(Boolean activa) {
-        this.activa = activa;
-    }
+  public void setDuracionMinutos(Integer duracionMinutos) {
+    this.duracionMinutos = duracionMinutos;
+  }
 
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
+  public Integer getCapacidadMaxima() {
+    return capacidadMaxima;
+  }
 
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
+  public void setCapacidadMaxima(Integer capacidadMaxima) {
+    this.capacidadMaxima = capacidadMaxima;
+  }
 
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
+  public NivelClase getNivel() {
+    return nivel;
+  }
 
-    public void setUpdatedAt(Instant updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+  public void setNivel(NivelClase nivel) {
+    this.nivel = nivel;
+  }
 
+  public Boolean getActiva() {
+    return activa;
+  }
+
+  public void setActiva(Boolean activa) {
+    this.activa = activa;
+  }
+
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
+
+  public Instant getUpdatedAt() {
+    return updatedAt;
+  }
+
+  public Set<Horario> getHorarios() {
+    return horarios;
+  }
+
+  public void setHorarios(Set<Horario> horarios) {
+    this.horarios = horarios;
+  }
+
+  @Override
+  public String toString() {
+    return "Clase{id=" + id + ", nombre='" + nombre + "', nivel=" + nivel + "}";
+  }
 }

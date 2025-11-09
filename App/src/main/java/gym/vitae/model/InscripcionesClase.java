@@ -1,92 +1,130 @@
 package gym.vitae.model;
 
-import javax.persistence.*;
+import gym.vitae.model.enums.EstadoInscripcion;
 import java.time.Instant;
 import java.time.LocalDate;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.Table;
 
 @Entity
-@Table(name = "inscripciones_clases", schema = "gym_system")
+@Table(
+    name = "inscripciones_clases",
+    indexes = {
+      @Index(name = "idx_horario", columnList = "horario_id"),
+      @Index(name = "idx_cliente", columnList = "cliente_id"),
+      @Index(name = "idx_fecha", columnList = "fecha_inscripcion"),
+      @Index(name = "idx_estado", columnList = "estado")
+    })
 public class InscripcionesClase {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "horario_id", nullable = false)
-    private Horario horario;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "cliente_id", nullable = false)
-    private Cliente cliente;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "horario_id", nullable = false)
+  private Horario horario;
 
-    @Column(name = "fecha_inscripcion", nullable = false)
-    private LocalDate fechaInscripcion;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "cliente_id", nullable = false)
+  private Cliente cliente;
 
-    @Lob
-    @Column(name = "estado")
-    private String estado;
+  @Column(name = "fecha_inscripcion", nullable = false)
+  private LocalDate fechaInscripcion;
 
-    @Column(name = "created_at")
-    private Instant createdAt;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "estado", length = 20)
+  private EstadoInscripcion estado = EstadoInscripcion.ACTIVA;
 
-    @Column(name = "updated_at")
-    private Instant updatedAt;
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private Instant createdAt;
 
-    public Integer getId() {
-        return id;
-    }
+  @Column(name = "updated_at")
+  private Instant updatedAt;
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+  // Constructores
+  public InscripcionesClase() {}
 
-    public Horario getHorario() {
-        return horario;
-    }
+  public InscripcionesClase(Horario horario, Cliente cliente, LocalDate fechaInscripcion) {
+    this.horario = horario;
+    this.cliente = cliente;
+    this.fechaInscripcion = fechaInscripcion;
+  }
 
-    public void setHorario(Horario horario) {
-        this.horario = horario;
-    }
+  @PrePersist
+  protected void onCreate() {
+    createdAt = Instant.now();
+    updatedAt = Instant.now();
+  }
 
-    public Cliente getCliente() {
-        return cliente;
-    }
+  @PreUpdate
+  protected void onUpdate() {
+    updatedAt = Instant.now();
+  }
 
-    public void setCliente(Cliente cliente) {
-        this.cliente = cliente;
-    }
+  // Getters y Setters
+  public Integer getId() {
+    return id;
+  }
 
-    public LocalDate getFechaInscripcion() {
-        return fechaInscripcion;
-    }
+  public void setId(Integer id) {
+    this.id = id;
+  }
 
-    public void setFechaInscripcion(LocalDate fechaInscripcion) {
-        this.fechaInscripcion = fechaInscripcion;
-    }
+  public Horario getHorario() {
+    return horario;
+  }
 
-    public String getEstado() {
-        return estado;
-    }
+  public void setHorario(Horario horario) {
+    this.horario = horario;
+  }
 
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
+  public Cliente getCliente() {
+    return cliente;
+  }
 
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
+  public void setCliente(Cliente cliente) {
+    this.cliente = cliente;
+  }
 
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
+  public LocalDate getFechaInscripcion() {
+    return fechaInscripcion;
+  }
 
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
+  public void setFechaInscripcion(LocalDate fechaInscripcion) {
+    this.fechaInscripcion = fechaInscripcion;
+  }
 
-    public void setUpdatedAt(Instant updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+  public EstadoInscripcion getEstado() {
+    return estado;
+  }
 
+  public void setEstado(EstadoInscripcion estado) {
+    this.estado = estado;
+  }
+
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
+
+  public Instant getUpdatedAt() {
+    return updatedAt;
+  }
+
+  @Override
+  public String toString() {
+    return "InscripcionClase{id=" + id + ", fecha=" + fechaInscripcion + ", estado=" + estado + "}";
+  }
 }

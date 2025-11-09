@@ -1,192 +1,263 @@
 package gym.vitae.model;
 
-import javax.persistence.*;
+import gym.vitae.model.enums.EstadoEmpleado;
+import gym.vitae.model.enums.Genero;
+import gym.vitae.model.enums.TipoContrato;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "empleados", schema = "gym_system")
+@Table(
+    name = "empleados",
+    uniqueConstraints = {
+      @UniqueConstraint(columnNames = "codigo_empleado"),
+      @UniqueConstraint(columnNames = "cedula"),
+      @UniqueConstraint(columnNames = "email")
+    },
+    indexes = {
+      @Index(name = "idx_codigo", columnList = "codigo_empleado"),
+      @Index(name = "idx_cedula", columnList = "cedula"),
+      @Index(name = "idx_estado", columnList = "estado"),
+      @Index(name = "idx_nombres", columnList = "nombres,apellidos")
+    })
 public class Empleado {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "cargo_id", nullable = false)
-    private Cargo cargo;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
-    @Column(name = "codigo_empleado", nullable = false, length = 20)
-    private String codigoEmpleado;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "cargo_id", nullable = false)
+  private Cargo cargo;
 
-    @Column(name = "nombres", nullable = false, length = 100)
-    private String nombres;
+  @Column(name = "codigo_empleado", nullable = false, unique = true, length = 20)
+  private String codigoEmpleado;
 
-    @Column(name = "apellidos", nullable = false, length = 100)
-    private String apellidos;
+  @Column(name = "nombres", nullable = false, length = 100)
+  private String nombres;
 
-    @Column(name = "cedula", nullable = false, length = 10)
-    private String cedula;
+  @Column(name = "apellidos", nullable = false, length = 100)
+  private String apellidos;
 
-    @Lob
-    @Column(name = "genero", nullable = false)
-    private String genero;
+  @Column(name = "cedula", nullable = false, unique = true, length = 10)
+  private String cedula;
 
-    @Column(name = "telefono", nullable = false, length = 10)
-    private String telefono;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "genero", nullable = false, length = 20)
+  private Genero genero;
 
-    @Column(name = "direccion", length = 100)
-    private String direccion;
+  @Column(name = "telefono", nullable = false, length = 10)
+  private String telefono;
 
-    @Column(name = "email", length = 100)
-    private String email;
+  @Column(name = "direccion", length = 100)
+  private String direccion;
 
-    @Column(name = "fecha_ingreso", nullable = false)
-    private LocalDate fechaIngreso;
+  @Column(name = "email", unique = true, length = 100)
+  private String email;
 
-    @Column(name = "fecha_salida")
-    private LocalDate fechaSalida;
+  @Column(name = "fecha_ingreso", nullable = false)
+  private LocalDate fechaIngreso;
 
-    @Lob
-    @Column(name = "tipo_contrato", nullable = false)
-    private String tipoContrato;
+  @Column(name = "fecha_salida")
+  private LocalDate fechaSalida;
 
-    @Lob
-    @Column(name = "estado")
-    private String estado;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "tipo_contrato", nullable = false, length = 20)
+  private TipoContrato tipoContrato;
 
-    @Column(name = "created_at")
-    private Instant createdAt;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "estado", length = 20)
+  private EstadoEmpleado estado;
 
-    @Column(name = "updated_at")
-    private Instant updatedAt;
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private Instant createdAt;
 
-    public Integer getId() {
-        return id;
-    }
+  @Column(name = "updated_at")
+  private Instant updatedAt;
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+  @OneToMany(mappedBy = "empleado", cascade = CascadeType.ALL)
+  private Set<Nomina> nominas = new HashSet<>();
 
-    public Cargo getCargo() {
-        return cargo;
-    }
+  @OneToMany(mappedBy = "empleadoResponsable", cascade = CascadeType.ALL)
+  private Set<Factura> facturas = new HashSet<>();
 
-    public void setCargo(Cargo cargo) {
-        this.cargo = cargo;
-    }
+  @PrePersist
+  protected void onCreate() {
+    createdAt = Instant.now();
+    updatedAt = Instant.now();
+  }
 
-    public String getCodigoEmpleado() {
-        return codigoEmpleado;
-    }
+  @PreUpdate
+  protected void onUpdate() {
+    updatedAt = Instant.now();
+  }
 
-    public void setCodigoEmpleado(String codigoEmpleado) {
-        this.codigoEmpleado = codigoEmpleado;
-    }
+  // Getters y Setters
+  public Integer getId() {
+    return id;
+  }
 
-    public String getNombres() {
-        return nombres;
-    }
+  public void setId(Integer id) {
+    this.id = id;
+  }
 
-    public void setNombres(String nombres) {
-        this.nombres = nombres;
-    }
+  public Cargo getCargo() {
+    return cargo;
+  }
 
-    public String getApellidos() {
-        return apellidos;
-    }
+  public void setCargo(Cargo cargo) {
+    this.cargo = cargo;
+  }
 
-    public void setApellidos(String apellidos) {
-        this.apellidos = apellidos;
-    }
+  public String getCodigoEmpleado() {
+    return codigoEmpleado;
+  }
 
-    public String getCedula() {
-        return cedula;
-    }
+  public void setCodigoEmpleado(String codigoEmpleado) {
+    this.codigoEmpleado = codigoEmpleado;
+  }
 
-    public void setCedula(String cedula) {
-        this.cedula = cedula;
-    }
+  public String getNombres() {
+    return nombres;
+  }
 
-    public String getGenero() {
-        return genero;
-    }
+  public void setNombres(String nombres) {
+    this.nombres = nombres;
+  }
 
-    public void setGenero(String genero) {
-        this.genero = genero;
-    }
+  public String getApellidos() {
+    return apellidos;
+  }
 
-    public String getTelefono() {
-        return telefono;
-    }
+  public void setApellidos(String apellidos) {
+    this.apellidos = apellidos;
+  }
 
-    public void setTelefono(String telefono) {
-        this.telefono = telefono;
-    }
+  public String getCedula() {
+    return cedula;
+  }
 
-    public String getDireccion() {
-        return direccion;
-    }
+  public void setCedula(String cedula) {
+    this.cedula = cedula;
+  }
 
-    public void setDireccion(String direccion) {
-        this.direccion = direccion;
-    }
+  public Genero getGenero() {
+    return genero;
+  }
 
-    public String getEmail() {
-        return email;
-    }
+  public void setGenero(Genero genero) {
+    this.genero = genero;
+  }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+  public String getTelefono() {
+    return telefono;
+  }
 
-    public LocalDate getFechaIngreso() {
-        return fechaIngreso;
-    }
+  public void setTelefono(String telefono) {
+    this.telefono = telefono;
+  }
 
-    public void setFechaIngreso(LocalDate fechaIngreso) {
-        this.fechaIngreso = fechaIngreso;
-    }
+  public String getDireccion() {
+    return direccion;
+  }
 
-    public LocalDate getFechaSalida() {
-        return fechaSalida;
-    }
+  public void setDireccion(String direccion) {
+    this.direccion = direccion;
+  }
 
-    public void setFechaSalida(LocalDate fechaSalida) {
-        this.fechaSalida = fechaSalida;
-    }
+  public String getEmail() {
+    return email;
+  }
 
-    public String getTipoContrato() {
-        return tipoContrato;
-    }
+  public void setEmail(String email) {
+    this.email = email;
+  }
 
-    public void setTipoContrato(String tipoContrato) {
-        this.tipoContrato = tipoContrato;
-    }
+  public LocalDate getFechaIngreso() {
+    return fechaIngreso;
+  }
 
-    public String getEstado() {
-        return estado;
-    }
+  public void setFechaIngreso(LocalDate fechaIngreso) {
+    this.fechaIngreso = fechaIngreso;
+  }
 
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
+  public LocalDate getFechaSalida() {
+    return fechaSalida;
+  }
 
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
+  public void setFechaSalida(LocalDate fechaSalida) {
+    this.fechaSalida = fechaSalida;
+  }
 
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
+  public TipoContrato getTipoContrato() {
+    return tipoContrato;
+  }
 
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
+  public void setTipoContrato(TipoContrato tipoContrato) {
+    this.tipoContrato = tipoContrato;
+  }
 
-    public void setUpdatedAt(Instant updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+  public EstadoEmpleado getEstado() {
+    return estado;
+  }
 
+  public void setEstado(EstadoEmpleado estado) {
+    this.estado = estado;
+  }
+
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
+
+  public Instant getUpdatedAt() {
+    return updatedAt;
+  }
+
+  public Set<Nomina> getNominas() {
+    return nominas;
+  }
+
+  public void setNominas(Set<Nomina> nominas) {
+    this.nominas = nominas;
+  }
+
+  public Set<Factura> getFacturas() {
+    return facturas;
+  }
+
+  public void setFacturas(Set<Factura> facturas) {
+    this.facturas = facturas;
+  }
+
+  @Override
+  public String toString() {
+    return "Empleado{id="
+        + id
+        + ", codigo='"
+        + codigoEmpleado
+        + "', nombre='"
+        + nombres
+        + " "
+        + apellidos
+        + "'}";
+  }
 }

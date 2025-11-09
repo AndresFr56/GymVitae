@@ -1,142 +1,178 @@
 package gym.vitae.model;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
-import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.Table;
 
 @Entity
-@Table(name = "detalles_factura", schema = "gym_system")
+@Table(
+    name = "detalles_factura",
+    indexes = {
+      @Index(name = "idx_factura", columnList = "factura_id"),
+      @Index(name = "idx_tipo_membresia", columnList = "tipo_membresia_id"),
+      @Index(name = "idx_iva", columnList = "iva_id")
+    })
 public class DetallesFactura {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "factura_id", nullable = false)
-    private Factura factura;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
-    @Column(name = "cantidad", nullable = false)
-    private Integer cantidad;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "factura_id", nullable = false)
+  private Factura factura;
 
-    @Column(name = "precio_unitario", nullable = false, precision = 10, scale = 2)
-    private BigDecimal precioUnitario;
+  @Column(name = "cantidad", nullable = false)
+  private Integer cantidad = 1;
 
-    @Column(name = "subtotal", nullable = false, precision = 10, scale = 2)
-    private BigDecimal subtotal;
+  @Column(name = "precio_unitario", nullable = false, precision = 10, scale = 2)
+  private BigDecimal precioUnitario;
 
-    @Column(name = "aplica_iva")
-    private Boolean aplicaIva;
+  @Column(name = "subtotal", nullable = false, precision = 10, scale = 2)
+  private BigDecimal subtotal;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "iva_id")
-    private Iva iva;
+  @Column(name = "aplica_iva")
+  private Boolean aplicaIva = false;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tipo_membresia_id")
-    private TiposMembresia tipoMembresia;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "iva_id")
+  private Iva iva;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "producto_id")
-    private Producto producto;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "tipo_membresia_id")
+  private TiposMembresia tipoMembresia;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "equipo_id")
-    private Equipo equipo;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "producto_id")
+  private Producto producto;
 
-    @Column(name = "created_at")
-    private Instant createdAt;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "equipo_id")
+  private Equipo equipo;
 
-    public Integer getId() {
-        return id;
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private Instant createdAt;
+
+  public DetallesFactura() {}
+
+  public DetallesFactura(Factura factura, Integer cantidad, BigDecimal precioUnitario) {
+    this.factura = factura;
+    this.cantidad = cantidad;
+    this.precioUnitario = precioUnitario;
+    calcularSubtotal();
+  }
+
+  @PrePersist
+  protected void onCreate() {
+    createdAt = Instant.now();
+    calcularSubtotal();
+  }
+
+  private void calcularSubtotal() {
+    if (precioUnitario != null && cantidad != null) {
+      subtotal = precioUnitario.multiply(BigDecimal.valueOf(cantidad));
     }
+  }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+  // Getters y Setters
+  public Integer getId() {
+    return id;
+  }
 
-    public Factura getFactura() {
-        return factura;
-    }
+  public void setId(Integer id) {
+    this.id = id;
+  }
 
-    public void setFactura(Factura factura) {
-        this.factura = factura;
-    }
+  public Factura getFactura() {
+    return factura;
+  }
 
-    public Integer getCantidad() {
-        return cantidad;
-    }
+  public void setFactura(Factura factura) {
+    this.factura = factura;
+  }
 
-    public void setCantidad(Integer cantidad) {
-        this.cantidad = cantidad;
-    }
+  public Integer getCantidad() {
+    return cantidad;
+  }
 
-    public BigDecimal getPrecioUnitario() {
-        return precioUnitario;
-    }
+  public void setCantidad(Integer cantidad) {
+    this.cantidad = cantidad;
+    calcularSubtotal();
+  }
 
-    public void setPrecioUnitario(BigDecimal precioUnitario) {
-        this.precioUnitario = precioUnitario;
-    }
+  public BigDecimal getPrecioUnitario() {
+    return precioUnitario;
+  }
 
-    public BigDecimal getSubtotal() {
-        return subtotal;
-    }
+  public void setPrecioUnitario(BigDecimal precioUnitario) {
+    this.precioUnitario = precioUnitario;
+    calcularSubtotal();
+  }
 
-    public void setSubtotal(BigDecimal subtotal) {
-        this.subtotal = subtotal;
-    }
+  public BigDecimal getSubtotal() {
+    return subtotal;
+  }
 
-    public Boolean getAplicaIva() {
-        return aplicaIva;
-    }
+  public void setSubtotal(BigDecimal subtotal) {
+    this.subtotal = subtotal;
+  }
 
-    public void setAplicaIva(Boolean aplicaIva) {
-        this.aplicaIva = aplicaIva;
-    }
+  public Boolean getAplicaIva() {
+    return aplicaIva;
+  }
 
-    public Iva getIva() {
-        return iva;
-    }
+  public void setAplicaIva(Boolean aplicaIva) {
+    this.aplicaIva = aplicaIva;
+  }
 
-    public void setIva(Iva iva) {
-        this.iva = iva;
-    }
+  public Iva getIva() {
+    return iva;
+  }
 
-    public TiposMembresia getTipoMembresia() {
-        return tipoMembresia;
-    }
+  public void setIva(Iva iva) {
+    this.iva = iva;
+  }
 
-    public void setTipoMembresia(TiposMembresia tipoMembresia) {
-        this.tipoMembresia = tipoMembresia;
-    }
+  public TiposMembresia getTipoMembresia() {
+    return tipoMembresia;
+  }
 
-    public Producto getProducto() {
-        return producto;
-    }
+  public void setTipoMembresia(TiposMembresia tipoMembresia) {
+    this.tipoMembresia = tipoMembresia;
+  }
 
-    public void setProducto(Producto producto) {
-        this.producto = producto;
-    }
+  public Producto getProducto() {
+    return producto;
+  }
 
-    public Equipo getEquipo() {
-        return equipo;
-    }
+  public void setProducto(Producto producto) {
+    this.producto = producto;
+  }
 
-    public void setEquipo(Equipo equipo) {
-        this.equipo = equipo;
-    }
+  public Equipo getEquipo() {
+    return equipo;
+  }
 
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
+  public void setEquipo(Equipo equipo) {
+    this.equipo = equipo;
+  }
 
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
 
+  @Override
+  public String toString() {
+    return "DetalleFactura{id=" + id + ", cantidad=" + cantidad + ", subtotal=" + subtotal + "}";
+  }
 }

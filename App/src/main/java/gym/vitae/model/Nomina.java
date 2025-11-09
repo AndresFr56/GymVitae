@@ -1,195 +1,251 @@
 package gym.vitae.model;
 
-import javax.persistence.*;
+import gym.vitae.model.enums.EstadoNomina;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "nominas", schema = "gym_system")
+@Table(
+    name = "nominas",
+    uniqueConstraints = {
+      @UniqueConstraint(
+          name = "unique_nomina",
+          columnNames = {"empleado_id", "mes", "anio"})
+    },
+    indexes = {
+      @Index(name = "idx_fecha_pago", columnList = "fecha_pago"),
+      @Index(name = "idx_estado", columnList = "estado"),
+      @Index(name = "idx_mes_anio", columnList = "mes,anio")
+    })
 public class Nomina {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "empleado_id", nullable = false)
-    private Empleado empleado;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
-    @Column(name = "mes", nullable = false)
-    private Byte mes;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "empleado_id", nullable = false)
+  private Empleado empleado;
 
-    @Column(name = "anio", nullable = false)
-    private Integer anio;
+  @Column(name = "mes", nullable = false)
+  private Integer mes;
 
-    @Column(name = "salario_base", nullable = false, precision = 10, scale = 2)
-    private BigDecimal salarioBase;
+  @Column(name = "anio", nullable = false)
+  private Integer anio;
 
-    @Column(name = "bonificaciones", precision = 10, scale = 2)
-    private BigDecimal bonificaciones;
+  @Column(name = "salario_base", nullable = false, precision = 10, scale = 2)
+  private BigDecimal salarioBase;
 
-    @Column(name = "deducciones", precision = 10, scale = 2)
-    private BigDecimal deducciones;
+  @Column(name = "bonificaciones", precision = 10, scale = 2)
+  private BigDecimal bonificaciones = BigDecimal.ZERO;
 
-    @Column(name = "total_pagar", nullable = false, precision = 10, scale = 2)
-    private BigDecimal totalPagar;
+  @Column(name = "deducciones", precision = 10, scale = 2)
+  private BigDecimal deducciones = BigDecimal.ZERO;
 
-    @Column(name = "fecha_pago")
-    private LocalDate fechaPago;
+  @Column(name = "total_pagar", nullable = false, precision = 10, scale = 2)
+  private BigDecimal totalPagar;
 
-    @Lob
-    @Column(name = "estado")
-    private String estado;
+  @Column(name = "fecha_pago")
+  private LocalDate fechaPago;
 
-    @Lob
-    @Column(name = "observaciones")
-    private String observaciones;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "estado", length = 20)
+  private EstadoNomina estado = EstadoNomina.PENDIENTE;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "generada_por")
-    private Empleado generadaPor;
+  @Lob
+  @Column(name = "observaciones", columnDefinition = "TEXT")
+  private String observaciones;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "aprobada_por")
-    private Empleado aprobadaPor;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "generada_por")
+  private Empleado generadaPor;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "pagada_por")
-    private Empleado pagadaPor;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "aprobada_por")
+  private Empleado aprobadaPor;
 
-    @Column(name = "created_at")
-    private Instant createdAt;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "pagada_por")
+  private Empleado pagadaPor;
 
-    @Column(name = "updated_at")
-    private Instant updatedAt;
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private Instant createdAt;
 
-    public Integer getId() {
-        return id;
+  @Column(name = "updated_at")
+  private Instant updatedAt;
+
+  // Constructores
+  public Nomina() {}
+
+  public Nomina(Empleado empleado, Integer mes, Integer anio, BigDecimal salarioBase) {
+    this.empleado = empleado;
+    this.mes = mes;
+    this.anio = anio;
+    this.salarioBase = salarioBase;
+    this.totalPagar = salarioBase;
+  }
+
+  @PrePersist
+  protected void onCreate() {
+    createdAt = Instant.now();
+    updatedAt = Instant.now();
+    calcularTotal();
+  }
+
+  @PreUpdate
+  protected void onUpdate() {
+    updatedAt = Instant.now();
+    calcularTotal();
+  }
+
+  private void calcularTotal() {
+    if (salarioBase != null) {
+      BigDecimal bonif = bonificaciones != null ? bonificaciones : BigDecimal.ZERO;
+      BigDecimal deduc = deducciones != null ? deducciones : BigDecimal.ZERO;
+      totalPagar = salarioBase.add(bonif).subtract(deduc);
     }
+  }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+  // Getters y Setters
+  public Integer getId() {
+    return id;
+  }
 
-    public Empleado getEmpleado() {
-        return empleado;
-    }
+  public void setId(Integer id) {
+    this.id = id;
+  }
 
-    public void setEmpleado(Empleado empleado) {
-        this.empleado = empleado;
-    }
+  public Empleado getEmpleado() {
+    return empleado;
+  }
 
-    public Byte getMes() {
-        return mes;
-    }
+  public void setEmpleado(Empleado empleado) {
+    this.empleado = empleado;
+  }
 
-    public void setMes(Byte mes) {
-        this.mes = mes;
-    }
+  public Integer getMes() {
+    return mes;
+  }
 
-    public Integer getAnio() {
-        return anio;
-    }
+  public void setMes(Integer mes) {
+    this.mes = mes;
+  }
 
-    public void setAnio(Integer anio) {
-        this.anio = anio;
-    }
+  public Integer getAnio() {
+    return anio;
+  }
 
-    public BigDecimal getSalarioBase() {
-        return salarioBase;
-    }
+  public void setAnio(Integer anio) {
+    this.anio = anio;
+  }
 
-    public void setSalarioBase(BigDecimal salarioBase) {
-        this.salarioBase = salarioBase;
-    }
+  public BigDecimal getSalarioBase() {
+    return salarioBase;
+  }
 
-    public BigDecimal getBonificaciones() {
-        return bonificaciones;
-    }
+  public void setSalarioBase(BigDecimal salarioBase) {
+    this.salarioBase = salarioBase;
+  }
 
-    public void setBonificaciones(BigDecimal bonificaciones) {
-        this.bonificaciones = bonificaciones;
-    }
+  public BigDecimal getBonificaciones() {
+    return bonificaciones;
+  }
 
-    public BigDecimal getDeducciones() {
-        return deducciones;
-    }
+  public void setBonificaciones(BigDecimal bonificaciones) {
+    this.bonificaciones = bonificaciones;
+  }
 
-    public void setDeducciones(BigDecimal deducciones) {
-        this.deducciones = deducciones;
-    }
+  public BigDecimal getDeducciones() {
+    return deducciones;
+  }
 
-    public BigDecimal getTotalPagar() {
-        return totalPagar;
-    }
+  public void setDeducciones(BigDecimal deducciones) {
+    this.deducciones = deducciones;
+  }
 
-    public void setTotalPagar(BigDecimal totalPagar) {
-        this.totalPagar = totalPagar;
-    }
+  public BigDecimal getTotalPagar() {
+    return totalPagar;
+  }
 
-    public LocalDate getFechaPago() {
-        return fechaPago;
-    }
+  public void setTotalPagar(BigDecimal totalPagar) {
+    this.totalPagar = totalPagar;
+  }
 
-    public void setFechaPago(LocalDate fechaPago) {
-        this.fechaPago = fechaPago;
-    }
+  public LocalDate getFechaPago() {
+    return fechaPago;
+  }
 
-    public String getEstado() {
-        return estado;
-    }
+  public void setFechaPago(LocalDate fechaPago) {
+    this.fechaPago = fechaPago;
+  }
 
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
+  public EstadoNomina getEstado() {
+    return estado;
+  }
 
-    public String getObservaciones() {
-        return observaciones;
-    }
+  public void setEstado(EstadoNomina estado) {
+    this.estado = estado;
+  }
 
-    public void setObservaciones(String observaciones) {
-        this.observaciones = observaciones;
-    }
+  public String getObservaciones() {
+    return observaciones;
+  }
 
-    public Empleado getGeneradaPor() {
-        return generadaPor;
-    }
+  public void setObservaciones(String observaciones) {
+    this.observaciones = observaciones;
+  }
 
-    public void setGeneradaPor(Empleado generadaPor) {
-        this.generadaPor = generadaPor;
-    }
+  public Empleado getGeneradaPor() {
+    return generadaPor;
+  }
 
-    public Empleado getAprobadaPor() {
-        return aprobadaPor;
-    }
+  public void setGeneradaPor(Empleado generadaPor) {
+    this.generadaPor = generadaPor;
+  }
 
-    public void setAprobadaPor(Empleado aprobadaPor) {
-        this.aprobadaPor = aprobadaPor;
-    }
+  public Empleado getAprobadaPor() {
+    return aprobadaPor;
+  }
 
-    public Empleado getPagadaPor() {
-        return pagadaPor;
-    }
+  public void setAprobadaPor(Empleado aprobadaPor) {
+    this.aprobadaPor = aprobadaPor;
+  }
 
-    public void setPagadaPor(Empleado pagadaPor) {
-        this.pagadaPor = pagadaPor;
-    }
+  public Empleado getPagadaPor() {
+    return pagadaPor;
+  }
 
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
+  public void setPagadaPor(Empleado pagadaPor) {
+    this.pagadaPor = pagadaPor;
+  }
 
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
 
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
+  public Instant getUpdatedAt() {
+    return updatedAt;
+  }
 
-    public void setUpdatedAt(Instant updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
+  @Override
+  public String toString() {
+    return "Nomina{id=" + id + ", mes=" + mes + ", anio=" + anio + ", total=" + totalPagar + "}";
+  }
 }
