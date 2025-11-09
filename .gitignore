@@ -38,7 +38,8 @@ build/
 .mvn/wrapper/maven-wrapper.jar
 .mvn
 ### Mysql-Docker dist
-database
+Database
+DatabaseStore
 
 ### env file
 .env

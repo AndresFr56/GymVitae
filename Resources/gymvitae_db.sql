@@ -146,6 +146,7 @@ CREATE TABLE `membresias`
     `id`                INT PRIMARY KEY AUTO_INCREMENT,
     `cliente_id`        INT            NOT NULL,
     `tipo_membresia_id` INT            NOT NULL,
+    `factura_id`        INT            NOT NULL,
     `fecha_inicio`      DATE           NOT NULL,
     `fecha_fin`         DATE           NOT NULL,
     `precio_pagado`     DECIMAL(10, 2) NOT NULL,
@@ -196,6 +197,8 @@ CREATE TABLE `detalles_factura`
     `cantidad`          INT            NOT NULL DEFAULT 1,
     `precio_unitario`   DECIMAL(10, 2) NOT NULL,
     `subtotal`          DECIMAL(10, 2) NOT NULL,
+    `aplica_iva`        BOOLEAN                 DEFAULT FALSE,
+    `iva_id`            INT,
     `tipo_membresia_id` INT,
     `producto_id`       INT,
     `equipo_id`         INT,
@@ -509,6 +512,10 @@ CREATE INDEX `idx_fecha` ON `inscripciones_clases` (`fecha_inscripcion`);
 
 CREATE INDEX `idx_estado` ON `inscripciones_clases` (`estado`);
 
+CREATE INDEX `idx_tipo_membresia` ON `detalles_factura` (`tipo_membresia_id`);
+
+CREATE INDEX `idx_iva` ON `detalles_factura` (`iva_id`);
+
 -- ============================================
 -- RELACIONES (FOREIGN KEYS)
 -- ============================================
@@ -558,6 +565,12 @@ ALTER TABLE
         FOREIGN KEY (`tipo_membresia_id`) REFERENCES `tipos_membresia` (`id`);
 
 ALTER TABLE
+    `membresias`
+    ADD
+        FOREIGN KEY (factura_id) REFERENCES facturas(id);
+
+
+ALTER TABLE
     `facturas`
     ADD
         FOREIGN KEY (`cliente_id`) REFERENCES `clientes` (`id`);
@@ -571,6 +584,11 @@ ALTER TABLE
     `detalles_factura`
     ADD
         FOREIGN KEY (`factura_id`) REFERENCES `facturas` (`id`) ON DELETE CASCADE;
+
+ALTER TABLE
+    `detalles_factura`
+    ADD
+        FOREIGN KEY (`iva_id`) REFERENCES `iva` (`id`);
 
 ALTER TABLE
     `detalles_factura`
@@ -1556,7 +1574,6 @@ BEGIN
 
         END IF;
 
--- Total a pagar (sin horas extra por ahora)
         SET
             v_total = v_salario_base;
 
