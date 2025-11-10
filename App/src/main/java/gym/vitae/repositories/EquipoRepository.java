@@ -1,61 +1,50 @@
 package gym.vitae.repositories;
 
+import gym.vitae.core.TransactionalExecutor;
 import gym.vitae.model.Equipo;
+import gym.vitae.model.enums.EstadoEquipo;
 import java.util.List;
 import java.util.Optional;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
 import javax.persistence.TypedQuery;
 
-public class EquipoRepository implements IRepository<Equipo> {
+public record EquipoRepository(EntityManager em) implements IRepository<Equipo> {
 
-  private final EntityManager em;
-
-  public EquipoRepository(EntityManager em) {
-    this.em = em;
+  public EquipoRepository {
+    if (em == null) {
+      throw new IllegalArgumentException("EntityManager cannot be null");
+    }
   }
 
   @Override
   public Equipo save(Equipo entity) {
-    EntityTransaction tx = em.getTransaction();
-    try {
-      if (!tx.isActive()) {
-        tx.begin();
-      }
-      em.persist(entity);
-      tx.commit();
-      return entity;
-    } catch (RuntimeException ex) {
-      if (tx.isActive()) {
-        tx.rollback();
-      }
-      throw ex;
-    }
+    return TransactionalExecutor.inTransaction(
+        em,
+        () -> {
+          em.persist(entity);
+          return entity;
+        });
   }
 
   @Override
   public boolean update(Equipo entity) {
-    EntityTransaction tx = em.getTransaction();
-    try {
-      if (!tx.isActive()) {
-        tx.begin();
-      }
-      em.merge(entity);
-      tx.commit();
-      return true;
-    } catch (RuntimeException ex) {
-      if (tx.isActive()) {
-        tx.rollback();
-      }
-      throw ex;
-    }
+    return TransactionalExecutor.inTransaction(
+        em,
+        () -> {
+          em.merge(entity);
+          return true;
+        });
   }
 
   @Override
   public void delete(int id) {
-    em.createQuery("update Equipo c set c.estado = 'fuera_servicio' where c.id = :id")
-        .setParameter("id", id)
-        .executeUpdate();
+    TransactionalExecutor.inTransaction(
+        em,
+        () ->
+            em.createQuery("update Equipo c set c.estado = :estado where c.id = :id")
+                .setParameter("id", id)
+                .setParameter("estado", EstadoEquipo.FUERA_SERVICIO)
+                .executeUpdate());
   }
 
   @Override

@@ -1,61 +1,50 @@
 package gym.vitae.repositories;
 
+import gym.vitae.core.TransactionalExecutor;
 import gym.vitae.model.Cliente;
+import gym.vitae.model.enums.EstadoCliente;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
 import javax.persistence.TypedQuery;
 
-public class ClienteRepository implements IRepository<Cliente> {
-
-  private final EntityManager em;
-
-  public ClienteRepository(EntityManager em) {
-    this.em = em;
+public record ClienteRepository(EntityManager em) implements IRepository<Cliente> {
+  public ClienteRepository {
+    if (em == null) {
+      throw new IllegalArgumentException("EntityManager cannot be null");
+    }
   }
 
   @Override
   public Cliente save(Cliente entity) {
-    EntityTransaction tx = em.getTransaction();
-    try {
-      if (!tx.isActive()) {
-        tx.begin();
-      }
-      em.persist(entity);
-      tx.commit();
-      return entity;
-    } catch (RuntimeException ex) {
-      if (tx.isActive()) {
-        tx.rollback();
-      }
-      throw ex;
-    }
+    return TransactionalExecutor.inTransaction(
+        em,
+        () -> {
+          em.persist(entity);
+          return entity;
+        });
   }
 
   @Override
   public boolean update(Cliente entity) {
-    EntityTransaction tx = em.getTransaction();
-    try {
-      if (!tx.isActive()) {
-        tx.begin();
-      }
-      em.merge(entity);
-      tx.commit();
-      return true;
-    } catch (RuntimeException ex) {
-      if (tx.isActive()) {
-        tx.rollback();
-      }
-      throw ex;
-    }
+    return TransactionalExecutor.inTransaction(
+        em,
+        () -> {
+          em.merge(entity);
+          return true;
+        });
   }
 
   @Override
   public void delete(int id) {
-    em.createQuery("update Cliente c set c.estado = 'suspendido' where c.id = :id")
-        .setParameter("id", id)
-        .executeUpdate();
+    TransactionalExecutor.inTransaction(
+        em,
+        () ->
+            em.createQuery("update Cliente c set c.estado = :estado where c.id = :id")
+                .setParameter("id", id)
+                .setParameter("estado", EstadoCliente.SUSPENDIDO)
+                .executeUpdate());
   }
 
   @Override
@@ -88,12 +77,24 @@ public class ClienteRepository implements IRepository<Cliente> {
     return em.find(Cliente.class, id) != null;
   }
 
-  // Model-specific helper: find by codigoCliente
   public Optional<Cliente> findByCodigoCliente(String codigo) {
     TypedQuery<Cliente> q =
         em.createQuery("from Cliente c where c.codigoCliente = :codigo", Cliente.class);
     q.setParameter("codigo", codigo);
     List<Cliente> res = q.getResultList();
-    return res.isEmpty() ? Optional.empty() : Optional.of(res.get(0));
+    return res.isEmpty() ? Optional.empty() : Optional.of(res.getFirst());
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == this) return true;
+    if (obj == null || obj.getClass() != this.getClass()) return false;
+    var that = (ClienteRepository) obj;
+    return Objects.equals(this.em, that.em);
+  }
+
+  @Override
+  public String toString() {
+    return "ClienteRepository[" + "em=" + em + ']';
   }
 }

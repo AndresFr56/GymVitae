@@ -36,7 +36,7 @@
             <!-- none = no hace nada con el esquema -->
             <!-- update = actualiza el esquema si es necesario -->
             <!-- create = recrea el esquema (CUIDADO: borra datos) -->
-            <property name="hibernate.hbm2ddl.auto" value="none"/>
+            <property name="hibernate.hbm2ddl.auto" value="update"/>
 
             <!-- Mostrar SQL en consola (útil para desarrollo) -->
             <property name="hibernate.show_sql" value="true"/>

@@ -1,61 +1,42 @@
 package gym.vitae.repositories;
 
+import gym.vitae.core.TransactionalExecutor;
 import gym.vitae.model.Categoria;
 import java.util.List;
 import java.util.Optional;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
 import javax.persistence.TypedQuery;
 
-public class CategoriaRepository implements IRepository<Categoria> {
-
-  private final EntityManager em;
-
-  public CategoriaRepository(EntityManager em) {
-    this.em = em;
-  }
+public record CategoriaRepository(EntityManager em) implements IRepository<Categoria> {
 
   @Override
   public Categoria save(Categoria entity) {
-    EntityTransaction tx = em.getTransaction();
-    try {
-      if (!tx.isActive()) {
-        tx.begin();
-      }
-      em.persist(entity);
-      tx.commit();
-      return entity;
-    } catch (RuntimeException ex) {
-      if (tx.isActive()) {
-        tx.rollback();
-      }
-      throw ex;
-    }
+    return TransactionalExecutor.inTransaction(
+        em,
+        () -> {
+          em.persist(entity);
+          return entity;
+        });
   }
 
   @Override
   public boolean update(Categoria entity) {
-    EntityTransaction tx = em.getTransaction();
-    try {
-      if (!tx.isActive()) {
-        tx.begin();
-      }
-      em.merge(entity);
-      tx.commit();
-      return true;
-    } catch (RuntimeException ex) {
-      if (tx.isActive()) {
-        tx.rollback();
-      }
-      throw ex;
-    }
+    return TransactionalExecutor.inTransaction(
+        em,
+        () -> {
+          em.merge(entity);
+          return true;
+        });
   }
 
   @Override
   public void delete(int id) {
-    em.createQuery("update Categoria c set c.activo = false where c.id = :id")
-        .setParameter("id", id)
-        .executeUpdate();
+    TransactionalExecutor.inTransaction(
+        em,
+        () ->
+            em.createQuery("update Categoria c set c.activo = false where c.id = :id")
+                .setParameter("id", id)
+                .executeUpdate());
   }
 
   @Override

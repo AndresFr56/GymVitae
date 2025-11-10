@@ -1,61 +1,48 @@
 package gym.vitae.repositories;
 
+import gym.vitae.core.TransactionalExecutor;
 import gym.vitae.model.Proveedore;
 import java.util.List;
 import java.util.Optional;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
 import javax.persistence.TypedQuery;
 
-public class ProveedoreRepository implements IRepository<Proveedore> {
+public record ProveedoreRepository(EntityManager em) implements IRepository<Proveedore> {
 
-  private final EntityManager em;
-
-  public ProveedoreRepository(EntityManager em) {
-    this.em = em;
+  public ProveedoreRepository {
+    if (em == null) {
+      throw new IllegalArgumentException("EntityManager cannot be null");
+    }
   }
 
   @Override
   public Proveedore save(Proveedore entity) {
-    EntityTransaction tx = em.getTransaction();
-    try {
-      if (!tx.isActive()) {
-        tx.begin();
-      }
-      em.persist(entity);
-      tx.commit();
-      return entity;
-    } catch (RuntimeException ex) {
-      if (tx.isActive()) {
-        tx.rollback();
-      }
-      throw ex;
-    }
+    return TransactionalExecutor.inTransaction(
+        em,
+        () -> {
+          em.persist(entity);
+          return entity;
+        });
   }
 
   @Override
   public boolean update(Proveedore entity) {
-    EntityTransaction tx = em.getTransaction();
-    try {
-      if (!tx.isActive()) {
-        tx.begin();
-      }
-      em.merge(entity);
-      tx.commit();
-      return true;
-    } catch (RuntimeException ex) {
-      if (tx.isActive()) {
-        tx.rollback();
-      }
-      throw ex;
-    }
+    return TransactionalExecutor.inTransaction(
+        em,
+        () -> {
+          em.merge(entity);
+          return true;
+        });
   }
 
   @Override
   public void delete(int id) {
-    em.createQuery("update Proveedore p set p.activo = false where p.id = :id")
-        .setParameter("id", id)
-        .executeUpdate();
+    TransactionalExecutor.inTransaction(
+        em,
+        () ->
+            em.createQuery("update Proveedore p set p.activo = false where p.id = :id")
+                .setParameter("id", id)
+                .executeUpdate());
   }
 
   @Override
