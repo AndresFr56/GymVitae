@@ -12,27 +12,26 @@
 
 Un sistema de gestion de Gimnasio Open Source con la licensia GPL cualquiera puede hacer uso de este o mantener este software mandando PR con sus soluciones.
 
-
 ## Instalacion
 
 En esta sección se explica el proceso de instalación de todas las dependencias necesarias para ejecutar el proyecto.
 
-
 ### 📦 Requerimientos de Instalacion
+
 - [Docker](https://www.docker.com/)
 - [Docker Compose](https://docs.docker.com/compose/install)
 - [Apache Maven](https://maven.apache.org/install.html)
 - [Java SKD 21 o superior](https://www.oracle.com/java/technologies/downloads/#java21)
 
 ### 📦 Requerimientos de desarrollo y Testing
+
 - [Jetbrains o Netbeans](https://www.jetbrains.com/idea/)
 - [PMD](https://pmd.github.io/)
 - [SonarQube jetbrains plugin(optional)](https://plugins.jetbrains.com/plugin/7973-sonarqube-for-ide)
 - [Google-java-format(optional)](https://plugins.jetbrains.com/plugin/8527-google-java-format)
 - [Git](https://git-scm.com/install/)
 - [DataGrid or cualquier DBSM](https://www.jetbrains.com/datagrip/)
-- [CheckStyle Opcional](https://checkstyle.sourceforge.io/
-)
+- [CheckStyle Opcional](https://checkstyle.sourceforge.io/)
 
 ### 📝 Clonar Repositorio
 
@@ -54,10 +53,6 @@ MYSQL_ROOT_PASSWORD=gymvitae_root_2025
 MYSQL_DATABASE=gym_system
 MYSQL_USER=gym_admin
 MYSQL_PASSWORD=gym_pass_2025
-MYSQL_TEST_ROOT_PASSWORD=gymvitae_root_2025
-MYSQL_TEST_DATABASE=gym_system
-MYSQL_TEST_USER=gym_admin
-MYSQL_TEST_PASSWORD=gym_pass_2025
 ```
 
 > [!WARNING]  
