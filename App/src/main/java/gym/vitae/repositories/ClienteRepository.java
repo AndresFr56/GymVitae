@@ -1,6 +1,7 @@
 package gym.vitae.repositories;
 
-import gym.vitae.core.TransactionalExecutor;
+import gym.vitae.core.DBConnectionManager;
+import gym.vitae.core.TransactionHandler;
 import gym.vitae.model.Cliente;
 import gym.vitae.model.enums.EstadoCliente;
 import java.util.List;
@@ -9,18 +10,19 @@ import java.util.Optional;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
-public record ClienteRepository(EntityManager em) implements IRepository<Cliente> {
+public record ClienteRepository(DBConnectionManager db) implements IRepository<Cliente> {
   public ClienteRepository {
-    if (em == null) {
-      throw new IllegalArgumentException("EntityManager cannot be null");
+    if (db == null) {
+      throw new IllegalArgumentException("DBConnectionManager cannot be null");
     }
   }
 
   @Override
   public Cliente save(Cliente entity) {
-    return TransactionalExecutor.inTransaction(
-        em,
+    return TransactionHandler.inTransaction(
+        db,
         () -> {
+          EntityManager em = db.getEntityManager();
           em.persist(entity);
           return entity;
         });
@@ -28,9 +30,10 @@ public record ClienteRepository(EntityManager em) implements IRepository<Cliente
 
   @Override
   public boolean update(Cliente entity) {
-    return TransactionalExecutor.inTransaction(
-        em,
+    return TransactionHandler.inTransaction(
+        db,
         () -> {
+          EntityManager em = db.getEntityManager();
           em.merge(entity);
           return true;
         });
@@ -38,51 +41,83 @@ public record ClienteRepository(EntityManager em) implements IRepository<Cliente
 
   @Override
   public void delete(int id) {
-    TransactionalExecutor.inTransaction(
-        em,
-        () ->
-            em.createQuery("update Cliente c set c.estado = :estado where c.id = :id")
-                .setParameter("id", id)
-                .setParameter("estado", EstadoCliente.SUSPENDIDO)
-                .executeUpdate());
+    TransactionHandler.inTransaction(
+        db,
+        () -> {
+          EntityManager em = db.getEntityManager();
+          em.createQuery("update Cliente c set c.estado = :estado where c.id = :id")
+              .setParameter("id", id)
+              .setParameter("estado", EstadoCliente.SUSPENDIDO)
+              .executeUpdate();
+        });
   }
 
   @Override
   public Optional<Cliente> findById(int id) {
-    return Optional.ofNullable(em.find(Cliente.class, id));
+    return TransactionHandler.inTransaction(
+        db,
+        () -> {
+          EntityManager em = db.getEntityManager();
+          return Optional.ofNullable(em.find(Cliente.class, id));
+        });
   }
 
   @Override
   public List<Cliente> findAll() {
-    TypedQuery<Cliente> q = em.createQuery("from Cliente c order by c.id", Cliente.class);
-    return q.getResultList();
+    return TransactionHandler.inTransaction(
+        db,
+        () -> {
+          EntityManager em = db.getEntityManager();
+          TypedQuery<Cliente> q = em.createQuery("from Cliente c order by c.id", Cliente.class);
+          return q.getResultList();
+        });
   }
 
   @Override
   public List<Cliente> findAll(int offset, int limit) {
-    TypedQuery<Cliente> q = em.createQuery("from Cliente c order by c.id", Cliente.class);
-    q.setFirstResult(offset);
-    q.setMaxResults(limit);
-    return q.getResultList();
+    return TransactionHandler.inTransaction(
+        db,
+        () -> {
+          EntityManager em = db.getEntityManager();
+          TypedQuery<Cliente> q = em.createQuery("from Cliente c order by c.id", Cliente.class);
+          q.setFirstResult(offset);
+          q.setMaxResults(limit);
+          return q.getResultList();
+        });
   }
 
   @Override
   public long count() {
-    TypedQuery<Long> q = em.createQuery("select count(c) from Cliente c", Long.class);
-    return q.getSingleResult();
+    return TransactionHandler.inTransaction(
+        db,
+        () -> {
+          EntityManager em = db.getEntityManager();
+          TypedQuery<Long> q = em.createQuery("select count(c) from Cliente c", Long.class);
+          return q.getSingleResult();
+        });
   }
 
   @Override
   public boolean existsById(int id) {
-    return em.find(Cliente.class, id) != null;
+    return TransactionHandler.inTransaction(
+        db,
+        () -> {
+          EntityManager em = db.getEntityManager();
+          return em.find(Cliente.class, id) != null;
+        });
   }
 
   public Optional<Cliente> findByCodigoCliente(String codigo) {
-    TypedQuery<Cliente> q =
-        em.createQuery("from Cliente c where c.codigoCliente = :codigo", Cliente.class);
-    q.setParameter("codigo", codigo);
-    List<Cliente> res = q.getResultList();
-    return res.isEmpty() ? Optional.empty() : Optional.of(res.getFirst());
+    return TransactionHandler.inTransaction(
+        db,
+        () -> {
+          EntityManager em = db.getEntityManager();
+          TypedQuery<Cliente> q =
+              em.createQuery("from Cliente c where c.codigoCliente = :codigo", Cliente.class);
+          q.setParameter("codigo", codigo);
+          List<Cliente> res = q.getResultList();
+          return res.isEmpty() ? Optional.empty() : Optional.of(res.getFirst());
+        });
   }
 
   @Override
@@ -90,11 +125,11 @@ public record ClienteRepository(EntityManager em) implements IRepository<Cliente
     if (obj == this) return true;
     if (obj == null || obj.getClass() != this.getClass()) return false;
     var that = (ClienteRepository) obj;
-    return Objects.equals(this.em, that.em);
+    return Objects.equals(this.db, that.db);
   }
 
   @Override
   public String toString() {
-    return "ClienteRepository[" + "em=" + em + ']';
+    return "ClienteRepository[" + "db=" + db + ']';
   }
 }

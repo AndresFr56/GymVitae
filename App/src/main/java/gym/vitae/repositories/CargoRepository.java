@@ -1,19 +1,27 @@
 package gym.vitae.repositories;
 
-import gym.vitae.core.TransactionalExecutor;
+import gym.vitae.core.DBConnectionManager;
+import gym.vitae.core.TransactionHandler;
 import gym.vitae.model.Cargo;
 import java.util.List;
 import java.util.Optional;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
-public record CargoRepository(EntityManager em) implements IRepository<Cargo> {
+public record CargoRepository(DBConnectionManager db) implements IRepository<Cargo> {
+
+  public CargoRepository {
+    if (db == null) {
+      throw new IllegalArgumentException("DBConnectionManager cannot be null");
+    }
+  }
 
   @Override
   public Cargo save(Cargo entity) {
-    return TransactionalExecutor.inTransaction(
-        em,
+    return TransactionHandler.inTransaction(
+        db,
         () -> {
+          EntityManager em = db.getEntityManager();
           em.persist(entity);
           return entity;
         });
@@ -21,9 +29,10 @@ public record CargoRepository(EntityManager em) implements IRepository<Cargo> {
 
   @Override
   public boolean update(Cargo entity) {
-    return TransactionalExecutor.inTransaction(
-        em,
+    return TransactionHandler.inTransaction(
+        db,
         () -> {
+          EntityManager em = db.getEntityManager();
           em.merge(entity);
           return true;
         });
@@ -31,41 +40,68 @@ public record CargoRepository(EntityManager em) implements IRepository<Cargo> {
 
   @Override
   public void delete(int id) {
-    TransactionalExecutor.inTransaction(
-        em,
-        () ->
-            em.createQuery("update Cargo C set C.activo = false where C.id = :id")
-                .setParameter("id", id)
-                .executeUpdate());
+    TransactionHandler.inTransaction(
+        db,
+        () -> {
+          EntityManager em = db.getEntityManager();
+          em.createQuery("update Cargo C set C.activo = false where C.id = :id")
+              .setParameter("id", id)
+              .executeUpdate();
+        });
   }
 
   @Override
   public Optional<Cargo> findById(int id) {
-    return Optional.ofNullable(em.find(Cargo.class, id));
+    return TransactionHandler.inTransaction(
+        db,
+        () -> {
+          EntityManager em = db.getEntityManager();
+          return Optional.ofNullable(em.find(Cargo.class, id));
+        });
   }
 
   @Override
   public List<Cargo> findAll() {
-    TypedQuery<Cargo> q = em.createQuery("from Cargo c order by c.id", Cargo.class);
-    return q.getResultList();
+    return TransactionHandler.inTransaction(
+        db,
+        () -> {
+          EntityManager em = db.getEntityManager();
+          TypedQuery<Cargo> q = em.createQuery("from Cargo c order by c.id", Cargo.class);
+          return q.getResultList();
+        });
   }
 
   @Override
   public List<Cargo> findAll(int offset, int limit) {
-    TypedQuery<Cargo> q = em.createQuery("from Cargo c order by c.id", Cargo.class);
-    q.setFirstResult(offset);
-    q.setMaxResults(limit);
-    return q.getResultList();
+    return TransactionHandler.inTransaction(
+        db,
+        () -> {
+          EntityManager em = db.getEntityManager();
+          TypedQuery<Cargo> q = em.createQuery("from Cargo c order by c.id", Cargo.class);
+          q.setFirstResult(offset);
+          q.setMaxResults(limit);
+          return q.getResultList();
+        });
   }
 
   @Override
   public long count() {
-    TypedQuery<Long> q = em.createQuery("select count(c) from Cargo c", Long.class);
-    return q.getSingleResult();
+    return TransactionHandler.inTransaction(
+        db,
+        () -> {
+          EntityManager em = db.getEntityManager();
+          TypedQuery<Long> q = em.createQuery("select count(c) from Cargo c", Long.class);
+          return q.getSingleResult();
+        });
   }
 
   @Override
   public boolean existsById(int id) {
-    return em.find(Cargo.class, id) != null;
+    return TransactionHandler.inTransaction(
+        db,
+        () -> {
+          EntityManager em = db.getEntityManager();
+          return em.find(Cargo.class, id) != null;
+        });
   }
 }

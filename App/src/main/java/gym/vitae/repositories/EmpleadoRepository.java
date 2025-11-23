@@ -1,6 +1,7 @@
 package gym.vitae.repositories;
 
-import gym.vitae.core.TransactionalExecutor;
+import gym.vitae.core.DBConnectionManager;
+import gym.vitae.core.TransactionHandler;
 import gym.vitae.model.Empleado;
 import gym.vitae.model.enums.EstadoEmpleado;
 import java.util.List;
@@ -8,19 +9,20 @@ import java.util.Optional;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
-public record EmpleadoRepository(EntityManager em) implements IRepository<Empleado> {
+public record EmpleadoRepository(DBConnectionManager db) implements IRepository<Empleado> {
 
   public EmpleadoRepository {
-    if (em == null) {
-      throw new IllegalArgumentException("EntityManager cannot be null");
+    if (db == null) {
+      throw new IllegalArgumentException("DBConnectionManager cannot be null");
     }
   }
 
   @Override
   public Empleado save(Empleado entity) {
-    return TransactionalExecutor.inTransaction(
-        em,
+    return TransactionHandler.inTransaction(
+        db,
         () -> {
+          EntityManager em = db.getEntityManager();
           em.persist(entity);
           return entity;
         });
@@ -28,9 +30,10 @@ public record EmpleadoRepository(EntityManager em) implements IRepository<Emplea
 
   @Override
   public boolean update(Empleado entity) {
-    return TransactionalExecutor.inTransaction(
-        em,
+    return TransactionHandler.inTransaction(
+        db,
         () -> {
+          EntityManager em = db.getEntityManager();
           em.merge(entity);
           return true;
         });
@@ -39,42 +42,69 @@ public record EmpleadoRepository(EntityManager em) implements IRepository<Emplea
   @Override
   public void delete(int id) {
     // actualizando el estado a inactivo to'inactivo' ENUM ('activo', 'inactivo', 'vacaciones')
-    TransactionalExecutor.inTransaction(
-        em,
-        () ->
-            em.createQuery("update Empleado e set e.estado = :estado where e.id = :id")
-                .setParameter("id", id)
-                .setParameter("estado", EstadoEmpleado.INACTIVO)
-                .executeUpdate());
+    TransactionHandler.inTransaction(
+        db,
+        () -> {
+          EntityManager em = db.getEntityManager();
+          em.createQuery("update Empleado e set e.estado = :estado where e.id = :id")
+              .setParameter("id", id)
+              .setParameter("estado", EstadoEmpleado.INACTIVO)
+              .executeUpdate();
+        });
   }
 
   @Override
   public Optional<Empleado> findById(int id) {
-    return Optional.ofNullable(em.find(Empleado.class, id));
+    return TransactionHandler.inTransaction(
+        db,
+        () -> {
+          EntityManager em = db.getEntityManager();
+          return Optional.ofNullable(em.find(Empleado.class, id));
+        });
   }
 
   @Override
   public List<Empleado> findAll() {
-    TypedQuery<Empleado> q = em.createQuery("from Empleado e order by e.id", Empleado.class);
-    return q.getResultList();
+    return TransactionHandler.inTransaction(
+        db,
+        () -> {
+          EntityManager em = db.getEntityManager();
+          TypedQuery<Empleado> q = em.createQuery("from Empleado e order by e.id", Empleado.class);
+          return q.getResultList();
+        });
   }
 
   @Override
   public List<Empleado> findAll(int offset, int limit) {
-    TypedQuery<Empleado> q = em.createQuery("from Empleado e order by e.id", Empleado.class);
-    q.setFirstResult(offset);
-    q.setMaxResults(limit);
-    return q.getResultList();
+    return TransactionHandler.inTransaction(
+        db,
+        () -> {
+          EntityManager em = db.getEntityManager();
+          TypedQuery<Empleado> q = em.createQuery("from Empleado e order by e.id", Empleado.class);
+          q.setFirstResult(offset);
+          q.setMaxResults(limit);
+          return q.getResultList();
+        });
   }
 
   @Override
   public long count() {
-    TypedQuery<Long> q = em.createQuery("select count(e) from Empleado e", Long.class);
-    return q.getSingleResult();
+    return TransactionHandler.inTransaction(
+        db,
+        () -> {
+          EntityManager em = db.getEntityManager();
+          TypedQuery<Long> q = em.createQuery("select count(e) from Empleado e", Long.class);
+          return q.getSingleResult();
+        });
   }
 
   @Override
   public boolean existsById(int id) {
-    return em.find(Empleado.class, id) != null;
+    return TransactionHandler.inTransaction(
+        db,
+        () -> {
+          EntityManager em = db.getEntityManager();
+          return em.find(Empleado.class, id) != null;
+        });
   }
 }

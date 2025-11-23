@@ -1,25 +1,27 @@
 package gym.vitae.repositories;
 
-import gym.vitae.core.TransactionalExecutor;
+import gym.vitae.core.DBConnectionManager;
+import gym.vitae.core.TransactionHandler;
 import gym.vitae.model.Horario;
 import java.util.List;
 import java.util.Optional;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
-public record HorarioRepository(EntityManager em) implements IRepository<Horario> {
+public record HorarioRepository(DBConnectionManager db) implements IRepository<Horario> {
 
   public HorarioRepository {
-    if (em == null) {
-      throw new IllegalArgumentException("EntityManager cannot be null");
+    if (db == null) {
+      throw new IllegalArgumentException("DBConnectionManager cannot be null");
     }
   }
 
   @Override
   public Horario save(Horario entity) {
-    return TransactionalExecutor.inTransaction(
-        em,
+    return TransactionHandler.inTransaction(
+        db,
         () -> {
+          EntityManager em = db.getEntityManager();
           em.persist(entity);
           return entity;
         });
@@ -27,9 +29,10 @@ public record HorarioRepository(EntityManager em) implements IRepository<Horario
 
   @Override
   public boolean update(Horario entity) {
-    return TransactionalExecutor.inTransaction(
-        em,
+    return TransactionHandler.inTransaction(
+        db,
         () -> {
+          EntityManager em = db.getEntityManager();
           em.merge(entity);
           return true;
         });
@@ -37,41 +40,68 @@ public record HorarioRepository(EntityManager em) implements IRepository<Horario
 
   @Override
   public void delete(int id) {
-    TransactionalExecutor.inTransaction(
-        em,
-        () ->
-            em.createQuery("update Horario h set h.activo = false where h.id = :id")
-                .setParameter("id", id)
-                .executeUpdate());
+    TransactionHandler.inTransaction(
+        db,
+        () -> {
+          EntityManager em = db.getEntityManager();
+          em.createQuery("update Horario h set h.activo = false where h.id = :id")
+              .setParameter("id", id)
+              .executeUpdate();
+        });
   }
 
   @Override
   public Optional<Horario> findById(int id) {
-    return Optional.ofNullable(em.find(Horario.class, id));
+    return TransactionHandler.inTransaction(
+        db,
+        () -> {
+          EntityManager em = db.getEntityManager();
+          return Optional.ofNullable(em.find(Horario.class, id));
+        });
   }
 
   @Override
   public List<Horario> findAll() {
-    TypedQuery<Horario> q = em.createQuery("from Horario h order by h.id", Horario.class);
-    return q.getResultList();
+    return TransactionHandler.inTransaction(
+        db,
+        () -> {
+          EntityManager em = db.getEntityManager();
+          TypedQuery<Horario> q = em.createQuery("from Horario h order by h.id", Horario.class);
+          return q.getResultList();
+        });
   }
 
   @Override
   public List<Horario> findAll(int offset, int limit) {
-    TypedQuery<Horario> q = em.createQuery("from Horario h order by h.id", Horario.class);
-    q.setFirstResult(offset);
-    q.setMaxResults(limit);
-    return q.getResultList();
+    return TransactionHandler.inTransaction(
+        db,
+        () -> {
+          EntityManager em = db.getEntityManager();
+          TypedQuery<Horario> q = em.createQuery("from Horario h order by h.id", Horario.class);
+          q.setFirstResult(offset);
+          q.setMaxResults(limit);
+          return q.getResultList();
+        });
   }
 
   @Override
   public long count() {
-    TypedQuery<Long> q = em.createQuery("select count(h) from Horario h", Long.class);
-    return q.getSingleResult();
+    return TransactionHandler.inTransaction(
+        db,
+        () -> {
+          EntityManager em = db.getEntityManager();
+          TypedQuery<Long> q = em.createQuery("select count(h) from Horario h", Long.class);
+          return q.getSingleResult();
+        });
   }
 
   @Override
   public boolean existsById(int id) {
-    return em.find(Horario.class, id) != null;
+    return TransactionHandler.inTransaction(
+        db,
+        () -> {
+          EntityManager em = db.getEntityManager();
+          return em.find(Horario.class, id) != null;
+        });
   }
 }
