@@ -9,7 +9,7 @@
 
 Un sistema de gestion de Gimnasio Open Source con la licensia GPL cualquiera puede hacer uso de este o mantener este software mandando PR con sus soluciones.
 
-## Instalacion
+## 🛠 Instalacion
 
 En esta sección se explica el proceso de instalación de todas las dependencias necesarias para ejecutar el proyecto.
 
@@ -39,7 +39,7 @@ cd GymVitae
 
 o tambien puedes decargar el zip de la ultima release/Commit del Repositorio
 
-### Variables de Entorno .env
+### 🖥️ Variables de Entorno .env
 
 Actualmente tenemos un archivo `.env-template` copie el archivo y cambie el nombre por `.env`
 
@@ -66,8 +66,6 @@ docker-compose up -d
 En esta sección se explica el proceso de ejecución del proyecto.
 Para una mejor experiencia instale [MAVEN](https://maven.apache.org/install.html)
 
-
-
 ```sh
 cd App && mvn clean install
 mvn clean package
@@ -93,6 +91,7 @@ Para ejecutar PMD en el proyecto, utilice el siguiente comando Maven:
 ```sh
 mvn pmd:pmd ./App/main/java -R rulesets/java/quickstart.xml -f html -r report.html
 ```
+
 O ejecutar PMD instalado desde su equipo
 
 ```sh
@@ -100,7 +99,23 @@ pmd -d ./App/main/java -R rulesets/java/quickstart.xml -f html -r report.html
 ```
 
 ### SonarQube
+
 Para ejecutar SonarQube en el proyecto, asegúrese de tener SonarQube instalado y en ejecución p utilizar la extension de SonarQube.
+
+## 🤝 Contribuciones
+
+Nosotros estamos dispuestos a recibir sus aportes de cualquier tipo al final es algo para la comunidad y se puede Contribuir desde bux fixes, new features, documentacion y testing.
+
+- **Encontraste un bug?** [Crea una Issue](https://github.com/AndresFr56/GymVitae/issues/new/choose)
+- **Quieres apartar con codigo?** Revisa nuestra guia de Contribucion [Development Guidelines](https://github.com/AndresFr56/GymVitae/blob/main/CONTRIBUTING.md)
+
+## 🎉 Agradecimientos
+Gracias a todos los que han contribuido a este proyecto de alguna manera.
+
+<!-- TODO: estos son los contribuidores de ejemplo, no son de GymVitae -->
+<a href="https://github.com/Savecoders/ZoneVitae/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Savecoders/ZoneVitae" />
+</a>
 
 ## Licencia
 
