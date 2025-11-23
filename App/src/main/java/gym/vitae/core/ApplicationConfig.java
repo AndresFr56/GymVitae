@@ -3,7 +3,6 @@ package gym.vitae.core;
 import gym.vitae.repositories.*;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 
 /**
  * ApplicationConfig es el entrypoint para la configuración de la aplicación. Permite inicializar y
@@ -18,36 +17,40 @@ public final class ApplicationConfig {
 
   public static void init() {
 
-    EntityManagerFactory emf = Persistence.createEntityManagerFactory("gym_vitaePU");
-    EntityManager em = emf.createEntityManager();
-
     ServiceContainer sc = ServiceContainer.getInstance();
 
-    // recursos necesarios de jpa entity manager
-    sc.register(EntityManagerFactory.class, emf);
-    sc.register(EntityManager.class, em);
+    DBConnectionManager dbManager = new DBConnectionManager();
+    dbManager.init();
 
-    // repositorios definidos
-    sc.register(BeneficioRepository.class, new BeneficioRepository(em));
-    sc.register(CargoRepository.class, new CargoRepository(em));
-    sc.register(CategoriaRepository.class, new CategoriaRepository(em));
-    sc.register(ClaseRepository.class, new ClaseRepository(em));
-    sc.register(ClienteRepository.class, new ClienteRepository(em));
-    sc.register(DetallesFacturaRepository.class, new DetallesFacturaRepository(em));
-    sc.register(EmpleadoRepository.class, new EmpleadoRepository(em));
-    sc.register(EquipoRepository.class, new EquipoRepository(em));
-    sc.register(FacturaRepository.class, new FacturaRepository(em));
-    sc.register(HorarioRepository.class, new HorarioRepository(em));
-    sc.register(InscripcionesClaseRepository.class, new InscripcionesClaseRepository(em));
-    sc.register(IvaRepository.class, new IvaRepository(em));
-    sc.register(MembresiaRepository.class, new MembresiaRepository(em));
-    sc.register(MembresiaBeneficioRepository.class, new MembresiaBeneficioRepository(em));
-    sc.register(MovimientosInventarioRepository.class, new MovimientosInventarioRepository(em));
-    sc.register(NominaRepository.class, new NominaRepository(em));
-    sc.register(PagoRepository.class, new PagoRepository(em));
-    sc.register(ProductoRepository.class, new ProductoRepository(em));
-    sc.register(ProveedoreRepository.class, new ProveedoreRepository(em));
-    sc.register(TiposMembresiaRepository.class, new TiposMembresiaRepository(em));
+    sc.register(DBConnectionManager.class, dbManager);
+
+    sc.register(BeneficioRepository.class, new BeneficioRepository(dbManager));
+    sc.register(CargoRepository.class, new CargoRepository(dbManager));
+    sc.register(CategoriaRepository.class, new CategoriaRepository(dbManager));
+    sc.register(ClaseRepository.class, new ClaseRepository(dbManager));
+    sc.register(ClienteRepository.class, new ClienteRepository(dbManager));
+    sc.register(DetallesFacturaRepository.class, new DetallesFacturaRepository(dbManager));
+    sc.register(EmpleadoRepository.class, new EmpleadoRepository(dbManager));
+    sc.register(EquipoRepository.class, new EquipoRepository(dbManager));
+    sc.register(FacturaRepository.class, new FacturaRepository(dbManager));
+    sc.register(HorarioRepository.class, new HorarioRepository(dbManager));
+    sc.register(InscripcionesClaseRepository.class, new InscripcionesClaseRepository(dbManager));
+    sc.register(IvaRepository.class, new IvaRepository(dbManager));
+    sc.register(MembresiaRepository.class, new MembresiaRepository(dbManager));
+    sc.register(MembresiaBeneficioRepository.class, new MembresiaBeneficioRepository(dbManager));
+    sc.register(MovimientosInventarioRepository.class, new MovimientosInventarioRepository(dbManager));
+    sc.register(NominaRepository.class, new NominaRepository(dbManager));
+    sc.register(PagoRepository.class, new PagoRepository(dbManager));
+    sc.register(ProductoRepository.class, new ProductoRepository(dbManager));
+    sc.register(ProveedoreRepository.class, new ProveedoreRepository(dbManager));
+    sc.register(TiposMembresiaRepository.class, new TiposMembresiaRepository(dbManager));
+
+    if (dbManager.isConnected()) {
+      EntityManagerFactory emf = dbManager.getEntityManagerFactory();
+      EntityManager em = dbManager.getEntityManager();
+      sc.register(EntityManagerFactory.class, emf);
+      sc.register(EntityManager.class, em);
+    }
   }
 
   /**
@@ -59,12 +62,17 @@ public final class ApplicationConfig {
 
     if (sc.isRegistered(EntityManager.class)) {
       EntityManager em = sc.resolve(EntityManager.class);
-      em.close();
+      if (em.isOpen()) em.close();
     }
 
     if (sc.isRegistered(EntityManagerFactory.class)) {
       EntityManagerFactory emf = sc.resolve(EntityManagerFactory.class);
-      emf.close();
+      if (emf.isOpen()) emf.close();
+    }
+
+    if (sc.isRegistered(DBConnectionManager.class)) {
+      DBConnectionManager db = sc.resolve(DBConnectionManager.class);
+      db.close();
     }
 
     sc.clear();

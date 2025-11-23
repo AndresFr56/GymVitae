@@ -12,18 +12,10 @@ import java.beans.PropertyChangeSupport;
 public final class SessionManager {
 
   private static final SessionManager INSTANCE = new SessionManager();
-  private Empleado empleadoActual;
   private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+  private Empleado empleadoActual;
 
   private SessionManager() {}
-
-  public void addPropertyChangeListener(PropertyChangeListener listener) {
-    pcs.addPropertyChangeListener(listener);
-  }
-
-  public void removePropertyChangeListener(PropertyChangeListener listener) {
-    pcs.removePropertyChangeListener(listener);
-  }
 
   /**
    * Obtiene la instancia única del SessionManager.
@@ -32,6 +24,14 @@ public final class SessionManager {
    */
   public static SessionManager getInstance() {
     return INSTANCE;
+  }
+
+  public void addPropertyChangeListener(PropertyChangeListener listener) {
+    pcs.addPropertyChangeListener(listener);
+  }
+
+  public void removePropertyChangeListener(PropertyChangeListener listener) {
+    pcs.removePropertyChangeListener(listener);
   }
 
   /**
@@ -63,9 +63,7 @@ public final class SessionManager {
     return empleadoActual != null;
   }
 
-  /**
-   * Cierra la sesión del empleado actual.
-   */
+  /** Cierra la sesión del empleado actual. */
   public void logout() {
     Empleado old = this.empleadoActual;
     this.empleadoActual = null;
