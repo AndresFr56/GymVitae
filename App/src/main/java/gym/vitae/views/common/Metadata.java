@@ -1,4 +1,4 @@
-package raven.modal.demo.utils;
+package gym.vitae.views.common;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,11 +7,10 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface SystemForm {
+public @interface Metadata {
+  String name() default "";
 
-    String name() default "";
+  String description() default "";
 
-    String description() default "";
-
-    String[] tags() default {};
+  String[] tags() default {};
 }
