@@ -104,3 +104,10 @@ pmd -d ./App/main/java -R rulesets/java/quickstart.xml -f html -r report.html
 
 ### SonarQube
 Para ejecutar SonarQube en el proyecto, asegúrese de tener SonarQube instalado y en ejecución p utilizar la extension de SonarQube.
+
+## Licencia
+
+Este proyecto está bajo la Licencia GPL - vea el archivo [LICENSE](LICENSE) para más detalles.
+
+[Stargazers]: https://img.shields.io/github/stars/AndresFr56/GymVitae?color=fafafa&logo=github&logoColor=fff&style=for-the-badge
+[License]: https://img.shields.io/github/license/AndresFr56/GymVitae?color=0a0a0a&logo=github&logoColor=fff&style=for-the-badge
