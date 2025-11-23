@@ -50,6 +50,10 @@ public final class ApplicationConfig {
     sc.register(TiposMembresiaRepository.class, new TiposMembresiaRepository(em));
   }
 
+  /**
+   * Cierra los recursos abiertos por la aplicación, como el EntityManager y el
+   * EntityManagerFactory.
+   */
   public static void shutdown() {
     ServiceContainer sc = ServiceContainer.getInstance();
 

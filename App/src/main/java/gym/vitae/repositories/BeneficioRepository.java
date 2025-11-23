@@ -2,8 +2,6 @@ package gym.vitae.repositories;
 
 import gym.vitae.core.TransactionalExecutor;
 import gym.vitae.model.Beneficio;
-import gym.vitae.model.Membresia;
-
 import java.util.List;
 import java.util.Optional;
 import javax.persistence.EntityManager;
