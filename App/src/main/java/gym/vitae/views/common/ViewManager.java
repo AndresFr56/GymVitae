@@ -4,12 +4,11 @@ import gym.vitae.views.auth.ViewLogin;
 import gym.vitae.views.components.contents.SearchContext;
 import gym.vitae.views.components.primitives.About;
 import gym.vitae.views.personal.ViewPersonal;
+import gym.vitae.views.utils.UndoRedo;
+import javax.swing.*;
 import raven.modal.Drawer;
 import raven.modal.ModalDialog;
 import raven.modal.component.SimpleModalBorder;
-
-import gym.vitae.views.utils.UndoRedo;
-import javax.swing.*;
 
 public final class ViewManager {
 

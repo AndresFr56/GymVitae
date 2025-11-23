@@ -6,13 +6,6 @@ import gym.vitae.views.common.ViewManager;
 import gym.vitae.views.components.Menu;
 import gym.vitae.views.components.ModalBorder;
 import gym.vitae.views.components.SearchPanel;
-import raven.modal.ModalDialog;
-import raven.modal.drawer.data.Item;
-import raven.modal.drawer.data.MenuItem;
-import raven.modal.option.Location;
-import raven.modal.option.Option;
-
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -21,6 +14,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.*;
+import raven.modal.ModalDialog;
+import raven.modal.drawer.data.Item;
+import raven.modal.drawer.data.MenuItem;
+import raven.modal.option.Location;
+import raven.modal.option.Option;
 
 public class SearchContext {
 

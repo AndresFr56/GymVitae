@@ -8,11 +8,10 @@ import gym.vitae.views.common.ViewContainer;
     description = "Vista para crear un nuevo miembro del personal del gimnasio")
 public class RegisterPersonal extends ViewContainer {
 
-    public RegisterPersonal() {
-        super();
-    }
+  public RegisterPersonal() {
+    super();
+  }
 
-    @Override
-    protected void init() {
-    }
+  @Override
+  protected void init() {}
 }

@@ -21,17 +21,16 @@ public class CardItem extends JPanel {
     setLayout(new MigLayout("hidemode 3,wrap", "15 push[] 15 push"));
     putClientProperty(FlatClientProperties.STYLE, "background:null;");
 
-    lbTitle = new JLabel(title, icon, JLabel.LEADING);
+    lbTitle = new JLabel(title, icon, SwingConstants.LEADING);
     lbValue = new JLabel("0");
     lbDescription = new JLabel("description");
     lbTags = new JLabel("0%");
 
-    lbTitle.putClientProperty(
-        FlatClientProperties.STYLE,   "foreground:$Label.disabledForeground;");
-    lbValue.putClientProperty(FlatClientProperties.STYLE,   "font:+8;");
+    lbTitle.putClientProperty(FlatClientProperties.STYLE, "foreground:$Label.disabledForeground;");
+    lbValue.putClientProperty(FlatClientProperties.STYLE, "font:+8;");
 
     lbDescription.putClientProperty(
-        FlatClientProperties.STYLE,   "foreground:$Label.disabledForeground;");
+        FlatClientProperties.STYLE, "foreground:$Label.disabledForeground;");
 
     lbTags.putClientProperty(FlatClientProperties.STYLE_CLASS, "greenBadge small");
 

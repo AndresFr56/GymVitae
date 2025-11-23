@@ -7,7 +7,7 @@ import javax.swing.*;
 public class ToolBarSelection<T> extends JToolBar {
 
   public ToolBarSelection(T[] data, Consumer<T> callBack) {
-    putClientProperty(FlatClientProperties.STYLE,   "background:null;");
+    putClientProperty(FlatClientProperties.STYLE, "background:null;");
     ButtonGroup group = new ButtonGroup();
     boolean selected = false;
     for (T d : data) {

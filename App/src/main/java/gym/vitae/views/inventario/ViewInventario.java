@@ -3,7 +3,6 @@ package gym.vitae.views.inventario;
 import gym.vitae.views.common.Metadata;
 import gym.vitae.views.common.ViewContainer;
 
-
 @Metadata(
     name = "Vista de Inventario",
     description = "Vista para gestionar el inventario del gimnasio")

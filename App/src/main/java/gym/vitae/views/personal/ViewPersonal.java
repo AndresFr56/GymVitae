@@ -6,16 +6,14 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 
-@Metadata(
-    name = "Vista de Personal",
-    description = "Vista para gestionar el personal del gimnasio")
+@Metadata(name = "Vista de Personal", description = "Vista para gestionar el personal del gimnasio")
 public class ViewPersonal extends ViewContainer {
 
   @Override
   protected void init() {
-      setLayout(new MigLayout("al center center"));
-      JLabel text = new JLabel("Input");
-      add(text);
+    setLayout(new MigLayout("al center center"));
+    JLabel text = new JLabel("Input");
+    add(text);
   }
 
   @Override

@@ -2,9 +2,9 @@ package gym.vitae.views.components;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+import gym.vitae.core.SessionManager;
 import gym.vitae.model.Empleado;
 import gym.vitae.views.components.primitives.Icons;
-import gym.vitae.core.SessionManager;
 import javax.swing.*;
 import raven.extras.AvatarIcon;
 import raven.modal.drawer.DrawerPanel;
@@ -22,7 +22,6 @@ public class Menu extends SimpleDrawerBuilder {
 
   private static final int SHADOWSIZE = 12;
   private static Menu instance;
-  private final SessionManager sessionManager;
 
   private Menu() {
     super(createMenuOptions());
@@ -138,11 +137,6 @@ public class Menu extends SimpleDrawerBuilder {
 
     String title = "Usuario";
     String desc = "defaut@gmail.com";
-
-    //    if(sessionManager.isAuthenticated()) {
-    //      title = sessionManager.getNombreCompleto();
-    //      desc = sessionManager.getEmpleadoActual().getEmail();
-    //    }
 
     return new SimpleHeaderData().setIcon(icon).setTitle(title).setDescription(desc);
   }

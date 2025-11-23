@@ -8,10 +8,9 @@ import gym.vitae.core.ApplicationConfig;
 import gym.vitae.views.common.ViewManager;
 import gym.vitae.views.components.Menu;
 import gym.vitae.views.utils.Preferences;
-import raven.modal.Drawer;
-
-import javax.swing.*;
 import java.awt.*;
+import javax.swing.*;
+import raven.modal.Drawer;
 
 public class Main extends JFrame {
 

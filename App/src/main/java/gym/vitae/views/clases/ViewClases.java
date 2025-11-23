@@ -3,9 +3,7 @@ package gym.vitae.views.clases;
 import gym.vitae.views.common.Metadata;
 import gym.vitae.views.common.ViewContainer;
 
-@Metadata(
-    name = "Vista de Clases",
-    description = "Vista para gestionar las clases del gimnasio")
+@Metadata(name = "Vista de Clases", description = "Vista para gestionar las clases del gimnasio")
 public class ViewClases extends ViewContainer {
 
   @Override

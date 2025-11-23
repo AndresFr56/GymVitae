@@ -411,10 +411,7 @@ public class SearchPanel extends JPanel {
     private Component itemSource;
 
     public Item(
-        Metadata data,
-        Class<? extends ViewContainer> form,
-        boolean isRecent,
-        boolean isFavorite) {
+        Metadata data, Class<? extends ViewContainer> form, boolean isRecent, boolean isFavorite) {
       this.data = data;
       this.form = form;
       this.isRecent = isRecent;
@@ -437,7 +434,7 @@ public class SearchPanel extends JPanel {
               + "[light]selectedBackground:lighten($Button.selectedBackground,9%)");
       JLabel labelDescription = new JLabel(data.description());
       labelDescription.putClientProperty(
-          FlatClientProperties.STYLE,   "foreground:$Label.disabledForeground;");
+          FlatClientProperties.STYLE, "foreground:$Label.disabledForeground;");
       add(new JLabel(data.name()), "cell 0 0");
       add(labelDescription, "cell 0 1");
       if (!isRecent) {
@@ -488,7 +485,7 @@ public class SearchPanel extends JPanel {
             new JLabel(
                 new IconColorScheme(
                     Icons.FAVORITE.toString(), 0.4f, "Component.accentColor", 0.8f));
-        label.putClientProperty(FlatClientProperties.STYLE,   "border:3,3,3,3;");
+        label.putClientProperty(FlatClientProperties.STYLE, "border:3,3,3,3;");
         panel.add(label);
       }
       panel.add(new JSeparator(SwingConstants.VERTICAL), "gapy 5 5");
@@ -497,7 +494,7 @@ public class SearchPanel extends JPanel {
     }
 
     private JButton createButton(
-            String name, String icon, float scale, String hoverKey, float alpha) {
+        String name, String icon, float scale, String hoverKey, float alpha) {
       IconColorScheme svgIcon = new IconColorScheme(icon, scale, "Label.disabledForeground", alpha);
       JButton button = new JButton(svgIcon);
       button.setName(name);

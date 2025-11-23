@@ -21,7 +21,7 @@ public class About extends JPanel {
     setLayout(new MigLayout("fillx,wrap,insets 5 30 5 30,width 400", "[fill,330::]", ""));
 
     JTextPane title = createText("Gym Vitae - Sistema de Gestión de Gimnasios Open Source");
-    title.putClientProperty(FlatClientProperties.STYLE,   "font:bold +5");
+    title.putClientProperty(FlatClientProperties.STYLE, "font:bold +5");
 
     JTextPane description = createText("");
     description.setContentType("text/html");

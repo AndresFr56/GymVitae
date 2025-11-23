@@ -6,11 +6,10 @@ import gym.vitae.views.components.contents.SearchContext;
 import gym.vitae.views.components.primitives.Icons;
 import gym.vitae.views.components.primitives.RefreshLine;
 import gym.vitae.views.components.primitives.SearchButton;
+import java.awt.*;
+import javax.swing.*;
 import net.miginfocom.swing.MigLayout;
 import raven.modal.Drawer;
-
-import javax.swing.*;
-import java.awt.*;
 
 public class MainView extends ViewContainer {
 
@@ -109,6 +108,7 @@ public class MainView extends ViewContainer {
     }
   }
 
+  @Override
   public void refresh() {
     refreshLine.refresh();
   }

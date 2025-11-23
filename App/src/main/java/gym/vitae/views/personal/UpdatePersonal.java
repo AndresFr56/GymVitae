@@ -8,8 +8,6 @@ import gym.vitae.views.common.ViewContainer;
     description = "Vista para actualizar la información del personal del gimnasio")
 public class UpdatePersonal extends ViewContainer {
 
-    @Override
-    protected void init() {
-
-    }
+  @Override
+  protected void init() {}
 }
