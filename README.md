@@ -7,8 +7,14 @@
     <img alt="" align="right" src="https://badges.pufler.dev/visits/AndresFr56/GymVitae?style=for-the-badge&color=244981&logoColor=white&labelColor=244981"/>
   </a>
 </div>
+<div align="center">
 
-<h1 align="center" style="font-weight:mediun; padding:24px;">GymVitae - Sistema de gestion de Gimnasio Open Source</h1>
+## GymVitae - Sistema de gestion de Gimnasio Open Source
+
+![Stargazers]
+[![License]](LICENSE)
+
+</div>
 
 Un sistema de gestion de Gimnasio Open Source con la licensia GPL cualquiera puede hacer uso de este o mantener este software mandando PR con sus soluciones.
 
@@ -55,7 +61,13 @@ MYSQL_USER=gym_admin
 MYSQL_PASSWORD=gym_pass_2025
 ```
 
-> [!WARNING]  
+Para levantar el contenedor de docker
+
+```bash
+docker-compose up -d
+```
+
+> [!WARNING]
 > ⚠ Si no quiere tener problemas con Mysql, le recomendamos utilizar el docker-compose.yaml del proyecto y levantar la base de datos
 
 ## 🚀 Ejecución del Proyecto
@@ -66,5 +78,29 @@ En esta sección se explica el proceso de ejecución del proyecto.
 cd App && nvm run
 ```
 
-> [!WARNING]  
+> [!WARNING]
 > ⚠ Se recomienda revisar el archivo `pom.xml` para revisar las dependencias del proyecto.
+
+## QA y Testing
+
+Para cumplir con la verificacion del software se usan las siguientes herramientas
+
+- PMD
+- SonarQube
+- CheckStyle
+
+### PMD
+
+Para ejecutar PMD en el proyecto, utilice el siguiente comando Maven:
+
+```sh
+mvn pmd:pmd ./App/main/java -R rulesets/java/quickstart.xml -f html -r report.html
+```
+O ejecutar PMD instalado desde su equipo
+
+```sh
+pmd -d ./App/main/java -R rulesets/java/quickstart.xml -f html -r report.html
+```
+
+### SonarQube
+Para ejecutar SonarQube en el proyecto, asegúrese de tener SonarQube instalado y en ejecución p utilizar la extension de SonarQube.
