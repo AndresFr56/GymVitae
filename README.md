@@ -1,12 +1,3 @@
-<!-- BADGES -->
-<div>
-  <a href="#">
-    <img alt="" align="left" src="https://img.shields.io/github/stars/AndresFr56/GymVitae?color=244981&labelColor=0D1117&style=for-the-badge"/>
-  </a>
-  <a href="#">
-    <img alt="" align="right" src="https://badges.pufler.dev/visits/AndresFr56/GymVitae?style=for-the-badge&color=244981&logoColor=white&labelColor=244981"/>
-  </a>
-</div>
 <div align="center">
 
 ## GymVitae - Sistema de gestion de Gimnasio Open Source
@@ -73,9 +64,15 @@ docker-compose up -d
 ## 🚀 Ejecución del Proyecto
 
 En esta sección se explica el proceso de ejecución del proyecto.
+Para una mejor experiencia instale [MAVEN](https://maven.apache.org/install.html)
+
+
 
 ```sh
-cd App && nvm run
+cd App && mvn clean install
+mvn clean package
+mvn exec:java -Dexec.mainClass="com.gymvitae.Main"
+
 ```
 
 > [!WARNING]
