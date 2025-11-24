@@ -38,7 +38,8 @@ public final class ApplicationConfig {
     sc.register(IvaRepository.class, new IvaRepository(dbManager));
     sc.register(MembresiaRepository.class, new MembresiaRepository(dbManager));
     sc.register(MembresiaBeneficioRepository.class, new MembresiaBeneficioRepository(dbManager));
-    sc.register(MovimientosInventarioRepository.class, new MovimientosInventarioRepository(dbManager));
+    sc.register(
+        MovimientosInventarioRepository.class, new MovimientosInventarioRepository(dbManager));
     sc.register(NominaRepository.class, new NominaRepository(dbManager));
     sc.register(PagoRepository.class, new PagoRepository(dbManager));
     sc.register(ProductoRepository.class, new ProductoRepository(dbManager));
