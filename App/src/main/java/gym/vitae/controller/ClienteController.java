@@ -382,10 +382,7 @@ public class ClienteController extends BaseController {
   private void validateCedulaNoDuplicada(String cedula, Integer idActual) {
     List<Cliente> clientesExistentes =
         clienteRepository.findAll().stream()
-            .filter(
-                c ->
-                    c.getCedula().equals(cedula.trim())
-                        && (!c.getId().equals(idActual)))
+            .filter(c -> c.getCedula().equals(cedula.trim()) && (!c.getId().equals(idActual)))
             .toList();
 
     if (!clientesExistentes.isEmpty()) {
