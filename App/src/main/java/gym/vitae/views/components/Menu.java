@@ -2,9 +2,13 @@ package gym.vitae.views.components;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
-import gym.vitae.core.SessionManager;
 import gym.vitae.model.Empleado;
+import gym.vitae.views.clientes.ViewClientes;
+import gym.vitae.views.common.StateView;
+import gym.vitae.views.common.ViewContainer;
+import gym.vitae.views.common.ViewManager;
 import gym.vitae.views.components.primitives.Icons;
+import gym.vitae.views.personal.ViewPersonal;
 import javax.swing.*;
 import raven.extras.AvatarIcon;
 import raven.modal.drawer.DrawerPanel;
@@ -35,7 +39,6 @@ public class Menu extends SimpleDrawerBuilder {
               "Cambio de Tema",
               JOptionPane.INFORMATION_MESSAGE);
         });
-    sessionManager = SessionManager.getInstance();
   }
 
   public static Menu getInstance() {
@@ -54,18 +57,24 @@ public class Menu extends SimpleDrawerBuilder {
           new Item.Label("Menu Principal"),
           new Item("Inicio", "dashboard.svg"),
           new Item("Personal", "email.svg")
-              .subMenu("Lista de Empleados")
-              .subMenu("Agregar Empleado")
-              .subMenu("Nominas"),
+              .subMenu("Lista de Personal", ViewPersonal.class)
+              .subMenu("Nominass"),
           new Item("Facturacion", "page.svg")
               .subMenu("Crear Factura")
               .subMenu("Historial de Facturas"),
+          new Item("Clientes", "customer.svg")
+              .subMenu("Listado de Clientes", ViewClientes.class),
+          new Item("Clases", "calendar.svg")
+              .subMenu("Clases Programadas")
+              .subMenu("Horrarios de Clases"),
           new Item("Membresias", "employee.svg")
               .subMenu("Listado de Membresias")
               .subMenu("Tipos de Membresias"),
           new Item("Iventario", "pack.svg").subMenu("Productos y Equipos").subMenu("Proveedores"),
+          new Item("Cerrar Session", "logout.svg")
         };
 
+    // line style
     menuOption.setMenuStyle(
         new MenuStyle() {
           @Override
@@ -86,7 +95,30 @@ public class Menu extends SimpleDrawerBuilder {
     menuOption.getMenuStyle().setDrawerLineStyleRenderer(new DrawerStraightDotLineStyle());
     menuOption.setMenuValidation(new MenuValidation());
 
-    // implements logout
+    // Events de menu
+    menuOption.addMenuEvent(
+        (menuAction, ints) -> {
+          Class<?> itemMenu = menuAction.getItem().getItemClass();
+
+          String text = menuAction.getItem().getName();
+          if (text != null && text.equalsIgnoreCase("Cerrar Session")) {
+            menuAction.consume();
+            ViewManager.logout();
+            return;
+          }
+
+          if (itemMenu == null || !ViewContainer.class.isAssignableFrom(itemMenu)) {
+            menuAction.consume();
+            return;
+          }
+
+          @SuppressWarnings("unchecked")
+          Class<? extends ViewContainer> viewClass = (Class<? extends ViewContainer>) itemMenu;
+
+          ViewManager.showView(StateView.getView(viewClass));
+        });
+
+    // agregando el icon Path Resources/icons/modules
 
     menuOption.setMenus(items).setBaseIconPath("icons/modules").setIconScale(0.46f);
 
