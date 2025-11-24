@@ -167,46 +167,82 @@ public class ClasesController extends BaseController {
       throw new IllegalArgumentException("La clase no puede ser nula");
     }
 
-    // Validar nombre
-    if (clase.getNombre() == null || clase.getNombre().trim().isEmpty()) {
+    validateNombre(clase.getNombre(), clase.getId());
+    validateDuracion(clase.getDuracionMinutos());
+    validateCapacidad(clase.getCapacidadMaxima());
+    validateNivel(clase.getNivel());
+    validateDescripcion(clase.getDescripcion());
+  }
+
+  /** Valida el nombre de la clase. */
+  private void validateNombre(String nombre, Integer idActual) {
+    if (nombre == null || nombre.trim().isEmpty()) {
       throw new IllegalArgumentException("El nombre de la clase es obligatorio");
     }
-    if (clase.getNombre().length() > 100) {
+    if (nombre.length() > 100) {
       throw new IllegalArgumentException("El nombre no puede exceder 100 caracteres");
     }
 
-    // Validar duración
-    if (clase.getDuracionMinutos() == null) {
+    // Validar solo letras y espacios
+    if (!nombre.matches("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$")) {
+      throw new IllegalArgumentException("El nombre solo puede contener letras y espacios");
+    }
+
+    // Validar que no esté duplicado
+    validateNombreNoDuplicado(nombre.trim(), idActual);
+  }
+
+  /** Valida que el nombre no esté duplicado. */
+  private void validateNombreNoDuplicado(String nombre, Integer idActual) {
+    List<Clase> clases = repository.findAll();
+    boolean existe =
+        clases.stream()
+            .anyMatch(
+                c ->
+                    c.getNombre().equalsIgnoreCase(nombre)
+                        && (!c.getId().equals(idActual)));
+
+    if (existe) {
+      throw new IllegalArgumentException("Ya existe una clase con el nombre: " + nombre);
+    }
+  }
+
+  /** Valida la duración en minutos. */
+  private void validateDuracion(Integer duracion) {
+    if (duracion == null) {
       throw new IllegalArgumentException("La duración es obligatoria");
     }
-    if (clase.getDuracionMinutos() <= 0) {
-      throw new IllegalArgumentException("La duración debe ser mayor a 0 minutos");
-    }
-    if (clase.getDuracionMinutos() > 480) {
-      // Máximo 8 horas
-      throw new IllegalArgumentException("La duración no puede exceder 480 minutos (8 horas)");
+    if (duracion < 15 || duracion > 180) {
+      throw new IllegalArgumentException("La duración debe estar entre 15 y 180 minutos");
     }
 
-    // Validar capacidad máxima
-    if (clase.getCapacidadMaxima() == null) {
+    // Validar que sea múltiplo de 5
+    if (duracion % 5 != 0) {
+      throw new IllegalArgumentException("La duración debe ser múltiplo de 5 minutos");
+    }
+  }
+
+  /** Valida la capacidad máxima. */
+  private void validateCapacidad(Integer capacidad) {
+    if (capacidad == null) {
       throw new IllegalArgumentException("La capacidad máxima es obligatoria");
     }
-    if (clase.getCapacidadMaxima() <= 0) {
-      throw new IllegalArgumentException("La capacidad máxima debe ser mayor a 0");
+    if (capacidad < 1 || capacidad > 50) {
+      throw new IllegalArgumentException("La capacidad debe estar entre 1 y 50 personas");
     }
-    if (clase.getCapacidadMaxima() > 100) {
-      throw new IllegalArgumentException(
-          "La capacidad máxima no puede exceder 100 personas por razones de seguridad");
-    }
+  }
 
-    // Validar nivel
-    if (clase.getNivel() == null) {
+  /** Valida el nivel de la clase. */
+  private void validateNivel(NivelClase nivel) {
+    if (nivel == null) {
       throw new IllegalArgumentException("El nivel de la clase es obligatorio");
     }
+  }
 
-    // Validar descripción (opcional)
-    if (clase.getDescripcion() != null && clase.getDescripcion().length() > 5000) {
-      throw new IllegalArgumentException("La descripción no puede exceder 5000 caracteres");
+  /** Valida la descripción (opcional). */
+  private void validateDescripcion(String descripcion) {
+    if (descripcion != null && descripcion.length() > 500) {
+      throw new IllegalArgumentException("La descripción no puede exceder 500 caracteres");
     }
   }
 }
