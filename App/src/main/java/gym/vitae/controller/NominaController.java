@@ -372,9 +372,8 @@ public class NominaController extends BaseController {
 
     // No se puede volver a estado anterior (excepto anular)
     if (nuevoEstado != EstadoNomina.ANULADA && estadoActual == EstadoNomina.PAGADA) {
-        throw new IllegalArgumentException("No se puede cambiar el estado de una nómina ya pagada");
-      }
-
+      throw new IllegalArgumentException("No se puede cambiar el estado de una nómina ya pagada");
+    }
   }
 
   /**

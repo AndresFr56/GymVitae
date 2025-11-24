@@ -35,6 +35,15 @@ public class PersonalController extends BaseController {
   }
 
   /**
+   * Obtiene todos los cargos
+   *
+   * @return Lista de cargos
+   */
+  public List<Cargo> getCargos() {
+    return cargoRepository.findAll();
+  }
+
+  /**
    * Obtiene empleados con paginación
    *
    * @param offset Posición inicial
@@ -91,12 +100,28 @@ public class PersonalController extends BaseController {
 
     empleado.setCargo(cargo);
 
+    // Generar código de empleado automáticamente si no existe
+    if (empleado.getCodigoEmpleado() == null || empleado.getCodigoEmpleado().trim().isEmpty()) {
+      empleado.setCodigoEmpleado(generateCodigoEmpleado());
+    }
+
     // Establecer estado inicial si no se proporciona
     if (empleado.getEstado() == null) {
       empleado.setEstado(EstadoEmpleado.ACTIVO);
     }
 
     return empleadoRepository.save(empleado);
+  }
+
+  /**
+   * Genera un código único para el empleado basado en el año actual y el contador.
+   *
+   * @return Código generado en formato EMP-YYYYNNN
+   */
+  private String generateCodigoEmpleado() {
+    long count = empleadoRepository.count();
+    int year = java.time.Year.now().getValue();
+    return String.format("EMP-%d%03d", year, count + 1);
   }
 
   /**
@@ -157,6 +182,39 @@ public class PersonalController extends BaseController {
    */
   public long countEmpleados() {
     return empleadoRepository.count();
+  }
+
+  /**
+   * Obtiene empleados con filtros y paginación.
+   *
+   * @param searchText Texto de búsqueda (puede ser null)
+   * @param cargoId ID del cargo (puede ser null)
+   * @param genero Género (puede ser null)
+   * @param offset Posición inicial
+   * @param limit Cantidad de registros
+   * @return Lista de empleados filtrada y paginada
+   */
+  public List<Empleado> getEmpleadosWithFilters(
+      String searchText, Integer cargoId, String genero, int offset, int limit) {
+    if (offset < 0) {
+      throw new IllegalArgumentException("El offset no puede ser negativo");
+    }
+    if (limit <= 0) {
+      throw new IllegalArgumentException("El limit debe ser mayor a 0");
+    }
+    return empleadoRepository.findAllWithFilters(searchText, cargoId, genero, offset, limit);
+  }
+
+  /**
+   * Cuenta empleados con filtros.
+   *
+   * @param searchText Texto de búsqueda (puede ser null)
+   * @param cargoId ID del cargo (puede ser null)
+   * @param genero Género (puede ser null)
+   * @return Cantidad de empleados que coinciden con los filtros
+   */
+  public long countEmpleadosWithFilters(String searchText, Integer cargoId, String genero) {
+    return empleadoRepository.countWithFilters(searchText, cargoId, genero);
   }
 
   /**
@@ -261,10 +319,8 @@ public class PersonalController extends BaseController {
    * @throws IllegalArgumentException si la validación falla
    */
   private void validateCodigoEmpleado(String codigoEmpleado) {
-    if (codigoEmpleado == null || codigoEmpleado.trim().isEmpty()) {
-      throw new IllegalArgumentException("El código de empleado es obligatorio");
-    }
-    if (codigoEmpleado.length() > 20) {
+    // El código de empleado es auto-generado, solo validar si ya existe
+    if (codigoEmpleado != null && codigoEmpleado.length() > 20) {
       throw new IllegalArgumentException("El código de empleado no puede exceder 20 caracteres");
     }
   }
