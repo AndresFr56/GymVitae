@@ -6,7 +6,6 @@ import gym.vitae.model.Membresia;
 import gym.vitae.model.enums.EstadoMembresia;
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 public record MembresiaRepository(DBConnectionManager db) implements IRepository<Membresia> {
@@ -21,9 +20,9 @@ public record MembresiaRepository(DBConnectionManager db) implements IRepository
   public Membresia save(Membresia entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.persist(entity);
+          em.flush();
           return entity;
         });
   }
@@ -32,9 +31,9 @@ public record MembresiaRepository(DBConnectionManager db) implements IRepository
   public boolean update(Membresia entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.merge(entity);
+          em.flush();
           return true;
         });
   }
@@ -43,31 +42,24 @@ public record MembresiaRepository(DBConnectionManager db) implements IRepository
   public void delete(int id) {
     TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          em.createQuery("update Membresia m set m.estado = :estado where m.id = :id")
-              .setParameter("id", id)
-              .setParameter("estado", EstadoMembresia.CANCELADA)
-              .executeUpdate();
-        });
+        em ->
+            em.createQuery("update Membresia m set m.estado = :estado where m.id = :id")
+                .setParameter("id", id)
+                .setParameter("estado", EstadoMembresia.CANCELADA)
+                .executeUpdate());
   }
 
   @Override
   public Optional<Membresia> findById(int id) {
     return TransactionHandler.inTransaction(
-        db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return Optional.ofNullable(em.find(Membresia.class, id));
-        });
+        db, em -> Optional.ofNullable(em.find(Membresia.class, id)));
   }
 
   @Override
   public List<Membresia> findAll() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Membresia> q =
               em.createQuery("from Membresia m order by m.id", Membresia.class);
           return q.getResultList();
@@ -78,8 +70,7 @@ public record MembresiaRepository(DBConnectionManager db) implements IRepository
   public List<Membresia> findAll(int offset, int limit) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Membresia> q =
               em.createQuery("from Membresia m order by m.id", Membresia.class);
           q.setFirstResult(offset);
@@ -92,8 +83,7 @@ public record MembresiaRepository(DBConnectionManager db) implements IRepository
   public long count() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Long> q = em.createQuery("select count(m) from Membresia m", Long.class);
           return q.getSingleResult();
         });
@@ -101,11 +91,6 @@ public record MembresiaRepository(DBConnectionManager db) implements IRepository
 
   @Override
   public boolean existsById(int id) {
-    return TransactionHandler.inTransaction(
-        db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return em.find(Membresia.class, id) != null;
-        });
+    return TransactionHandler.inTransaction(db, em -> em.find(Membresia.class, id) != null);
   }
 }

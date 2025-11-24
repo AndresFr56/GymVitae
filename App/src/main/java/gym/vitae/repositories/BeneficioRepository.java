@@ -5,7 +5,6 @@ import gym.vitae.core.TransactionHandler;
 import gym.vitae.model.Beneficio;
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 public record BeneficioRepository(DBConnectionManager db) implements IRepository<Beneficio> {
@@ -20,9 +19,9 @@ public record BeneficioRepository(DBConnectionManager db) implements IRepository
   public Beneficio save(Beneficio entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.persist(entity);
+          em.flush();
           return entity;
         });
   }
@@ -31,9 +30,9 @@ public record BeneficioRepository(DBConnectionManager db) implements IRepository
   public boolean update(Beneficio entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.merge(entity);
+          em.flush();
           return true;
         });
   }
@@ -42,30 +41,23 @@ public record BeneficioRepository(DBConnectionManager db) implements IRepository
   public void delete(int id) {
     TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          em.createQuery("update Beneficio c set c.activo = false where c.id = :id")
-              .setParameter("id", id)
-              .executeUpdate();
-        });
+        em ->
+            em.createQuery("update Beneficio c set c.activo = false where c.id = :id")
+                .setParameter("id", id)
+                .executeUpdate());
   }
 
   @Override
   public Optional<Beneficio> findById(int id) {
     return TransactionHandler.inTransaction(
-        db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return Optional.ofNullable(em.find(Beneficio.class, id));
-        });
+        db, em -> Optional.ofNullable(em.find(Beneficio.class, id)));
   }
 
   @Override
   public List<Beneficio> findAll() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Beneficio> q =
               em.createQuery("from Beneficio b order by b.id", Beneficio.class);
           return q.getResultList();
@@ -76,8 +68,7 @@ public record BeneficioRepository(DBConnectionManager db) implements IRepository
   public List<Beneficio> findAll(int offset, int limit) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Beneficio> q =
               em.createQuery("from Beneficio b order by b.id", Beneficio.class);
           q.setFirstResult(offset);
@@ -90,8 +81,7 @@ public record BeneficioRepository(DBConnectionManager db) implements IRepository
   public long count() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Long> q = em.createQuery("select count(b) from Beneficio b", Long.class);
           return q.getSingleResult();
         });
@@ -99,11 +89,6 @@ public record BeneficioRepository(DBConnectionManager db) implements IRepository
 
   @Override
   public boolean existsById(int id) {
-    return TransactionHandler.inTransaction(
-        db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return em.find(Beneficio.class, id) != null;
-        });
+    return TransactionHandler.inTransaction(db, em -> em.find(Beneficio.class, id) != null);
   }
 }

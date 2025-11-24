@@ -6,7 +6,6 @@ import gym.vitae.model.Factura;
 import gym.vitae.model.enums.EstadoFactura;
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 public record FacturaRepository(DBConnectionManager db) implements IRepository<Factura> {
@@ -21,9 +20,9 @@ public record FacturaRepository(DBConnectionManager db) implements IRepository<F
   public Factura save(Factura entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.persist(entity);
+          em.flush();
           return entity;
         });
   }
@@ -32,9 +31,9 @@ public record FacturaRepository(DBConnectionManager db) implements IRepository<F
   public boolean update(Factura entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.merge(entity);
+          em.flush();
           return true;
         });
   }
@@ -43,31 +42,24 @@ public record FacturaRepository(DBConnectionManager db) implements IRepository<F
   public void delete(int id) {
     TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          em.createQuery("update Factura f set f.estado = :estado where f.id = :id")
-              .setParameter("id", id)
-              .setParameter("estado", EstadoFactura.ANULADA)
-              .executeUpdate();
-        });
+        em ->
+            em.createQuery("update Factura f set f.estado = :estado where f.id = :id")
+                .setParameter("id", id)
+                .setParameter("estado", EstadoFactura.ANULADA)
+                .executeUpdate());
   }
 
   @Override
   public Optional<Factura> findById(int id) {
     return TransactionHandler.inTransaction(
-        db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return Optional.ofNullable(em.find(Factura.class, id));
-        });
+        db, em -> Optional.ofNullable(em.find(Factura.class, id)));
   }
 
   @Override
   public List<Factura> findAll() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Factura> q = em.createQuery("from Factura f order by f.id", Factura.class);
           return q.getResultList();
         });
@@ -77,8 +69,7 @@ public record FacturaRepository(DBConnectionManager db) implements IRepository<F
   public List<Factura> findAll(int offset, int limit) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Factura> q = em.createQuery("from Factura f order by f.id", Factura.class);
           q.setFirstResult(offset);
           q.setMaxResults(limit);
@@ -90,8 +81,7 @@ public record FacturaRepository(DBConnectionManager db) implements IRepository<F
   public long count() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Long> q = em.createQuery("select count(f) from Factura f", Long.class);
           return q.getSingleResult();
         });
@@ -99,11 +89,6 @@ public record FacturaRepository(DBConnectionManager db) implements IRepository<F
 
   @Override
   public boolean existsById(int id) {
-    return TransactionHandler.inTransaction(
-        db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return em.find(Factura.class, id) != null;
-        });
+    return TransactionHandler.inTransaction(db, em -> em.find(Factura.class, id) != null);
   }
 }

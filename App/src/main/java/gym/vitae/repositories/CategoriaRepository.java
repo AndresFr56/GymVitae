@@ -5,7 +5,6 @@ import gym.vitae.core.TransactionHandler;
 import gym.vitae.model.Categoria;
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 public record CategoriaRepository(DBConnectionManager db) implements IRepository<Categoria> {
@@ -20,9 +19,9 @@ public record CategoriaRepository(DBConnectionManager db) implements IRepository
   public Categoria save(Categoria entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.persist(entity);
+          em.flush();
           return entity;
         });
   }
@@ -31,9 +30,9 @@ public record CategoriaRepository(DBConnectionManager db) implements IRepository
   public boolean update(Categoria entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.merge(entity);
+          em.flush();
           return true;
         });
   }
@@ -42,30 +41,23 @@ public record CategoriaRepository(DBConnectionManager db) implements IRepository
   public void delete(int id) {
     TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          em.createQuery("update Categoria c set c.activo = false where c.id = :id")
-              .setParameter("id", id)
-              .executeUpdate();
-        });
+        em ->
+            em.createQuery("update Categoria c set c.activo = false where c.id = :id")
+                .setParameter("id", id)
+                .executeUpdate());
   }
 
   @Override
   public Optional<Categoria> findById(int id) {
     return TransactionHandler.inTransaction(
-        db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return Optional.ofNullable(em.find(Categoria.class, id));
-        });
+        db, em -> Optional.ofNullable(em.find(Categoria.class, id)));
   }
 
   @Override
   public List<Categoria> findAll() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Categoria> q =
               em.createQuery("from Categoria c order by c.id", Categoria.class);
           return q.getResultList();
@@ -76,8 +68,7 @@ public record CategoriaRepository(DBConnectionManager db) implements IRepository
   public List<Categoria> findAll(int offset, int limit) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Categoria> q =
               em.createQuery("from Categoria c order by c.id", Categoria.class);
           q.setFirstResult(offset);
@@ -90,8 +81,7 @@ public record CategoriaRepository(DBConnectionManager db) implements IRepository
   public long count() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Long> q = em.createQuery("select count(c) from Categoria c", Long.class);
           return q.getSingleResult();
         });
@@ -99,11 +89,6 @@ public record CategoriaRepository(DBConnectionManager db) implements IRepository
 
   @Override
   public boolean existsById(int id) {
-    return TransactionHandler.inTransaction(
-        db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return em.find(Categoria.class, id) != null;
-        });
+    return TransactionHandler.inTransaction(db, em -> em.find(Categoria.class, id) != null);
   }
 }

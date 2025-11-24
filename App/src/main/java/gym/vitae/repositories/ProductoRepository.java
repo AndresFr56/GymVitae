@@ -5,7 +5,6 @@ import gym.vitae.core.TransactionHandler;
 import gym.vitae.model.Producto;
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 public record ProductoRepository(DBConnectionManager db) implements IRepository<Producto> {
@@ -20,9 +19,9 @@ public record ProductoRepository(DBConnectionManager db) implements IRepository<
   public Producto save(Producto entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.persist(entity);
+          em.flush();
           return entity;
         });
   }
@@ -31,9 +30,9 @@ public record ProductoRepository(DBConnectionManager db) implements IRepository<
   public boolean update(Producto entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.merge(entity);
+          em.flush();
           return true;
         });
   }
@@ -42,30 +41,23 @@ public record ProductoRepository(DBConnectionManager db) implements IRepository<
   public void delete(int id) {
     TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          em.createQuery("update Producto p set p.activo = false where p.id = :id")
-              .setParameter("id", id)
-              .executeUpdate();
-        });
+        em ->
+            em.createQuery("update Producto p set p.activo = false where p.id = :id")
+                .setParameter("id", id)
+                .executeUpdate());
   }
 
   @Override
   public Optional<Producto> findById(int id) {
     return TransactionHandler.inTransaction(
-        db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return Optional.ofNullable(em.find(Producto.class, id));
-        });
+        db, em -> Optional.ofNullable(em.find(Producto.class, id)));
   }
 
   @Override
   public List<Producto> findAll() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Producto> q = em.createQuery("from Producto p order by p.id", Producto.class);
           return q.getResultList();
         });
@@ -75,8 +67,7 @@ public record ProductoRepository(DBConnectionManager db) implements IRepository<
   public List<Producto> findAll(int offset, int limit) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Producto> q = em.createQuery("from Producto p order by p.id", Producto.class);
           q.setFirstResult(offset);
           q.setMaxResults(limit);
@@ -88,8 +79,7 @@ public record ProductoRepository(DBConnectionManager db) implements IRepository<
   public long count() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Long> q = em.createQuery("select count(p) from Producto p", Long.class);
           return q.getSingleResult();
         });
@@ -97,11 +87,6 @@ public record ProductoRepository(DBConnectionManager db) implements IRepository<
 
   @Override
   public boolean existsById(int id) {
-    return TransactionHandler.inTransaction(
-        db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return em.find(Producto.class, id) != null;
-        });
+    return TransactionHandler.inTransaction(db, em -> em.find(Producto.class, id) != null);
   }
 }

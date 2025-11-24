@@ -5,7 +5,6 @@ import gym.vitae.core.TransactionHandler;
 import gym.vitae.model.Clase;
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 public record ClaseRepository(DBConnectionManager db) implements IRepository<Clase> {
@@ -20,9 +19,9 @@ public record ClaseRepository(DBConnectionManager db) implements IRepository<Cla
   public Clase save(Clase entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.persist(entity);
+          em.flush();
           return entity;
         });
   }
@@ -31,9 +30,9 @@ public record ClaseRepository(DBConnectionManager db) implements IRepository<Cla
   public boolean update(Clase entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.merge(entity);
+          em.flush();
           return true;
         });
   }
@@ -42,30 +41,23 @@ public record ClaseRepository(DBConnectionManager db) implements IRepository<Cla
   public void delete(int id) {
     TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          em.createQuery("update Clase c set c.activa = false where c.id = :id")
-              .setParameter("id", id)
-              .executeUpdate();
-        });
+        em ->
+            em.createQuery("update Clase c set c.activa = false where c.id = :id")
+                .setParameter("id", id)
+                .executeUpdate());
   }
 
   @Override
   public Optional<Clase> findById(int id) {
     return TransactionHandler.inTransaction(
-        db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return Optional.ofNullable(em.find(Clase.class, id));
-        });
+        db, em -> Optional.ofNullable(em.find(Clase.class, id)));
   }
 
   @Override
   public List<Clase> findAll() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Clase> q = em.createQuery("from Clase c order by c.id", Clase.class);
           return q.getResultList();
         });
@@ -75,8 +67,7 @@ public record ClaseRepository(DBConnectionManager db) implements IRepository<Cla
   public List<Clase> findAll(int offset, int limit) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Clase> q = em.createQuery("from Clase c order by c.id", Clase.class);
           q.setFirstResult(offset);
           q.setMaxResults(limit);
@@ -88,8 +79,7 @@ public record ClaseRepository(DBConnectionManager db) implements IRepository<Cla
   public long count() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Long> q = em.createQuery("select count(c) from Clase c", Long.class);
           return q.getSingleResult();
         });
@@ -97,23 +87,94 @@ public record ClaseRepository(DBConnectionManager db) implements IRepository<Cla
 
   @Override
   public boolean existsById(int id) {
-    return TransactionHandler.inTransaction(
-        db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return em.find(Clase.class, id) != null;
-        });
+    return TransactionHandler.inTransaction(db, em -> em.find(Clase.class, id) != null);
   }
 
   // Model-specific logic examples
   public List<Clase> findActive() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Clase> q =
               em.createQuery("from Clase c where c.activa = true order by c.nombre", Clase.class);
           return q.getResultList();
+        });
+  }
+
+  /**
+   * Busca clases con filtros opcionales y paginación.
+   *
+   * @param searchText Texto de búsqueda en nombre (puede ser null)
+   * @param nivel Nivel para filtrar (puede ser null)
+   * @param offset Posición inicial
+   * @param limit Cantidad de registros
+   * @return Lista de clases que coinciden con los filtros
+   */
+  public List<Clase> findAllWithFilters(String searchText, String nivel, int offset, int limit) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          StringBuilder jpql = new StringBuilder("SELECT c FROM Clase c WHERE 1=1");
+
+          if (searchText != null && !searchText.trim().isEmpty()) {
+            jpql.append(" AND LOWER(c.nombre) LIKE :searchText");
+          }
+
+          if (nivel != null && !nivel.isEmpty()) {
+            jpql.append(" AND c.nivel = :nivel");
+          }
+
+          jpql.append(" ORDER BY c.nombre");
+
+          TypedQuery<Clase> query = em.createQuery(jpql.toString(), Clase.class);
+
+          if (searchText != null && !searchText.trim().isEmpty()) {
+            query.setParameter("searchText", "%" + searchText.toLowerCase() + "%");
+          }
+
+          if (nivel != null && !nivel.isEmpty()) {
+            query.setParameter("nivel", gym.vitae.model.enums.NivelClase.valueOf(nivel));
+          }
+
+          query.setFirstResult(offset);
+          query.setMaxResults(limit);
+
+          return query.getResultList();
+        });
+  }
+
+  /**
+   * Cuenta clases con filtros opcionales.
+   *
+   * @param searchText Texto de búsqueda en nombre (puede ser null)
+   * @param nivel Nivel para filtrar (puede ser null)
+   * @return Cantidad de clases que coinciden con los filtros
+   */
+  public long countWithFilters(String searchText, String nivel) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          StringBuilder jpql = new StringBuilder("SELECT COUNT(c) FROM Clase c WHERE 1=1");
+
+          if (searchText != null && !searchText.trim().isEmpty()) {
+            jpql.append(" AND LOWER(c.nombre) LIKE :searchText");
+          }
+
+          if (nivel != null && !nivel.isEmpty()) {
+            jpql.append(" AND c.nivel = :nivel");
+          }
+
+          TypedQuery<Long> query = em.createQuery(jpql.toString(), Long.class);
+
+          if (searchText != null && !searchText.trim().isEmpty()) {
+            query.setParameter("searchText", "%" + searchText.toLowerCase() + "%");
+          }
+
+          if (nivel != null && !nivel.isEmpty()) {
+            query.setParameter("nivel", gym.vitae.model.enums.NivelClase.valueOf(nivel));
+          }
+
+          return query.getSingleResult();
         });
   }
 }

@@ -5,7 +5,6 @@ import gym.vitae.core.TransactionHandler;
 import gym.vitae.model.DetallesFactura;
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 public record DetallesFacturaRepository(DBConnectionManager db)
@@ -21,9 +20,9 @@ public record DetallesFacturaRepository(DBConnectionManager db)
   public DetallesFactura save(DetallesFactura entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.persist(entity);
+          em.flush();
           return entity;
         });
   }
@@ -32,9 +31,9 @@ public record DetallesFacturaRepository(DBConnectionManager db)
   public boolean update(DetallesFactura entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.merge(entity);
+          em.flush();
           return true;
         });
   }
@@ -43,28 +42,23 @@ public record DetallesFacturaRepository(DBConnectionManager db)
   public void delete(int id) {
     TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          em.remove(findById(id));
-        });
+        em ->
+            em.createQuery("delete from DetallesFactura d where d.id = :id")
+                .setParameter("id", id)
+                .executeUpdate());
   }
 
   @Override
   public Optional<DetallesFactura> findById(int id) {
     return TransactionHandler.inTransaction(
-        db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return Optional.ofNullable(em.find(DetallesFactura.class, id));
-        });
+        db, em -> Optional.ofNullable(em.find(DetallesFactura.class, id)));
   }
 
   @Override
   public List<DetallesFactura> findAll() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<DetallesFactura> q =
               em.createQuery("from DetallesFactura d order by d.id", DetallesFactura.class);
           return q.getResultList();
@@ -75,8 +69,7 @@ public record DetallesFacturaRepository(DBConnectionManager db)
   public List<DetallesFactura> findAll(int offset, int limit) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<DetallesFactura> q =
               em.createQuery("from DetallesFactura d order by d.id", DetallesFactura.class);
           q.setFirstResult(offset);
@@ -89,8 +82,7 @@ public record DetallesFacturaRepository(DBConnectionManager db)
   public long count() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Long> q = em.createQuery("select count(d) from DetallesFactura d", Long.class);
           return q.getSingleResult();
         });
@@ -98,11 +90,6 @@ public record DetallesFacturaRepository(DBConnectionManager db)
 
   @Override
   public boolean existsById(int id) {
-    return TransactionHandler.inTransaction(
-        db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return em.find(DetallesFactura.class, id) != null;
-        });
+    return TransactionHandler.inTransaction(db, em -> em.find(DetallesFactura.class, id) != null);
   }
 }

@@ -6,7 +6,6 @@ import gym.vitae.model.InscripcionesClase;
 import gym.vitae.model.enums.EstadoInscripcion;
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 public record InscripcionesClaseRepository(DBConnectionManager db)
@@ -22,9 +21,9 @@ public record InscripcionesClaseRepository(DBConnectionManager db)
   public InscripcionesClase save(InscripcionesClase entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.persist(entity);
+          em.flush();
           return entity;
         });
   }
@@ -33,9 +32,9 @@ public record InscripcionesClaseRepository(DBConnectionManager db)
   public boolean update(InscripcionesClase entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.merge(entity);
+          em.flush();
           return true;
         });
   }
@@ -45,31 +44,24 @@ public record InscripcionesClaseRepository(DBConnectionManager db)
     // cancelar subscripcion
     TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          em.createQuery("update InscripcionesClase ic set ic.estado = :estado where ic.id = :id")
-              .setParameter("id", id)
-              .setParameter("estado", EstadoInscripcion.CANCELADA)
-              .executeUpdate();
-        });
+        em ->
+            em.createQuery("update InscripcionesClase ic set ic.estado = :estado where ic.id = :id")
+                .setParameter("id", id)
+                .setParameter("estado", EstadoInscripcion.CANCELADA)
+                .executeUpdate());
   }
 
   @Override
   public Optional<InscripcionesClase> findById(int id) {
     return TransactionHandler.inTransaction(
-        db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return Optional.ofNullable(em.find(InscripcionesClase.class, id));
-        });
+        db, em -> Optional.ofNullable(em.find(InscripcionesClase.class, id)));
   }
 
   @Override
   public List<InscripcionesClase> findAll() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<InscripcionesClase> q =
               em.createQuery("from InscripcionesClase i order by i.id", InscripcionesClase.class);
           return q.getResultList();
@@ -80,8 +72,7 @@ public record InscripcionesClaseRepository(DBConnectionManager db)
   public List<InscripcionesClase> findAll(int offset, int limit) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<InscripcionesClase> q =
               em.createQuery("from InscripcionesClase i order by i.id", InscripcionesClase.class);
           q.setFirstResult(offset);
@@ -94,8 +85,7 @@ public record InscripcionesClaseRepository(DBConnectionManager db)
   public long count() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Long> q =
               em.createQuery("select count(i) from InscripcionesClase i", Long.class);
           return q.getSingleResult();
@@ -105,10 +95,6 @@ public record InscripcionesClaseRepository(DBConnectionManager db)
   @Override
   public boolean existsById(int id) {
     return TransactionHandler.inTransaction(
-        db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return em.find(InscripcionesClase.class, id) != null;
-        });
+        db, em -> em.find(InscripcionesClase.class, id) != null);
   }
 }

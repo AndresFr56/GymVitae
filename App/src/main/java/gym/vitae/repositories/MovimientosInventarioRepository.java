@@ -5,7 +5,6 @@ import gym.vitae.core.TransactionHandler;
 import gym.vitae.model.MovimientosInventario;
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 public record MovimientosInventarioRepository(DBConnectionManager db)
@@ -21,9 +20,9 @@ public record MovimientosInventarioRepository(DBConnectionManager db)
   public MovimientosInventario save(MovimientosInventario entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.persist(entity);
+          em.flush();
           return entity;
         });
   }
@@ -32,9 +31,9 @@ public record MovimientosInventarioRepository(DBConnectionManager db)
   public boolean update(MovimientosInventario entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.merge(entity);
+          em.flush();
           return true;
         });
   }
@@ -43,28 +42,25 @@ public record MovimientosInventarioRepository(DBConnectionManager db)
   public void delete(int id) {
     TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          em.remove(em.find(MovimientosInventario.class, id));
-        });
+        em ->
+            em.find(MovimientosInventario.class, id) != null
+                ? em.createQuery("delete from MovimientosInventario m where m.id = :id")
+                    .setParameter("id", id)
+                    .executeUpdate()
+                : 0);
   }
 
   @Override
   public Optional<MovimientosInventario> findById(int id) {
     return TransactionHandler.inTransaction(
-        db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return Optional.ofNullable(em.find(MovimientosInventario.class, id));
-        });
+        db, em -> Optional.ofNullable(em.find(MovimientosInventario.class, id)));
   }
 
   @Override
   public List<MovimientosInventario> findAll() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<MovimientosInventario> q =
               em.createQuery(
                   "from MovimientosInventario m order by m.id", MovimientosInventario.class);
@@ -76,8 +72,7 @@ public record MovimientosInventarioRepository(DBConnectionManager db)
   public List<MovimientosInventario> findAll(int offset, int limit) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<MovimientosInventario> q =
               em.createQuery(
                   "from MovimientosInventario m order by m.id", MovimientosInventario.class);
@@ -91,8 +86,7 @@ public record MovimientosInventarioRepository(DBConnectionManager db)
   public long count() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Long> q =
               em.createQuery("select count(m) from MovimientosInventario m", Long.class);
           return q.getSingleResult();
@@ -102,10 +96,6 @@ public record MovimientosInventarioRepository(DBConnectionManager db)
   @Override
   public boolean existsById(int id) {
     return TransactionHandler.inTransaction(
-        db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return em.find(MovimientosInventario.class, id) != null;
-        });
+        db, em -> em.find(MovimientosInventario.class, id) != null);
   }
 }

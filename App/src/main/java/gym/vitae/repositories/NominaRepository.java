@@ -6,7 +6,6 @@ import gym.vitae.model.Nomina;
 import gym.vitae.model.enums.EstadoNomina;
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 public record NominaRepository(DBConnectionManager db) implements IRepository<Nomina> {
@@ -21,9 +20,9 @@ public record NominaRepository(DBConnectionManager db) implements IRepository<No
   public Nomina save(Nomina entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.persist(entity);
+          em.flush();
           return entity;
         });
   }
@@ -32,9 +31,9 @@ public record NominaRepository(DBConnectionManager db) implements IRepository<No
   public boolean update(Nomina entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.merge(entity);
+          em.flush();
           return true;
         });
   }
@@ -44,31 +43,24 @@ public record NominaRepository(DBConnectionManager db) implements IRepository<No
     // Soft-delete: mark payroll as anulada
     TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          em.createQuery("update Nomina n set n.estado = :estado where n.id = :id")
-              .setParameter("id", id)
-              .setParameter("estado", EstadoNomina.ANULADA)
-              .executeUpdate();
-        });
+        em ->
+            em.createQuery("update Nomina n set n.estado = :estado where n.id = :id")
+                .setParameter("id", id)
+                .setParameter("estado", EstadoNomina.ANULADA)
+                .executeUpdate());
   }
 
   @Override
   public Optional<Nomina> findById(int id) {
     return TransactionHandler.inTransaction(
-        db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return Optional.ofNullable(em.find(Nomina.class, id));
-        });
+        db, em -> Optional.ofNullable(em.find(Nomina.class, id)));
   }
 
   @Override
   public List<Nomina> findAll() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Nomina> q = em.createQuery("from Nomina n order by n.id", Nomina.class);
           return q.getResultList();
         });
@@ -78,8 +70,7 @@ public record NominaRepository(DBConnectionManager db) implements IRepository<No
   public List<Nomina> findAll(int offset, int limit) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Nomina> q = em.createQuery("from Nomina n order by n.id", Nomina.class);
           q.setFirstResult(offset);
           q.setMaxResults(limit);
@@ -91,8 +82,7 @@ public record NominaRepository(DBConnectionManager db) implements IRepository<No
   public long count() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Long> q = em.createQuery("select count(n) from Nomina n", Long.class);
           return q.getSingleResult();
         });
@@ -100,20 +90,14 @@ public record NominaRepository(DBConnectionManager db) implements IRepository<No
 
   @Override
   public boolean existsById(int id) {
-    return TransactionHandler.inTransaction(
-        db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return em.find(Nomina.class, id) != null;
-        });
+    return TransactionHandler.inTransaction(db, em -> em.find(Nomina.class, id) != null);
   }
 
   // Convenience finder: by empleado, mes y anio
   public Optional<Nomina> findByEmpleadoAndPeriodo(int empleadoId, byte mes, int anio) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Nomina> q =
               em.createQuery(
                   "from Nomina n where n.empleado.id = :empId and n.mes = :mes and n.anio = :anio",

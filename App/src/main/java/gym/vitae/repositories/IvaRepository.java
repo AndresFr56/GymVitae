@@ -5,7 +5,6 @@ import gym.vitae.core.TransactionHandler;
 import gym.vitae.model.Iva;
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 public record IvaRepository(DBConnectionManager db) implements IRepository<Iva> {
@@ -20,9 +19,9 @@ public record IvaRepository(DBConnectionManager db) implements IRepository<Iva> 
   public Iva save(Iva entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.persist(entity);
+          em.flush();
           return entity;
         });
   }
@@ -31,9 +30,9 @@ public record IvaRepository(DBConnectionManager db) implements IRepository<Iva> 
   public boolean update(Iva entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.merge(entity);
+          em.flush();
           return true;
         });
   }
@@ -43,30 +42,22 @@ public record IvaRepository(DBConnectionManager db) implements IRepository<Iva> 
     // Soft-delete: mark inactive
     TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          em.createQuery("update Iva i set i.activo = false where i.id = :id")
-              .setParameter("id", id)
-              .executeUpdate();
-        });
+        em ->
+            em.createQuery("update Iva i set i.activo = false where i.id = :id")
+                .setParameter("id", id)
+                .executeUpdate());
   }
 
   @Override
   public Optional<Iva> findById(int id) {
-    return TransactionHandler.inTransaction(
-        db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return Optional.ofNullable(em.find(Iva.class, id));
-        });
+    return TransactionHandler.inTransaction(db, em -> Optional.ofNullable(em.find(Iva.class, id)));
   }
 
   @Override
   public List<Iva> findAll() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Iva> q = em.createQuery("from Iva i order by i.id", Iva.class);
           return q.getResultList();
         });
@@ -76,8 +67,7 @@ public record IvaRepository(DBConnectionManager db) implements IRepository<Iva> 
   public List<Iva> findAll(int offset, int limit) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Iva> q = em.createQuery("from Iva i order by i.id", Iva.class);
           q.setFirstResult(offset);
           q.setMaxResults(limit);
@@ -89,8 +79,7 @@ public record IvaRepository(DBConnectionManager db) implements IRepository<Iva> 
   public long count() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Long> q = em.createQuery("select count(i) from Iva i", Long.class);
           return q.getSingleResult();
         });
@@ -98,11 +87,6 @@ public record IvaRepository(DBConnectionManager db) implements IRepository<Iva> 
 
   @Override
   public boolean existsById(int id) {
-    return TransactionHandler.inTransaction(
-        db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return em.find(Iva.class, id) != null;
-        });
+    return TransactionHandler.inTransaction(db, em -> em.find(Iva.class, id) != null);
   }
 }

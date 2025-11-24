@@ -6,7 +6,6 @@ import gym.vitae.model.Pago;
 import gym.vitae.model.enums.EstadoNomina;
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 public record PagoRepository(DBConnectionManager db) implements IRepository<Pago> {
@@ -21,9 +20,9 @@ public record PagoRepository(DBConnectionManager db) implements IRepository<Pago
   public Pago save(Pago entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.persist(entity);
+          em.flush();
           return entity;
         });
   }
@@ -32,9 +31,9 @@ public record PagoRepository(DBConnectionManager db) implements IRepository<Pago
   public boolean update(Pago entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.merge(entity);
+          em.flush();
           return true;
         });
   }
@@ -43,31 +42,23 @@ public record PagoRepository(DBConnectionManager db) implements IRepository<Pago
   public void delete(int id) {
     TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          em.createQuery("update Pago p set p.estado = :estado where p.id = :id")
-              .setParameter("id", id)
-              .setParameter("estado", EstadoNomina.ANULADA)
-              .executeUpdate();
-        });
+        em ->
+            em.createQuery("update Pago p set p.estado = :estado where p.id = :id")
+                .setParameter("id", id)
+                .setParameter("estado", EstadoNomina.ANULADA)
+                .executeUpdate());
   }
 
   @Override
   public Optional<Pago> findById(int id) {
-    return TransactionHandler.inTransaction(
-        db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return Optional.ofNullable(em.find(Pago.class, id));
-        });
+    return TransactionHandler.inTransaction(db, em -> Optional.ofNullable(em.find(Pago.class, id)));
   }
 
   @Override
   public List<Pago> findAll() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Pago> q = em.createQuery("from Pago p order by p.id", Pago.class);
           return q.getResultList();
         });
@@ -77,8 +68,7 @@ public record PagoRepository(DBConnectionManager db) implements IRepository<Pago
   public List<Pago> findAll(int offset, int limit) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Pago> q = em.createQuery("from Pago p order by p.id", Pago.class);
           q.setFirstResult(offset);
           q.setMaxResults(limit);
@@ -90,8 +80,7 @@ public record PagoRepository(DBConnectionManager db) implements IRepository<Pago
   public long count() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Long> q = em.createQuery("select count(p) from Pago p", Long.class);
           return q.getSingleResult();
         });
@@ -99,11 +88,6 @@ public record PagoRepository(DBConnectionManager db) implements IRepository<Pago
 
   @Override
   public boolean existsById(int id) {
-    return TransactionHandler.inTransaction(
-        db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return em.find(Pago.class, id) != null;
-        });
+    return TransactionHandler.inTransaction(db, em -> em.find(Pago.class, id) != null);
   }
 }

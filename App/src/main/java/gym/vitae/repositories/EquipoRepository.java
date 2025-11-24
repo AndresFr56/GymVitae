@@ -6,7 +6,6 @@ import gym.vitae.model.Equipo;
 import gym.vitae.model.enums.EstadoEquipo;
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 public record EquipoRepository(DBConnectionManager db) implements IRepository<Equipo> {
@@ -21,9 +20,9 @@ public record EquipoRepository(DBConnectionManager db) implements IRepository<Eq
   public Equipo save(Equipo entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.persist(entity);
+          em.flush();
           return entity;
         });
   }
@@ -32,9 +31,9 @@ public record EquipoRepository(DBConnectionManager db) implements IRepository<Eq
   public boolean update(Equipo entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.merge(entity);
+          em.flush();
           return true;
         });
   }
@@ -43,31 +42,24 @@ public record EquipoRepository(DBConnectionManager db) implements IRepository<Eq
   public void delete(int id) {
     TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          em.createQuery("update Equipo c set c.estado = :estado where c.id = :id")
-              .setParameter("id", id)
-              .setParameter("estado", EstadoEquipo.FUERA_SERVICIO)
-              .executeUpdate();
-        });
+        em ->
+            em.createQuery("update Equipo c set c.estado = :estado where c.id = :id")
+                .setParameter("id", id)
+                .setParameter("estado", EstadoEquipo.FUERA_SERVICIO)
+                .executeUpdate());
   }
 
   @Override
   public Optional<Equipo> findById(int id) {
     return TransactionHandler.inTransaction(
-        db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return Optional.ofNullable(em.find(Equipo.class, id));
-        });
+        db, em -> Optional.ofNullable(em.find(Equipo.class, id)));
   }
 
   @Override
   public List<Equipo> findAll() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Equipo> q = em.createQuery("from Equipo e order by e.id", Equipo.class);
           return q.getResultList();
         });
@@ -77,8 +69,7 @@ public record EquipoRepository(DBConnectionManager db) implements IRepository<Eq
   public List<Equipo> findAll(int offset, int limit) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Equipo> q = em.createQuery("from Equipo e order by e.id", Equipo.class);
           q.setFirstResult(offset);
           q.setMaxResults(limit);
@@ -90,8 +81,7 @@ public record EquipoRepository(DBConnectionManager db) implements IRepository<Eq
   public long count() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Long> q = em.createQuery("select count(e) from Equipo e", Long.class);
           return q.getSingleResult();
         });
@@ -99,11 +89,6 @@ public record EquipoRepository(DBConnectionManager db) implements IRepository<Eq
 
   @Override
   public boolean existsById(int id) {
-    return TransactionHandler.inTransaction(
-        db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return em.find(Equipo.class, id) != null;
-        });
+    return TransactionHandler.inTransaction(db, em -> em.find(Equipo.class, id) != null);
   }
 }
