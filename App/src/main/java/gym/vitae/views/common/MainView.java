@@ -98,6 +98,11 @@ public class MainView extends ViewContainer {
     mainPanel.repaint();
     mainPanel.revalidate();
 
+    // Lifecycle methods
+    view.onViewShow();
+    view.load();
+    view.open();
+
     // check button
     buttonUndo.setEnabled(ViewManager.isUndoable());
     buttonRedo.setEnabled(ViewManager.isRedoable());
