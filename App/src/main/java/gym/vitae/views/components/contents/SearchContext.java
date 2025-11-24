@@ -54,8 +54,7 @@ public class SearchContext {
   }
 
   /**
-   * Recorre los elementos del menú para obtener las clases de ViewContainer
-   * asociadas.
+   * Recorre los elementos del menú para obtener las clases de ViewContainer asociadas.
    *
    * @param menuItems
    * @param view
