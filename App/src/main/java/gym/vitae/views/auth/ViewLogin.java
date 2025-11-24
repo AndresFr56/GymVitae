@@ -12,7 +12,6 @@ import gym.vitae.views.components.primitives.DropShadowBorder;
 import java.awt.*;
 import javax.swing.*;
 import net.miginfocom.swing.MigLayout;
-import raven.modal.Drawer;
 
 @Metadata(
     name = "Vista de inicio de session",
@@ -119,15 +118,13 @@ public class ViewLogin extends ViewContainer {
                   "Bienvenido" + (nombre != null ? " " + nombre : "") + "!",
                   "Acceso concedido",
                   JOptionPane.INFORMATION_MESSAGE);
-              // limpiar campos
+
               txtUsername.setText("");
               txtPassword.setText("");
               chRememberMe.setSelected(false);
-              SwingUtilities.invokeLater(() -> txtUsername.requestFocusInWindow());
 
-              // rebuild/install the drawer so the Menu header reflects the authenticated user
+              SwingUtilities.invokeLater(() -> txtUsername.requestFocusInWindow());
               Menu.getInstance().seUserInfo(sessionManager.getEmpleadoActual());
-              Drawer.installDrawer(ViewManager.getFrame(), Menu.getInstance());
               ViewManager.login();
 
             } else {
