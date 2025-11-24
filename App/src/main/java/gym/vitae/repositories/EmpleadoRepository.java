@@ -4,9 +4,9 @@ import gym.vitae.core.DBConnectionManager;
 import gym.vitae.core.TransactionHandler;
 import gym.vitae.model.Empleado;
 import gym.vitae.model.enums.EstadoEmpleado;
+import gym.vitae.model.enums.Genero;
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 public record EmpleadoRepository(DBConnectionManager db) implements IRepository<Empleado> {
@@ -21,9 +21,9 @@ public record EmpleadoRepository(DBConnectionManager db) implements IRepository<
   public Empleado save(Empleado entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.persist(entity);
+          em.flush();
           return entity;
         });
   }
@@ -32,9 +32,9 @@ public record EmpleadoRepository(DBConnectionManager db) implements IRepository<
   public boolean update(Empleado entity) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           em.merge(entity);
+          em.flush();
           return true;
         });
   }
@@ -44,31 +44,24 @@ public record EmpleadoRepository(DBConnectionManager db) implements IRepository<
     // actualizando el estado a inactivo to'inactivo' ENUM ('activo', 'inactivo', 'vacaciones')
     TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          em.createQuery("update Empleado e set e.estado = :estado where e.id = :id")
-              .setParameter("id", id)
-              .setParameter("estado", EstadoEmpleado.INACTIVO)
-              .executeUpdate();
-        });
+        em ->
+            em.createQuery("update Empleado e set e.estado = :estado where e.id = :id")
+                .setParameter("id", id)
+                .setParameter("estado", EstadoEmpleado.INACTIVO)
+                .executeUpdate());
   }
 
   @Override
   public Optional<Empleado> findById(int id) {
     return TransactionHandler.inTransaction(
-        db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return Optional.ofNullable(em.find(Empleado.class, id));
-        });
+        db, em -> Optional.ofNullable(em.find(Empleado.class, id)));
   }
 
   @Override
   public List<Empleado> findAll() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Empleado> q = em.createQuery("from Empleado e order by e.id", Empleado.class);
           return q.getResultList();
         });
@@ -78,8 +71,7 @@ public record EmpleadoRepository(DBConnectionManager db) implements IRepository<
   public List<Empleado> findAll(int offset, int limit) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Empleado> q = em.createQuery("from Empleado e order by e.id", Empleado.class);
           q.setFirstResult(offset);
           q.setMaxResults(limit);
@@ -91,8 +83,7 @@ public record EmpleadoRepository(DBConnectionManager db) implements IRepository<
   public long count() {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
+        em -> {
           TypedQuery<Long> q = em.createQuery("select count(e) from Empleado e", Long.class);
           return q.getSingleResult();
         });
@@ -100,11 +91,110 @@ public record EmpleadoRepository(DBConnectionManager db) implements IRepository<
 
   @Override
   public boolean existsById(int id) {
+    return TransactionHandler.inTransaction(db, em -> em.find(Empleado.class, id) != null);
+  }
+
+  /**
+   * Busca empleados con filtros opcionales y paginación.
+   *
+   * @param searchText Texto de búsqueda en nombres/apellidos (puede ser null)
+   * @param cargoId ID del cargo para filtrar (puede ser null)
+   * @param genero Género para filtrar (puede ser null)
+   * @param offset Posición inicial
+   * @param limit Cantidad de registros
+   * @return Lista de empleados que coinciden con los filtros
+   */
+  public List<Empleado> findAllWithFilters(
+      String searchText, Integer cargoId, String genero, int offset, int limit) {
     return TransactionHandler.inTransaction(
         db,
-        () -> {
-          EntityManager em = db.getEntityManager();
-          return em.find(Empleado.class, id) != null;
+        em -> {
+          String jpql =
+              buildFilterQuery("SELECT e FROM Empleado e WHERE 1=1", searchText, cargoId, genero);
+          jpql += " ORDER BY e.id";
+
+          TypedQuery<Empleado> query = em.createQuery(jpql, Empleado.class);
+          applyFilterParameters(query, searchText, cargoId, genero);
+
+          query.setFirstResult(offset);
+          query.setMaxResults(limit);
+
+          return query.getResultList();
+        });
+  }
+
+  /**
+   * Cuenta empleados con filtros opcionales.
+   *
+   * @param searchText Texto de búsqueda en nombres/apellidos (puede ser null)
+   * @param cargoId ID del cargo para filtrar (puede ser null)
+   * @param genero Género para filtrar (puede ser null)
+   * @return Cantidad de empleados que coinciden con los filtros
+   */
+  public long countWithFilters(String searchText, Integer cargoId, String genero) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          String jpql =
+              buildFilterQuery(
+                  "SELECT COUNT(e) FROM Empleado e WHERE 1=1", searchText, cargoId, genero);
+
+          TypedQuery<Long> query = em.createQuery(jpql, Long.class);
+          applyFilterParameters(query, searchText, cargoId, genero);
+
+          return query.getSingleResult();
+        });
+  }
+
+  private String buildFilterQuery(
+      String baseQuery, String searchText, Integer cargoId, String genero) {
+    StringBuilder jpql = new StringBuilder(baseQuery);
+
+    if (searchText != null && !searchText.trim().isEmpty()) {
+      jpql.append(
+          " AND (LOWER(e.nombres) LIKE :searchText OR LOWER(e.apellidos) LIKE :searchText)");
+    }
+
+    if (cargoId != null) {
+      jpql.append(" AND e.cargo.id = :cargoId");
+    }
+
+    if (genero != null && !genero.isEmpty()) {
+      jpql.append(" AND e.genero = :genero");
+    }
+
+    return jpql.toString();
+  }
+
+  private void applyFilterParameters(
+      TypedQuery<?> query, String searchText, Integer cargoId, String genero) {
+    if (searchText != null && !searchText.trim().isEmpty()) {
+      query.setParameter("searchText", "%" + searchText.toLowerCase() + "%");
+    }
+
+    if (cargoId != null) {
+      query.setParameter("cargoId", cargoId);
+    }
+
+    if (genero != null && !genero.isEmpty()) {
+      query.setParameter("genero", Genero.valueOf(genero));
+    }
+  }
+
+  /**
+   * Busca empleados con cargo cargado de forma EAGER para autenticación. Este método carga
+   * explícitamente la relación Cargo usando JOIN FETCH.
+   *
+   * @return Lista de todos los empleados con sus cargos cargados
+   */
+  public List<Empleado> findAllWithCargo() {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          TypedQuery<Empleado> q =
+              em.createQuery(
+                  "SELECT e FROM Empleado e LEFT JOIN FETCH e.cargo ORDER BY e.id", Empleado.class);
+          return q.getResultList();
         });
   }
 }
