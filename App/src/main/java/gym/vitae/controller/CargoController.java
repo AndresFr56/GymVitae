@@ -244,9 +244,7 @@ public class CargoController extends BaseController {
     List<Cargo> cargosExistentes =
         repository.findAll().stream()
             .filter(
-                c ->
-                    c.getNombre().equalsIgnoreCase(nombre.trim())
-                        && (!c.getId().equals(idActual)))
+                c -> c.getNombre().equalsIgnoreCase(nombre.trim()) && (!c.getId().equals(idActual)))
             .toList();
 
     if (!cargosExistentes.isEmpty()) {
