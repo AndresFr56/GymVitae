@@ -1,5 +1,6 @@
 package gym.vitae.views.common;
 
+import gym.vitae.core.SessionManager;
 import gym.vitae.views.auth.ViewLogin;
 import gym.vitae.views.components.contents.SearchContext;
 import gym.vitae.views.components.primitives.About;
@@ -35,7 +36,6 @@ public final class ViewManager {
     if (view == null) return;
 
     ViewContainer current = getCurrent();
-    // impedir navegación si la vista actual no permite salir
     if (current != null && current.checkStats()) {
       return;
     }
@@ -46,13 +46,11 @@ public final class ViewManager {
 
     history.add(view);
 
-    // lifecycle en EDT
+    // lifecycle en el hilo de eventos
     SwingUtilities.invokeLater(
         () -> {
-          view.onViewShow(); // init() si es la primera vez
-          view.load(); // cargar datos cada vez que se muestra (opcional)
-          view.open(); // open/animaciones
-          swapTo(view);
+          mainView.setView(view);
+          mainView.refresh();
         });
   }
 
@@ -98,21 +96,28 @@ public final class ViewManager {
   }
 
   public static void login() {
+
+    clearHistory();
+
     Drawer.setVisible(true);
     frame.getContentPane().removeAll();
     frame.getContentPane().add(getMainView());
+
     Drawer.setSelectedItemClass(ViewPersonal.class);
     frame.repaint();
     frame.revalidate();
   }
 
   public static void logout() {
+
     clearHistory();
 
     Drawer.setVisible(false);
     frame.getContentPane().removeAll();
+
     ViewLogin login = getLoginView();
-    history.add(login);
+    SessionManager.getInstance().logout();
+
     SwingUtilities.invokeLater(
         () -> {
           login.onViewShow();
