@@ -1,0 +1,53 @@
+package gym.vitae.mapper;
+
+import gym.vitae.model.MembresiaBeneficio;
+import gym.vitae.model.dtos.membresias.MembresiaBeneficioDetalleDTO;
+import gym.vitae.model.dtos.membresias.MembresiaBeneficioListadoDTO;
+import java.util.List;
+
+public class MembresiaBeneficioMapper {
+
+  private MembresiaBeneficioMapper() {}
+
+  public static MembresiaBeneficioListadoDTO toListadoDTO(MembresiaBeneficio membresiaBeneficio) {
+    if (membresiaBeneficio == null) return null;
+
+    return new MembresiaBeneficioListadoDTO(
+        membresiaBeneficio.getId(),
+        membresiaBeneficio.getTipoMembresia() != null
+            ? membresiaBeneficio.getTipoMembresia().getNombre()
+            : null,
+        membresiaBeneficio.getBeneficio() != null
+            ? membresiaBeneficio.getBeneficio().getNombre()
+            : null);
+  }
+
+  public static MembresiaBeneficioDetalleDTO toDetalleDTO(MembresiaBeneficio membresiaBeneficio) {
+    if (membresiaBeneficio == null) return null;
+
+    MembresiaBeneficioDetalleDTO dto = new MembresiaBeneficioDetalleDTO();
+    dto.setId(membresiaBeneficio.getId());
+    dto.setCreatedAt(membresiaBeneficio.getCreatedAt());
+
+    // Tipo Membresía info
+    if (membresiaBeneficio.getTipoMembresia() != null) {
+      dto.setTipoMembresiaId(membresiaBeneficio.getTipoMembresia().getId());
+      dto.setTipoMembresiaNombre(membresiaBeneficio.getTipoMembresia().getNombre());
+    }
+
+    // Beneficio info
+    if (membresiaBeneficio.getBeneficio() != null) {
+      dto.setBeneficioId(membresiaBeneficio.getBeneficio().getId());
+      dto.setBeneficioNombre(membresiaBeneficio.getBeneficio().getNombre());
+      dto.setBeneficioDescripcion(membresiaBeneficio.getBeneficio().getDescripcion());
+    }
+
+    return dto;
+  }
+
+  public static List<MembresiaBeneficioListadoDTO> toListadoDTOList(
+      List<MembresiaBeneficio> membresiaBeneficios) {
+    if (membresiaBeneficios == null) return List.of();
+    return membresiaBeneficios.stream().map(MembresiaBeneficioMapper::toListadoDTO).toList();
+  }
+}
