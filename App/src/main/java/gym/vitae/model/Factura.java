@@ -25,6 +25,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import org.hibernate.annotations.BatchSize;
 
 @Entity
 @Table(
@@ -79,12 +80,15 @@ public class Factura {
   private Instant updatedAt;
 
   @OneToMany(mappedBy = "factura", cascade = CascadeType.ALL, orphanRemoval = true)
+  @BatchSize(size = 20)
   private Set<DetallesFactura> detalles = new HashSet<>();
 
   @OneToMany(mappedBy = "factura", cascade = CascadeType.ALL)
+  @BatchSize(size = 20)
   private Set<Pago> pagos = new HashSet<>();
 
   @OneToMany(mappedBy = "factura", cascade = CascadeType.ALL)
+  @BatchSize(size = 20)
   private Set<Membresia> membresias = new HashSet<>();
 
   // Constructores

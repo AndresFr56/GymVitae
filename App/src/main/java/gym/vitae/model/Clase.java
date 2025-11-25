@@ -18,6 +18,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+import org.hibernate.annotations.BatchSize;
 
 @Entity
 @Table(
@@ -59,6 +60,7 @@ public class Clase {
   private Instant updatedAt;
 
   @OneToMany(mappedBy = "clase", cascade = CascadeType.ALL)
+  @BatchSize(size = 20)
   private Set<Horario> horarios = new HashSet<>();
 
   // Constructores
