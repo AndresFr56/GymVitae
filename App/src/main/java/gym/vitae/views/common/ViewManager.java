@@ -63,8 +63,7 @@ public final class ViewManager {
       if (previous != null) {
         SwingUtilities.invokeLater(
             () -> {
-              previous.open();
-              swapTo(previous);
+              mainView.setView(previous);
               Drawer.setSelectedItemClass(previous.getClass());
             });
       }
@@ -80,8 +79,7 @@ public final class ViewManager {
       if (v != null) {
         SwingUtilities.invokeLater(
             () -> {
-              v.open();
-              swapTo(v);
+              mainView.setView(v);
               Drawer.setSelectedItemClass(v.getClass());
             });
       }

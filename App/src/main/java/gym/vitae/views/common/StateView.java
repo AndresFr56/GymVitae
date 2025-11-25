@@ -3,7 +3,6 @@ package gym.vitae.views.common;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
-import javax.swing.*;
 
 public class StateView {
 
@@ -29,8 +28,7 @@ public class StateView {
     try {
       ViewContainer v = cls.getDeclaredConstructor().newInstance();
       a.viewsMap.put(cls, v);
-      // ensure init happens on EDT (onViewShow is idempotent)
-      SwingUtilities.invokeLater(v::onViewShow);
+      // La inicialización (onViewShow) se hará en MainView.setView()
       return v;
     } catch (NoSuchMethodException
         | InvocationTargetException
