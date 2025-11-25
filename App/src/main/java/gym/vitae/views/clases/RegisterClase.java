@@ -2,7 +2,7 @@ package gym.vitae.views.clases;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import gym.vitae.controller.ClasesController;
-import gym.vitae.model.Clase;
+import gym.vitae.model.dtos.clase.ClaseCreateDTO;
 import gym.vitae.model.enums.NivelClase;
 import gym.vitae.views.components.primitives.ButtonOutline;
 import java.awt.*;
@@ -18,7 +18,7 @@ public class RegisterClase extends JPanel {
   private static final int MAX_TEXT_LENGTH = 100;
   private static final int MAX_DESC_LENGTH = 500;
 
-  private final ClasesController controller;
+  private final transient ClasesController controller;
 
   // Panel de contenido scrollable
   private JPanel contentPanel;
@@ -42,28 +42,52 @@ public class RegisterClase extends JPanel {
 
   private void init() {
     setLayout(new BorderLayout());
-    setOpaque(false);
 
-    // Panel principal con scroll
-    contentPanel = new JPanel(new MigLayout("fillx,wrap,insets 20", "[fill]", "[]10[]"));
-    contentPanel.setOpaque(false);
-
-    // Label para errores
+    // Panel superior con mensaje de error
     lblError = new JLabel();
-    lblError.setForeground(new Color(220, 53, 69));
     lblError.setVisible(false);
-    contentPanel.add(lblError, "growx");
+    lblError.putClientProperty(
+        FlatClientProperties.STYLE, "foreground:#F44336;font:bold;border:0,0,10,0");
+
+    // Panel de contenido con scroll
+    contentPanel = new JPanel(new MigLayout("fillx,wrap,insets 0", "[fill]", ""));
+    JScrollPane scrollPane = new JScrollPane(contentPanel);
+    scrollPane.setBorder(null);
+    scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
+    // Panel de botones fijo en la parte inferior
+    JPanel buttonPanel = createButtonPanel();
+
+    // Ensamblar layout
+    JPanel topPanel = new JPanel(new MigLayout("fillx,wrap,insets 10 20 0 20", "[fill]"));
+    topPanel.add(lblError);
+
+    add(topPanel, BorderLayout.NORTH);
+    add(scrollPane, BorderLayout.CENTER);
+    add(buttonPanel, BorderLayout.SOUTH);
 
     initializeComponents();
     applyStyles();
     buildForm();
+  }
 
-    JScrollPane scrollPane = new JScrollPane(contentPanel);
-    scrollPane.setBorder(BorderFactory.createEmptyBorder());
-    scrollPane.setOpaque(false);
-    scrollPane.getViewport().setOpaque(false);
+  private JPanel createButtonPanel() {
+    JPanel panel = new JPanel(new MigLayout("insets 15 20 20 20", "[grow][120][120]"));
+    panel.putClientProperty(
+        FlatClientProperties.STYLE,
+        "background:$Panel.background;border:1,0,0,0,$Component.borderColor");
 
-    add(scrollPane, BorderLayout.CENTER);
+    btnCancelar = new ButtonOutline("Cancelar");
+    btnCancelar.putClientProperty(FlatClientProperties.STYLE, "font:bold +1");
+
+    btnGuardar = new ButtonOutline("Guardar");
+    btnGuardar.putClientProperty(FlatClientProperties.STYLE, "foreground:#4CAF50;font:bold +1");
+
+    panel.add(new JLabel(), "grow");
+    panel.add(btnCancelar, "center");
+    panel.add(btnGuardar, "center");
+
+    return panel;
   }
 
   private void initializeComponents() {
@@ -83,25 +107,19 @@ public class RegisterClase extends JPanel {
     cmbNivel = new JComboBox<>(NivelClase.values());
     cmbNivel.setSelectedItem(NivelClase.TODOS);
 
-    btnGuardar = new ButtonOutline();
-    btnCancelar = new ButtonOutline();
-
     // Aplicar filtros
-    applyLettersAndSpacesFilter(txtNombre, MAX_TEXT_LENGTH);
-    applyMaxLengthFilter(txtDescripcion, MAX_DESC_LENGTH);
+    applyLettersAndSpacesFilter(txtNombre);
+    applyMaxLengthFilter(txtDescripcion);
   }
 
   private void applyStyles() {
     txtNombre.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ej: Yoga, Spinning");
     txtDescripcion.putClientProperty(
         FlatClientProperties.PLACEHOLDER_TEXT, "Descripción de la clase (opcional)");
-
-    txtNombre.putClientProperty(FlatClientProperties.STYLE, "arc:8");
-    txtDescripcion.putClientProperty(FlatClientProperties.STYLE, "arc:8");
   }
 
   /** Aplica filtro para permitir solo letras y espacios. */
-  private void applyLettersAndSpacesFilter(JTextField textField, int maxLength) {
+  private void applyLettersAndSpacesFilter(JTextField textField) {
     ((AbstractDocument) textField.getDocument())
         .setDocumentFilter(
             new DocumentFilter() {
@@ -111,7 +129,8 @@ public class RegisterClase extends JPanel {
                   throws BadLocationException {
                 if (string == null) return;
                 if (isValidLettersAndSpaces(string)
-                    && (fb.getDocument().getLength() + string.length() <= maxLength)) {
+                    && (fb.getDocument().getLength() + string.length()
+                        <= RegisterClase.MAX_TEXT_LENGTH)) {
                   super.insertString(fb, offset, string, attr);
                 }
               }
@@ -122,7 +141,8 @@ public class RegisterClase extends JPanel {
                   throws BadLocationException {
                 if (text == null) return;
                 if (isValidLettersAndSpaces(text)
-                    && (fb.getDocument().getLength() - length + text.length() <= maxLength)) {
+                    && (fb.getDocument().getLength() - length + text.length()
+                        <= RegisterClase.MAX_TEXT_LENGTH)) {
                   super.replace(fb, offset, length, text, attrs);
                 }
               }
@@ -134,7 +154,7 @@ public class RegisterClase extends JPanel {
   }
 
   /** Aplica filtro de longitud máxima. */
-  private void applyMaxLengthFilter(JTextComponent textComponent, int maxLength) {
+  private void applyMaxLengthFilter(JTextComponent textComponent) {
     ((AbstractDocument) textComponent.getDocument())
         .setDocumentFilter(
             new DocumentFilter() {
@@ -143,7 +163,8 @@ public class RegisterClase extends JPanel {
                   FilterBypass fb, int offset, String string, AttributeSet attr)
                   throws BadLocationException {
                 if (string == null) return;
-                if (fb.getDocument().getLength() + string.length() <= maxLength) {
+                if (fb.getDocument().getLength() + string.length()
+                    <= RegisterClase.MAX_DESC_LENGTH) {
                   super.insertString(fb, offset, string, attr);
                 }
               }
@@ -153,7 +174,8 @@ public class RegisterClase extends JPanel {
                   FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
                   throws BadLocationException {
                 if (text == null) return;
-                if (fb.getDocument().getLength() - length + text.length() <= maxLength) {
+                if (fb.getDocument().getLength() - length + text.length()
+                    <= RegisterClase.MAX_DESC_LENGTH) {
                   super.replace(fb, offset, length, text, attrs);
                 }
               }
@@ -219,8 +241,8 @@ public class RegisterClase extends JPanel {
 
   public boolean saveClase() {
     try {
-      Clase clase = buildClaseFromForm();
-      controller.createClase(clase);
+      ClaseCreateDTO dto = buildDTOFromForm();
+      controller.createClase(dto);
 
       JOptionPane.showMessageDialog(
           this, "Clase registrada exitosamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
@@ -238,19 +260,14 @@ public class RegisterClase extends JPanel {
     }
   }
 
-  private Clase buildClaseFromForm() {
-    Clase clase = new Clase();
-    clase.setNombre(txtNombre.getText().trim());
-
+  private ClaseCreateDTO buildDTOFromForm() {
     String descripcion = txtDescripcion.getText().trim();
-    clase.setDescripcion(descripcion.isEmpty() ? null : descripcion);
-
-    clase.setDuracionMinutos((Integer) spnDuracion.getValue());
-    clase.setCapacidadMaxima((Integer) spnCapacidad.getValue());
-    clase.setNivel((NivelClase) cmbNivel.getSelectedItem());
-    clase.setActiva(true);
-
-    return clase;
+    return new ClaseCreateDTO(
+        txtNombre.getText().trim(),
+        descripcion.isEmpty() ? null : descripcion,
+        (Integer) spnDuracion.getValue(),
+        (Integer) spnCapacidad.getValue(),
+        (NivelClase) cmbNivel.getSelectedItem());
   }
 
   private void clearForm() {

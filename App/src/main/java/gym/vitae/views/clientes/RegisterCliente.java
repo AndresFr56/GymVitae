@@ -2,8 +2,7 @@ package gym.vitae.views.clientes;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import gym.vitae.controller.ClienteController;
-import gym.vitae.model.Cliente;
-import gym.vitae.model.enums.EstadoCliente;
+import gym.vitae.model.dtos.cliente.ClienteCreateDTO;
 import gym.vitae.model.enums.Genero;
 import gym.vitae.views.components.primitives.ButtonOutline;
 import java.awt.*;
@@ -20,7 +19,7 @@ public class RegisterCliente extends JPanel {
   private static final int MAX_TEXT_LENGTH = 100;
   private static final int MAX_NUMERIC_LENGTH = 10;
 
-  private final ClienteController controller;
+  private final transient ClienteController controller;
 
   // Panel de contenido scrollable
   private JPanel contentPanel;
@@ -54,28 +53,52 @@ public class RegisterCliente extends JPanel {
 
   private void init() {
     setLayout(new BorderLayout());
-    setOpaque(false);
 
-    // Panel principal con scroll
-    contentPanel = new JPanel(new MigLayout("fillx,wrap,insets 20", "[fill]", "[]10[]"));
-    contentPanel.setOpaque(false);
-
-    // Label para errores
+    // Panel superior con mensaje de error
     lblError = new JLabel();
-    lblError.setForeground(new Color(220, 53, 69));
     lblError.setVisible(false);
-    contentPanel.add(lblError, "growx");
+    lblError.putClientProperty(
+        FlatClientProperties.STYLE, "foreground:#F44336;font:bold;border:0,0,10,0");
+
+    // Panel de contenido con scroll
+    contentPanel = new JPanel(new MigLayout("fillx,wrap,insets 0", "[fill]", ""));
+    JScrollPane scrollPane = new JScrollPane(contentPanel);
+    scrollPane.setBorder(null);
+    scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
+    // Panel de botones fijo en la parte inferior
+    JPanel buttonPanel = createButtonPanel();
+
+    // Ensamblar layout
+    JPanel topPanel = new JPanel(new MigLayout("fillx,wrap,insets 10 20 0 20", "[fill]"));
+    topPanel.add(lblError);
+
+    add(topPanel, BorderLayout.NORTH);
+    add(scrollPane, BorderLayout.CENTER);
+    add(buttonPanel, BorderLayout.SOUTH);
 
     initializeComponents();
     applyStyles();
     buildForm();
+  }
 
-    JScrollPane scrollPane = new JScrollPane(contentPanel);
-    scrollPane.setBorder(BorderFactory.createEmptyBorder());
-    scrollPane.setOpaque(false);
-    scrollPane.getViewport().setOpaque(false);
+  private JPanel createButtonPanel() {
+    JPanel panel = new JPanel(new MigLayout("insets 15 20 20 20", "[grow][120][120]"));
+    panel.putClientProperty(
+        FlatClientProperties.STYLE,
+        "background:$Panel.background;border:1,0,0,0,$Component.borderColor");
 
-    add(scrollPane, BorderLayout.CENTER);
+    btnCancelar = new ButtonOutline("Cancelar");
+    btnCancelar.putClientProperty(FlatClientProperties.STYLE, "font:bold +1");
+
+    btnGuardar = new ButtonOutline("Guardar");
+    btnGuardar.putClientProperty(FlatClientProperties.STYLE, "foreground:#4CAF50;font:bold +1");
+
+    panel.add(new JLabel(), "grow");
+    panel.add(btnCancelar, "center");
+    panel.add(btnGuardar, "center");
+
+    return panel;
   }
 
   private void initializeComponents() {
@@ -94,9 +117,6 @@ public class RegisterCliente extends JPanel {
 
     txtContactoEmergencia = new JTextField();
     txtTelefonoEmergencia = new JTextField();
-
-    btnGuardar = new ButtonOutline();
-    btnCancelar = new ButtonOutline();
 
     // Aplicar filtros
     applyMaxLengthFilter(txtCodigoCliente, 20);
@@ -123,14 +143,6 @@ public class RegisterCliente extends JPanel {
         FlatClientProperties.PLACEHOLDER_TEXT, "correo@ejemplo.com (opcional)");
     txtDireccion.putClientProperty(
         FlatClientProperties.PLACEHOLDER_TEXT, "Dirección completa (opcional)");
-
-    txtCodigoCliente.putClientProperty(FlatClientProperties.STYLE, "arc:8");
-    txtNombres.putClientProperty(FlatClientProperties.STYLE, "arc:8");
-    txtApellidos.putClientProperty(FlatClientProperties.STYLE, "arc:8");
-    txtCedula.putClientProperty(FlatClientProperties.STYLE, "arc:8");
-    txtTelefono.putClientProperty(FlatClientProperties.STYLE, "arc:8");
-    txtEmail.putClientProperty(FlatClientProperties.STYLE, "arc:8");
-    txtDireccion.putClientProperty(FlatClientProperties.STYLE, "arc:8");
   }
 
   /** Aplica filtro para permitir solo letras y espacios. */
@@ -139,7 +151,8 @@ public class RegisterCliente extends JPanel {
         .setDocumentFilter(
             new DocumentFilter() {
               @Override
-              public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
+              public void insertString(
+                  FilterBypass fb, int offset, String string, AttributeSet attr)
                   throws BadLocationException {
                 if (string == null) return;
                 if (isValidLettersAndSpaces(string)
@@ -171,7 +184,8 @@ public class RegisterCliente extends JPanel {
         .setDocumentFilter(
             new DocumentFilter() {
               @Override
-              public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
+              public void insertString(
+                  FilterBypass fb, int offset, String string, AttributeSet attr)
                   throws BadLocationException {
                 if (string == null) return;
                 if (string.matches("\\d*")
@@ -199,7 +213,8 @@ public class RegisterCliente extends JPanel {
         .setDocumentFilter(
             new DocumentFilter() {
               @Override
-              public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
+              public void insertString(
+                  FilterBypass fb, int offset, String string, AttributeSet attr)
                   throws BadLocationException {
                 if (string == null) return;
                 if (fb.getDocument().getLength() + string.length() <= maxLength) {
@@ -335,12 +350,12 @@ public class RegisterCliente extends JPanel {
 
   public boolean saveCliente() {
     try {
-      Cliente cliente = buildClienteFromForm();
-      controller.createCliente(cliente);
+      ClienteCreateDTO clienteDTO = buildClienteDTOFromForm();
+      var clienteDetalle = controller.createCliente(clienteDTO);
 
       JOptionPane.showMessageDialog(
           this,
-          "Cliente registrado exitosamente con código: " + cliente.getCodigoCliente(),
+          "Cliente registrado exitosamente con código: " + clienteDetalle.codigoCliente(),
           "Éxito",
           JOptionPane.INFORMATION_MESSAGE);
 
@@ -357,38 +372,22 @@ public class RegisterCliente extends JPanel {
     }
   }
 
-  private Cliente buildClienteFromForm() {
-    Cliente cliente = new Cliente();
-    cliente.setCodigoCliente(txtCodigoCliente.getText().trim());
-    cliente.setNombres(txtNombres.getText().trim());
-    cliente.setApellidos(txtApellidos.getText().trim());
-    cliente.setCedula(txtCedula.getText().trim());
-    cliente.setGenero((Genero) cmbGenero.getSelectedItem());
-
-    // Fecha de nacimiento (opcional)
-    if (dateFechaNacimiento.getSelectedDate() != null) {
-      cliente.setFechaNacimiento(dateFechaNacimiento.getSelectedDate());
-    }
-
-    // Contacto
-    cliente.setTelefono(txtTelefono.getText().trim());
-
-    String email = txtEmail.getText().trim();
-    cliente.setEmail(email.isEmpty() ? null : email);
-
-    String direccion = txtDireccion.getText().trim();
-    cliente.setDireccion(direccion.isEmpty() ? null : direccion);
-
-    // Emergencia (opcional)
-    String contactoEmergencia = txtContactoEmergencia.getText().trim();
-    cliente.setContactoEmergencia(contactoEmergencia.isEmpty() ? null : contactoEmergencia);
-
-    String telefonoEmergencia = txtTelefonoEmergencia.getText().trim();
-    cliente.setTelefonoEmergencia(telefonoEmergencia.isEmpty() ? null : telefonoEmergencia);
-
-    cliente.setEstado(EstadoCliente.ACTIVO);
-
-    return cliente;
+  private ClienteCreateDTO buildClienteDTOFromForm() {
+    return new ClienteCreateDTO(
+        txtNombres.getText().trim(),
+        txtApellidos.getText().trim(),
+        txtCedula.getText().trim(),
+        (Genero) cmbGenero.getSelectedItem(),
+        txtTelefono.getText().trim(),
+        txtDireccion.getText().trim().isEmpty() ? null : txtDireccion.getText().trim(),
+        txtEmail.getText().trim().isEmpty() ? null : txtEmail.getText().trim(),
+        dateFechaNacimiento.getSelectedDate(),
+        txtContactoEmergencia.getText().trim().isEmpty()
+            ? null
+            : txtContactoEmergencia.getText().trim(),
+        txtTelefonoEmergencia.getText().trim().isEmpty()
+            ? null
+            : txtTelefonoEmergencia.getText().trim());
   }
 
   private void clearForm() {

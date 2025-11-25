@@ -1,30 +1,29 @@
 package gym.vitae.views.clases;
 
 import gym.vitae.controller.ClasesController;
-import gym.vitae.model.Clase;
-import gym.vitae.model.enums.NivelClase;
-import gym.vitae.views.components.ModalBorder;
+import gym.vitae.model.dtos.clase.ClaseDetalleDTO;
+import gym.vitae.model.dtos.clase.ClaseListadoDTO;
 import gym.vitae.views.components.tables.BaseTablePanel;
-import java.awt.*;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
 import net.miginfocom.swing.MigLayout;
 import raven.modal.ModalDialog;
+import raven.modal.component.SimpleModalBorder;
 import raven.modal.option.Location;
 import raven.modal.option.Option;
 
 /**
  * Panel de tabla específico para gestión de clases. Extiende BaseTablePanel con lógica
- * personalizada para Clase.
+ * personalizada para ClaseListadoDTO.
  */
-public class ClaseTablePanel extends BaseTablePanel<Clase> {
+public class ClaseTablePanel extends BaseTablePanel<ClaseListadoDTO> {
 
   private static final Logger LOGGER = Logger.getLogger(ClaseTablePanel.class.getName());
 
-  private final ClasesController controller;
+  private final transient ClasesController controller;
   private JComboBox<String> cmbNivel;
+  private JCheckBox chkConCupos;
 
   public ClaseTablePanel(ClasesController controller) {
     super("Gestión de Clases");
@@ -37,15 +36,15 @@ public class ClaseTablePanel extends BaseTablePanel<Clase> {
   }
 
   @Override
-  protected Object[] entityToRow(Clase clase, int rowNumber) {
+  protected Object[] entityToRow(ClaseListadoDTO clase, int rowNumber) {
     return new Object[] {
       false, // SELECT checkbox
       rowNumber,
-      clase.getNombre(),
-      clase.getDuracionMinutos(),
-      clase.getCapacidadMaxima(),
-      clase.getNivel().name(),
-      clase.getActiva() ? "Activa" : "Inactiva"
+      clase.nombre(),
+      clase.duracionMinutos(),
+      clase.capacidadMaxima(),
+      clase.nivel().name(),
+      Boolean.TRUE.equals(clase.activa()) ? "Activa" : "Inactiva"
     };
   }
 
@@ -55,18 +54,16 @@ public class ClaseTablePanel extends BaseTablePanel<Clase> {
   }
 
   @Override
-  protected List<Clase> fetchPagedData(int offset, int limit) {
+  protected List<ClaseListadoDTO> fetchPagedData(int offset, int limit) {
     return controller.getClases(offset, limit);
   }
 
   @Override
-  protected List<Clase> fetchPagedDataWithFilters(String searchText, int offset, int limit) {
+  protected List<ClaseListadoDTO> fetchPagedDataWithFilters(
+      String searchText, int offset, int limit) {
     String nivel = getSelectedNivel();
-    return controller.getClases().stream()
-        .filter(c -> filterEntity(c, searchText))
-        .skip(offset)
-        .limit(limit)
-        .toList();
+    Boolean conCupos = getConCuposFilter();
+    return controller.getClasesWithFilters(searchText, nivel, conCupos, offset, limit);
   }
 
   @Override
@@ -77,20 +74,26 @@ public class ClaseTablePanel extends BaseTablePanel<Clase> {
   @Override
   protected long fetchTotalCountWithFilters(String searchText) {
     String nivel = getSelectedNivel();
-    return controller.getClases().stream().filter(c -> filterEntity(c, searchText)).count();
+    Boolean conCupos = getConCuposFilter();
+    return controller.countClasesWithFilters(searchText, nivel, conCupos);
   }
 
   @Override
   protected JPanel createCustomFilters() {
-    JPanel filtersPanel = new JPanel(new MigLayout("insets 0", "[grow,fill]", "[]"));
+    JPanel filtersPanel = new JPanel(new MigLayout("insets 0", "[][grow,fill][][]", "[]"));
 
     // Filtro por nivel
     cmbNivel =
         new JComboBox<>(new String[] {"Todos", "PRINCIPIANTE", "INTERMEDIO", "AVANZADO", "TODOS"});
     cmbNivel.addActionListener(e -> loadData());
 
+    // Filtro por disponibilidad de cupos
+    chkConCupos = new JCheckBox("Con cupos disponibles");
+    chkConCupos.addActionListener(e -> loadData());
+
     filtersPanel.add(new JLabel("Nivel:"));
-    filtersPanel.add(cmbNivel, "width 200!");
+    filtersPanel.add(cmbNivel, "width 150!");
+    filtersPanel.add(chkConCupos, "gapleft 20");
 
     return filtersPanel;
   }
@@ -106,22 +109,21 @@ public class ClaseTablePanel extends BaseTablePanel<Clase> {
   }
 
   @Override
-  protected boolean filterEntity(Clase clase, String searchText) {
+  protected boolean filterEntity(ClaseListadoDTO clase, String searchText) {
     return matchesSearchText(clase, searchText) && matchesNivel(clase);
   }
 
   /** Verifica si la clase coincide con el texto de búsqueda. */
-  private boolean matchesSearchText(Clase clase, String searchText) {
+  private boolean matchesSearchText(ClaseListadoDTO clase, String searchText) {
     String lower = searchText.toLowerCase();
-    return clase.getNombre().toLowerCase().contains(lower)
-        || (clase.getDescripcion() != null && clase.getDescripcion().toLowerCase().contains(lower));
+    return clase.nombre().toLowerCase().contains(lower);
   }
 
   /** Verifica si la clase coincide con el filtro de nivel. */
-  private boolean matchesNivel(Clase clase) {
+  private boolean matchesNivel(ClaseListadoDTO clase) {
     String selectedNivel = getSelectedNivel();
     if (selectedNivel == null) return true;
-    return clase.getNivel().name().equals(selectedNivel);
+    return clase.nivel().name().equals(selectedNivel);
   }
 
   @Override
@@ -136,20 +138,35 @@ public class ClaseTablePanel extends BaseTablePanel<Clase> {
         .setAnimateDistance(0.7f, 0);
 
     ModalDialog.showModal(
-        SwingUtilities.getWindowAncestor(this),
-        new ModalBorder(
+        this,
+        new SimpleModalBorder(
             registerForm,
-            (modalController, action) -> {
-              if (action == ModalBorder.OPENED) {
-                // Modal abierto
-              }
+            "Registrar Nueva Clase",
+            SimpleModalBorder.DEFAULT_OPTION,
+            (control, action) -> {
+              // No hacer nada aquí - los botones se manejan internamente
             }),
         option);
+
+    // Configurar listeners de botones
+    registerForm
+        .getBtnGuardar()
+        .addOnClick(
+            e -> {
+              if (registerForm.validateForm() && registerForm.saveClase()) {
+                ModalDialog.closeAllModal();
+                refresh();
+              }
+            });
+
+    registerForm.getBtnCancelar().addOnClick(e -> ModalDialog.closeAllModal());
   }
 
   @Override
-  protected void onUpdateEntity(Clase clase) {
-    UpdateClase updateForm = new UpdateClase(controller, clase);
+  protected void onUpdateEntity(ClaseListadoDTO claseListado) {
+    // Cargar detalle completo para edición
+    ClaseDetalleDTO claseDetalle = controller.getClaseById(claseListado.id());
+    UpdateClase updateForm = new UpdateClase(controller, claseDetalle);
 
     Option option = ModalDialog.createOption();
     option
@@ -159,20 +176,37 @@ public class ClaseTablePanel extends BaseTablePanel<Clase> {
         .setAnimateDistance(0.7f, 0);
 
     ModalDialog.showModal(
-        SwingUtilities.getWindowAncestor(this),
-        new ModalBorder(
+        this,
+        new SimpleModalBorder(
             updateForm,
-            (modalController, action) -> {
-              if (action == ModalBorder.OPENED) {
-                // Modal abierto
-              }
+            "Actualizar Clase",
+            SimpleModalBorder.DEFAULT_OPTION,
+            (control, action) -> {
+              // No hacer nada aquí - los botones se manejan internamente
             }),
         option);
+
+    // Configurar listeners de botones
+    updateForm
+        .getBtnGuardar()
+        .addOnClick(
+            e -> {
+              if (updateForm.validateForm() && updateForm.updateClase()) {
+                ModalDialog.closeAllModal();
+                refresh();
+              }
+            });
+
+    updateForm.getBtnCancelar().addOnClick(e -> ModalDialog.closeAllModal());
   }
 
   @Override
-  protected void onDeleteEntities(List<Clase> clases) {
+  protected void onDeleteEntities(List<ClaseListadoDTO> clases) {
     // Implementar soft delete cambiando estado a inactiva
+    for (ClaseListadoDTO clase : clases) {
+      controller.deleteClase(clase.id());
+    }
+    loadData();
   }
 
   /** Obtiene el nivel seleccionado o null si es "Todos". */
@@ -180,5 +214,10 @@ public class ClaseTablePanel extends BaseTablePanel<Clase> {
     if (cmbNivel == null) return null;
     String selected = (String) cmbNivel.getSelectedItem();
     return (selected == null || selected.equals("Todos")) ? null : selected;
+  }
+
+  /** Obtiene el filtro de disponibilidad de cupos o null si no está seleccionado. */
+  private Boolean getConCuposFilter() {
+    return chkConCupos.isSelected() ? Boolean.TRUE : null;
   }
 }

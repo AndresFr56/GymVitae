@@ -3,6 +3,7 @@ package gym.vitae.views.components;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import gym.vitae.model.Empleado;
+import gym.vitae.views.clases.ViewClases;
 import gym.vitae.views.clientes.ViewClientes;
 import gym.vitae.views.common.StateView;
 import gym.vitae.views.common.ViewContainer;
@@ -62,10 +63,9 @@ public class Menu extends SimpleDrawerBuilder {
           new Item("Facturacion", "page.svg")
               .subMenu("Crear Factura")
               .subMenu("Historial de Facturas"),
-          new Item("Clientes", "customer.svg")
-              .subMenu("Listado de Clientes", ViewClientes.class),
+          new Item("Clientes", "customer.svg").subMenu("Listado de Clientes", ViewClientes.class),
           new Item("Clases", "calendar.svg")
-              .subMenu("Clases Programadas")
+              .subMenu("Clases Programadas", ViewClases.class)
               .subMenu("Horrarios de Clases"),
           new Item("Membresias", "employee.svg")
               .subMenu("Listado de Membresias")

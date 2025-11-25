@@ -4,8 +4,6 @@ import gym.vitae.controller.ClienteController;
 import gym.vitae.views.common.Metadata;
 import gym.vitae.views.common.ViewContainer;
 import gym.vitae.views.components.CeoHeader;
-import java.awt.BorderLayout;
-import javax.swing.JPanel;
 import net.miginfocom.swing.MigLayout;
 
 @Metadata(
@@ -13,23 +11,18 @@ import net.miginfocom.swing.MigLayout;
     description = "Vista para gestionar los clientes del gimnasio")
 public class ViewClientes extends ViewContainer {
 
-  private ClienteController controller;
-  private ClienteTablePanel tablePanel;
+  private transient ClienteTablePanel tablePanel;
 
   @Override
   protected void init() {
-    setLayout(new BorderLayout());
+    ClienteController controller;
+    setLayout(new MigLayout("fillx,wrap", "[fill]", "[][fill,grow]"));
 
     controller = new ClienteController();
-
-    JPanel contentPanel = new JPanel(new MigLayout("fill,insets 0", "[fill]", "[fill]"));
-    contentPanel.setOpaque(false);
-
     tablePanel = new ClienteTablePanel(controller);
-    contentPanel.add(tablePanel, "grow");
 
     add(CeoHeader.createHeaderPanel(getClass().getAnnotation(Metadata.class)), "growx");
-    add(contentPanel, BorderLayout.CENTER);
+    add(tablePanel, "grow");
   }
 
   @Override

@@ -2,7 +2,8 @@ package gym.vitae.views.clases;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import gym.vitae.controller.ClasesController;
-import gym.vitae.model.Clase;
+import gym.vitae.model.dtos.clase.ClaseDetalleDTO;
+import gym.vitae.model.dtos.clase.ClaseUpdateDTO;
 import gym.vitae.model.enums.NivelClase;
 import gym.vitae.views.components.primitives.ButtonOutline;
 import java.awt.*;
@@ -18,8 +19,8 @@ public class UpdateClase extends JPanel {
   private static final int MAX_TEXT_LENGTH = 100;
   private static final int MAX_DESC_LENGTH = 500;
 
-  private final ClasesController controller;
-  private final Clase clase;
+  private final transient ClasesController controller;
+  private final transient ClaseDetalleDTO claseDetalle;
 
   // Panel de contenido scrollable
   private JPanel contentPanel;
@@ -37,37 +38,61 @@ public class UpdateClase extends JPanel {
   private ButtonOutline btnGuardar;
   private ButtonOutline btnCancelar;
 
-  public UpdateClase(ClasesController controller, Clase clase) {
+  public UpdateClase(ClasesController controller, ClaseDetalleDTO claseDetalle) {
     this.controller = controller;
-    this.clase = clase;
+    this.claseDetalle = claseDetalle;
     init();
   }
 
   private void init() {
     setLayout(new BorderLayout());
-    setOpaque(false);
 
-    // Panel principal con scroll
-    contentPanel = new JPanel(new MigLayout("fillx,wrap,insets 20", "[fill]", "[]10[]"));
-    contentPanel.setOpaque(false);
-
-    // Label para errores
+    // Panel superior con mensaje de error
     lblError = new JLabel();
-    lblError.setForeground(new Color(220, 53, 69));
     lblError.setVisible(false);
-    contentPanel.add(lblError, "growx");
+    lblError.putClientProperty(
+        FlatClientProperties.STYLE, "foreground:#F44336;font:bold;border:0,0,10,0");
+
+    // Panel de contenido con scroll
+    contentPanel = new JPanel(new MigLayout("fillx,wrap,insets 0", "[fill]", ""));
+    JScrollPane scrollPane = new JScrollPane(contentPanel);
+    scrollPane.setBorder(null);
+    scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
+    // Panel de botones fijo en la parte inferior
+    JPanel buttonPanel = createButtonPanel();
+
+    // Ensamblar layout
+    JPanel topPanel = new JPanel(new MigLayout("fillx,wrap,insets 10 20 0 20", "[fill]"));
+    topPanel.add(lblError);
+
+    add(topPanel, BorderLayout.NORTH);
+    add(scrollPane, BorderLayout.CENTER);
+    add(buttonPanel, BorderLayout.SOUTH);
 
     initializeComponents();
     applyStyles();
     buildForm();
     loadClaseData();
+  }
 
-    JScrollPane scrollPane = new JScrollPane(contentPanel);
-    scrollPane.setBorder(BorderFactory.createEmptyBorder());
-    scrollPane.setOpaque(false);
-    scrollPane.getViewport().setOpaque(false);
+  private JPanel createButtonPanel() {
+    JPanel panel = new JPanel(new MigLayout("insets 15 20 20 20", "[grow][120][120]"));
+    panel.putClientProperty(
+        FlatClientProperties.STYLE,
+        "background:$Panel.background;border:1,0,0,0,$Component.borderColor");
 
-    add(scrollPane, BorderLayout.CENTER);
+    btnCancelar = new ButtonOutline("Cancelar");
+    btnCancelar.putClientProperty(FlatClientProperties.STYLE, "font:bold +1");
+
+    btnGuardar = new ButtonOutline("Guardar");
+    btnGuardar.putClientProperty(FlatClientProperties.STYLE, "foreground:#4CAF50;font:bold +1");
+
+    panel.add(new JLabel(), "grow");
+    panel.add(btnCancelar, "center");
+    panel.add(btnGuardar, "center");
+
+    return panel;
   }
 
   private void initializeComponents() {
@@ -87,11 +112,12 @@ public class UpdateClase extends JPanel {
     cmbNivel = new JComboBox<>(NivelClase.values());
     chkActiva = new JCheckBox("Clase Activa");
 
-    btnGuardar = new ButtonOutline();
-    btnCancelar = new ButtonOutline();
+    // NO aplicar filtros aquí - se aplicarán después de cargar datos
+  }
 
-    // Aplicar filtros
-    applyLettersAndSpacesFilter(txtNombre, MAX_TEXT_LENGTH);
+  /** Aplica los filtros de entrada después de cargar los datos iniciales. */
+  private void applyInputFilters() {
+    applyLettersAndSpacesFilter(txtNombre);
     applyMaxLengthFilter(txtDescripcion);
   }
 
@@ -99,13 +125,10 @@ public class UpdateClase extends JPanel {
     txtNombre.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ej: Yoga, Spinning");
     txtDescripcion.putClientProperty(
         FlatClientProperties.PLACEHOLDER_TEXT, "Descripción de la clase (opcional)");
-
-    txtNombre.putClientProperty(FlatClientProperties.STYLE, "arc:8");
-    txtDescripcion.putClientProperty(FlatClientProperties.STYLE, "arc:8");
   }
 
   /** Aplica filtro para permitir solo letras y espacios. */
-  private void applyLettersAndSpacesFilter(JTextField textField, int maxLength) {
+  private void applyLettersAndSpacesFilter(JTextField textField) {
     ((AbstractDocument) textField.getDocument())
         .setDocumentFilter(
             new DocumentFilter() {
@@ -115,7 +138,8 @@ public class UpdateClase extends JPanel {
                   throws BadLocationException {
                 if (string == null) return;
                 if (isValidLettersAndSpaces(string)
-                    && (fb.getDocument().getLength() + string.length() <= maxLength)) {
+                    && (fb.getDocument().getLength() + string.length()
+                        <= UpdateClase.MAX_TEXT_LENGTH)) {
                   super.insertString(fb, offset, string, attr);
                 }
               }
@@ -126,7 +150,8 @@ public class UpdateClase extends JPanel {
                   throws BadLocationException {
                 if (text == null) return;
                 if (isValidLettersAndSpaces(text)
-                    && (fb.getDocument().getLength() - length + text.length() <= maxLength)) {
+                    && (fb.getDocument().getLength() - length + text.length()
+                        <= UpdateClase.MAX_TEXT_LENGTH)) {
                   super.replace(fb, offset, length, text, attrs);
                 }
               }
@@ -199,12 +224,15 @@ public class UpdateClase extends JPanel {
   }
 
   private void loadClaseData() {
-    txtNombre.setText(clase.getNombre());
-    txtDescripcion.setText(clase.getDescripcion() != null ? clase.getDescripcion() : "");
-    spnDuracion.setValue(clase.getDuracionMinutos());
-    spnCapacidad.setValue(clase.getCapacidadMaxima());
-    cmbNivel.setSelectedItem(clase.getNivel());
-    chkActiva.setSelected(clase.getActiva());
+    txtNombre.setText(claseDetalle.nombre());
+    txtDescripcion.setText(claseDetalle.descripcion() != null ? claseDetalle.descripcion() : "");
+    spnDuracion.setValue(claseDetalle.duracionMinutos());
+    spnCapacidad.setValue(claseDetalle.capacidadMaxima());
+    cmbNivel.setSelectedItem(claseDetalle.nivel());
+    chkActiva.setSelected(claseDetalle.activa());
+
+    // Aplicar filtros DESPUÉS de cargar los datos
+    applyInputFilters();
   }
 
   public boolean validateForm() {
@@ -236,18 +264,17 @@ public class UpdateClase extends JPanel {
 
   public boolean updateClase() {
     try {
-      // Actualizar los datos de la clase
-      clase.setNombre(txtNombre.getText().trim());
-
       String descripcion = txtDescripcion.getText().trim();
-      clase.setDescripcion(descripcion.isEmpty() ? null : descripcion);
+      ClaseUpdateDTO dto =
+          new ClaseUpdateDTO(
+              txtNombre.getText().trim(),
+              descripcion.isEmpty() ? null : descripcion,
+              (Integer) spnDuracion.getValue(),
+              (Integer) spnCapacidad.getValue(),
+              (NivelClase) cmbNivel.getSelectedItem(),
+              chkActiva.isSelected());
 
-      clase.setDuracionMinutos((Integer) spnDuracion.getValue());
-      clase.setCapacidadMaxima((Integer) spnCapacidad.getValue());
-      clase.setNivel((NivelClase) cmbNivel.getSelectedItem());
-      clase.setActiva(chkActiva.isSelected());
-
-      controller.updateClase(clase);
+      controller.updateClase(claseDetalle.id(), dto);
 
       JOptionPane.showMessageDialog(
           this, "Clase actualizada exitosamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);

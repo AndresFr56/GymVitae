@@ -1,24 +1,23 @@
 package gym.vitae.views.clientes;
 
 import gym.vitae.controller.ClienteController;
-import gym.vitae.model.Cliente;
-import gym.vitae.views.components.ModalBorder;
+import gym.vitae.model.dtos.cliente.ClienteListadoDTO;
 import gym.vitae.views.components.tables.BaseTablePanel;
-import java.awt.*;
 import java.util.List;
 import javax.swing.*;
 import net.miginfocom.swing.MigLayout;
 import raven.modal.ModalDialog;
+import raven.modal.component.SimpleModalBorder;
 import raven.modal.option.Location;
 import raven.modal.option.Option;
 
 /**
  * Panel de tabla específico para gestión de clientes. Extiende BaseTablePanel con lógica
- * personalizada para Cliente.
+ * personalizada para ClienteListadoDTO.
  */
-public class ClienteTablePanel extends BaseTablePanel<Cliente> {
+public class ClienteTablePanel extends BaseTablePanel<ClienteListadoDTO> {
 
-  private final ClienteController controller;
+  private final transient ClienteController controller;
   private JComboBox<String> cmbEstado;
 
   public ClienteTablePanel(ClienteController controller) {
@@ -29,22 +28,20 @@ public class ClienteTablePanel extends BaseTablePanel<Cliente> {
   @Override
   protected String[] getColumnNames() {
     return new String[] {
-      "SELECT", "#", "Código", "Nombres", "Apellidos", "Cédula", "Teléfono", "Email", "Estado"
+      "SELECT", "#", "Código", "Nombre Completo", "Cédula", "Teléfono", "Estado"
     };
   }
 
   @Override
-  protected Object[] entityToRow(Cliente cliente, int rowNumber) {
+  protected Object[] entityToRow(ClienteListadoDTO cliente, int rowNumber) {
     return new Object[] {
       false, // SELECT checkbox
       rowNumber,
-      cliente.getCodigoCliente(),
-      cliente.getNombres(),
-      cliente.getApellidos(),
-      cliente.getCedula(),
-      cliente.getTelefono(),
-      cliente.getEmail() != null ? cliente.getEmail() : "",
-      cliente.getEstado().name()
+      cliente.codigoCliente(),
+      cliente.nombreCompleto(),
+      cliente.cedula(),
+      cliente.telefono(),
+      cliente.estado().name()
     };
   }
 
@@ -54,12 +51,13 @@ public class ClienteTablePanel extends BaseTablePanel<Cliente> {
   }
 
   @Override
-  protected List<Cliente> fetchPagedData(int offset, int limit) {
-    return controller.getClientes(offset, limit);
+  protected List<ClienteListadoDTO> fetchPagedData(int offset, int limit) {
+    return controller.getClientes();
   }
 
   @Override
-  protected List<Cliente> fetchPagedDataWithFilters(String searchText, int offset, int limit) {
+  protected List<ClienteListadoDTO> fetchPagedDataWithFilters(
+      String searchText, int offset, int limit) {
     return controller.getClientes().stream()
         .filter(c -> filterEntity(c, searchText))
         .skip(offset)
@@ -69,7 +67,7 @@ public class ClienteTablePanel extends BaseTablePanel<Cliente> {
 
   @Override
   protected long fetchTotalCount() {
-    return controller.countClientes();
+    return controller.getClientes().size();
   }
 
   @Override
@@ -93,33 +91,32 @@ public class ClienteTablePanel extends BaseTablePanel<Cliente> {
 
   @Override
   protected void configureColumnWidths(JTable table) {
+    // Columnas: 0=SELECT, 1=#, 2=Código, 3=Nombre, 4=Cédula, 5=Teléfono, 6=Estado
     table.getColumnModel().getColumn(0).setMaxWidth(50); // SELECT
     table.getColumnModel().getColumn(1).setMaxWidth(50); // #
     table.getColumnModel().getColumn(2).setPreferredWidth(100); // Código
-    table.getColumnModel().getColumn(5).setPreferredWidth(100); // Cédula
-    table.getColumnModel().getColumn(6).setPreferredWidth(100); // Teléfono
-    table.getColumnModel().getColumn(8).setPreferredWidth(100); // Estado
+    table.getColumnModel().getColumn(4).setPreferredWidth(100); // Cédula
+    table.getColumnModel().getColumn(5).setPreferredWidth(100); // Teléfono
+    table.getColumnModel().getColumn(6).setPreferredWidth(100); // Estado
   }
 
   @Override
-  protected boolean filterEntity(Cliente cliente, String searchText) {
+  protected boolean filterEntity(ClienteListadoDTO cliente, String searchText) {
     return matchesSearchText(cliente, searchText) && matchesEstado(cliente);
   }
 
   /** Verifica si el cliente coincide con el texto de búsqueda. */
-  private boolean matchesSearchText(Cliente cliente, String searchText) {
+  private boolean matchesSearchText(ClienteListadoDTO cliente, String searchText) {
     String lower = searchText.toLowerCase();
-    return cliente.getNombres().toLowerCase().contains(lower)
-        || cliente.getApellidos().toLowerCase().contains(lower)
-        || cliente.getCedula().contains(searchText)
-        || (cliente.getEmail() != null && cliente.getEmail().toLowerCase().contains(lower));
+    return cliente.nombreCompleto().toLowerCase().contains(lower)
+        || cliente.cedula().contains(searchText);
   }
 
   /** Verifica si el cliente coincide con el filtro de estado. */
-  private boolean matchesEstado(Cliente cliente) {
+  private boolean matchesEstado(ClienteListadoDTO cliente) {
     String selectedEstado = getSelectedEstado();
     if (selectedEstado == null) return true;
-    return cliente.getEstado().name().equals(selectedEstado);
+    return cliente.estado().name().equals(selectedEstado);
   }
 
   @Override
@@ -134,20 +131,35 @@ public class ClienteTablePanel extends BaseTablePanel<Cliente> {
         .setAnimateDistance(0.7f, 0);
 
     ModalDialog.showModal(
-        SwingUtilities.getWindowAncestor(this),
-        new ModalBorder(
+        this,
+        new SimpleModalBorder(
             registerForm,
-            (modalController, action) -> {
-              if (action == ModalBorder.OPENED) {
-                // Modal abierto
-              }
+            "Registrar Nuevo Cliente",
+            SimpleModalBorder.DEFAULT_OPTION,
+            (control, action) -> {
+              // No hacer nada aquí - los botones se manejan internamente
             }),
         option);
+
+    // Configurar listeners de botones
+    registerForm
+        .getBtnGuardar()
+        .addOnClick(
+            e -> {
+              if (registerForm.validateForm() && registerForm.saveCliente()) {
+                ModalDialog.closeAllModal();
+                refresh();
+              }
+            });
+
+    registerForm.getBtnCancelar().addOnClick(e -> ModalDialog.closeAllModal());
   }
 
   @Override
-  protected void onUpdateEntity(Cliente cliente) {
-    UpdateCliente updateForm = new UpdateCliente(controller, cliente);
+  protected void onUpdateEntity(ClienteListadoDTO clienteDTO) {
+    // Cargar el cliente completo para edición
+    var clienteDetalle = controller.getClienteById(clienteDTO.id());
+    UpdateCliente updateForm = new UpdateCliente(controller, clienteDetalle);
 
     Option option = ModalDialog.createOption();
     option
@@ -157,19 +169,32 @@ public class ClienteTablePanel extends BaseTablePanel<Cliente> {
         .setAnimateDistance(0.7f, 0);
 
     ModalDialog.showModal(
-        SwingUtilities.getWindowAncestor(this),
-        new ModalBorder(
+        this,
+        new SimpleModalBorder(
             updateForm,
-            (modalController, action) -> {
-              if (action == ModalBorder.OPENED) {
-                // Modal abierto
-              }
+            "Actualizar Cliente",
+            SimpleModalBorder.DEFAULT_OPTION,
+            (control, action) -> {
+              // No hacer nada aquí - los botones se manejan internamente
             }),
         option);
+
+    // Configurar listeners de botones
+    updateForm
+        .getBtnGuardar()
+        .addOnClick(
+            e -> {
+              if (updateForm.validateForm() && updateForm.updateCliente()) {
+                ModalDialog.closeAllModal();
+                refresh();
+              }
+            });
+
+    updateForm.getBtnCancelar().addOnClick(e -> ModalDialog.closeAllModal());
   }
 
   @Override
-  protected void onDeleteEntities(List<Cliente> clientes) {
+  protected void onDeleteEntities(List<ClienteListadoDTO> clientes) {
     // Implementar soft delete cambiando estado a SUSPENDIDO
   }
 

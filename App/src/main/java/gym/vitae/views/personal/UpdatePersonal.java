@@ -3,7 +3,9 @@ package gym.vitae.views.personal;
 import com.formdev.flatlaf.FlatClientProperties;
 import gym.vitae.controller.PersonalController;
 import gym.vitae.model.Cargo;
-import gym.vitae.model.Empleado;
+import gym.vitae.model.dtos.empleado.EmpleadoDetalleDTO;
+import gym.vitae.model.dtos.empleado.EmpleadoUpdateDTO;
+import gym.vitae.model.enums.EstadoEmpleado;
 import gym.vitae.model.enums.Genero;
 import gym.vitae.model.enums.TipoContrato;
 import gym.vitae.views.components.primitives.ButtonOutline;
@@ -17,15 +19,15 @@ import javax.swing.text.*;
 import net.miginfocom.swing.MigLayout;
 import raven.datetime.DatePicker;
 
-/** Formulario para actualizar un empleado existente. */
+/** Modal para actualizar un nuevo empleado en el sistema. */
 public class UpdatePersonal extends JPanel {
 
   private static final Logger LOGGER = Logger.getLogger(UpdatePersonal.class.getName());
   private static final int MAX_TEXT_LENGTH = 100;
   private static final int MAX_NUMERIC_LENGTH = 10;
 
-  private final PersonalController controller;
-  private final Empleado empleado;
+  private final transient PersonalController controller;
+  private final transient EmpleadoDetalleDTO empleadoDetalle;
 
   // Panel de contenido scrollable
   private JPanel contentPanel;
@@ -46,17 +48,32 @@ public class UpdatePersonal extends JPanel {
   private JComboBox<CargoWrapper> cmbCargo;
   private DatePicker dateFechaIngreso;
   private JComboBox<TipoContrato> cmbTipoContrato;
-  private JTextField txtSueldoBase;
+  private JComboBox<EstadoEmpleado> cmbEstado;
 
   // Botones
   private ButtonOutline btnGuardar;
   private ButtonOutline btnCancelar;
 
-  public UpdatePersonal(PersonalController controller, Empleado empleado) {
+  public UpdatePersonal(PersonalController controller, EmpleadoDetalleDTO empleadoDetalle) {
     this.controller = controller;
-    this.empleado = empleado;
+    this.empleadoDetalle = empleadoDetalle;
     init();
     loadEmpleadoData();
+  }
+
+  static void componentStyles(
+      JTextField txtNombres,
+      JTextField txtApellidos,
+      JTextField txtCedula,
+      JTextField txtTelefono,
+      JTextField txtEmail,
+      JTextArea txtDireccion) {
+    txtNombres.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Solo letras y espacios");
+    txtApellidos.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Solo letras y espacios");
+    txtCedula.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "10 dígitos");
+    txtTelefono.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "10 dígitos");
+    txtEmail.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "ejemplo@gymvitae.com");
+    txtDireccion.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Máximo 100 caracteres");
   }
 
   private void init() {
@@ -112,10 +129,10 @@ public class UpdatePersonal extends JPanel {
   private void initializeComponents() {
     // Información Personal
     txtNombres = new JTextField();
-    applyLettersAndSpacesFilter(txtNombres, MAX_TEXT_LENGTH);
+    applyLettersAndSpacesFilter(txtNombres);
 
     txtApellidos = new JTextField();
-    applyLettersAndSpacesFilter(txtApellidos, MAX_TEXT_LENGTH);
+    applyLettersAndSpacesFilter(txtApellidos);
 
     txtCedula = new JTextField();
     applyNumericFilter(txtCedula, MAX_NUMERIC_LENGTH);
@@ -127,39 +144,28 @@ public class UpdatePersonal extends JPanel {
     applyNumericFilter(txtTelefono, MAX_NUMERIC_LENGTH);
 
     txtEmail = new JTextField();
-    applyMaxLengthFilter(txtEmail, MAX_TEXT_LENGTH);
+    applyMaxLengthFilter(txtEmail);
 
     txtDireccion = new JTextArea(3, 20);
     txtDireccion.setWrapStyleWord(true);
     txtDireccion.setLineWrap(true);
-    applyMaxLengthFilter(txtDireccion, MAX_TEXT_LENGTH);
+    applyMaxLengthFilter(txtDireccion);
 
     // Información Laboral
     cmbCargo = new JComboBox<>();
     dateFechaIngreso = new DatePicker();
     cmbTipoContrato = new JComboBox<>(TipoContrato.values());
-
-    // Sueldo base (solo lectura)
-    txtSueldoBase = new JTextField();
-    txtSueldoBase.setEditable(false);
-    txtSueldoBase.putClientProperty(
-        FlatClientProperties.STYLE, "background:$TextField.disabledBackground");
+    cmbEstado = new JComboBox<>(EstadoEmpleado.values());
 
     applyStyles();
   }
 
   private void applyStyles() {
-    // Placeholders
-    txtNombres.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Solo letras y espacios");
-    txtApellidos.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Solo letras y espacios");
-    txtCedula.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "10 dígitos");
-    txtTelefono.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "10 dígitos");
-    txtEmail.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "ejemplo@gymvitae.com");
-    txtDireccion.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Máximo 100 caracteres");
+    componentStyles(txtNombres, txtApellidos, txtCedula, txtTelefono, txtEmail, txtDireccion);
   }
 
   /** Aplica filtro para permitir solo letras y espacios. */
-  private void applyLettersAndSpacesFilter(JTextField textField, int maxLength) {
+  private void applyLettersAndSpacesFilter(JTextField textField) {
     ((AbstractDocument) textField.getDocument())
         .setDocumentFilter(
             new DocumentFilter() {
@@ -169,7 +175,8 @@ public class UpdatePersonal extends JPanel {
                   throws BadLocationException {
                 if (string != null
                     && isValidLettersAndSpaces(string)
-                    && (fb.getDocument().getLength() + string.length() <= maxLength)) {
+                    && (fb.getDocument().getLength() + string.length()
+                        <= UpdatePersonal.MAX_TEXT_LENGTH)) {
                   super.insertString(fb, offset, string, attr);
                 }
               }
@@ -180,7 +187,8 @@ public class UpdatePersonal extends JPanel {
                   throws BadLocationException {
                 if (text != null
                     && isValidLettersAndSpaces(text)
-                    && (fb.getDocument().getLength() - length + text.length() <= maxLength)) {
+                    && (fb.getDocument().getLength() - length + text.length()
+                        <= UpdatePersonal.MAX_TEXT_LENGTH)) {
                   super.replace(fb, offset, length, text, attrs);
                 }
               }
@@ -221,7 +229,7 @@ public class UpdatePersonal extends JPanel {
   }
 
   /** Aplica filtro de longitud máxima. */
-  private void applyMaxLengthFilter(JTextComponent textComponent, int maxLength) {
+  private void applyMaxLengthFilter(JTextComponent textComponent) {
     ((AbstractDocument) textComponent.getDocument())
         .setDocumentFilter(
             new DocumentFilter() {
@@ -230,7 +238,8 @@ public class UpdatePersonal extends JPanel {
                   FilterBypass fb, int offset, String string, AttributeSet attr)
                   throws BadLocationException {
                 if (string != null
-                    && (fb.getDocument().getLength() + string.length() <= maxLength)) {
+                    && (fb.getDocument().getLength() + string.length()
+                        <= UpdatePersonal.MAX_TEXT_LENGTH)) {
                   super.insertString(fb, offset, string, attr);
                 }
               }
@@ -240,7 +249,8 @@ public class UpdatePersonal extends JPanel {
                   FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
                   throws BadLocationException {
                 if (text != null
-                    && (fb.getDocument().getLength() - length + text.length() <= maxLength)) {
+                    && (fb.getDocument().getLength() - length + text.length()
+                        <= UpdatePersonal.MAX_TEXT_LENGTH)) {
                   super.replace(fb, offset, length, text, attrs);
                 }
               }
@@ -278,8 +288,8 @@ public class UpdatePersonal extends JPanel {
     contentPanel.add(dateFechaIngreso);
     contentPanel.add(new JLabel("Tipo de Contrato *"), "gapy 5 0");
     contentPanel.add(cmbTipoContrato);
-    contentPanel.add(new JLabel("Sueldo Base"), "gapy 5 0");
-    contentPanel.add(txtSueldoBase);
+    contentPanel.add(new JLabel("Estado *"), "gapy 5 0");
+    contentPanel.add(cmbEstado);
 
     // Espacio adicional al final para scroll
     contentPanel.add(new JLabel(), "height 20");
@@ -299,17 +309,6 @@ public class UpdatePersonal extends JPanel {
       cargos.stream()
           .filter(Cargo::getActivo)
           .forEach(cargo -> cmbCargo.addItem(new CargoWrapper(cargo)));
-
-      // Listener para actualizar sueldo base cuando cambia el cargo
-      cmbCargo.addActionListener(
-          e -> {
-            CargoWrapper selected = (CargoWrapper) cmbCargo.getSelectedItem();
-            if (selected != null && selected.cargo.getSalarioBase() != null) {
-              txtSueldoBase.setText(String.format("$%.2f", selected.cargo.getSalarioBase()));
-            } else {
-              txtSueldoBase.setText("");
-            }
-          });
     } catch (Exception e) {
       LOGGER.log(Level.SEVERE, "Error al cargar cargos", e);
       showErrorMessage("Error al cargar los cargos disponibles");
@@ -317,44 +316,49 @@ public class UpdatePersonal extends JPanel {
   }
 
   private void loadEmpleadoData() {
-    if (empleado == null) {
+    if (empleadoDetalle == null) {
       return;
     }
 
     // Cargar información personal
-    txtNombres.setText(empleado.getNombres());
-    txtApellidos.setText(empleado.getApellidos());
-    txtCedula.setText(empleado.getCedula());
-    if (empleado.getGenero() != null) {
-      cmbGenero.setSelectedItem(empleado.getGenero());
+    txtNombres.setText(empleadoDetalle.nombres());
+    txtApellidos.setText(empleadoDetalle.apellidos());
+    txtCedula.setText(empleadoDetalle.cedula());
+    if (empleadoDetalle.genero() != null) {
+      cmbGenero.setSelectedItem(empleadoDetalle.genero());
     }
 
     // Cargar información de contacto
-    txtTelefono.setText(empleado.getTelefono());
-    if (empleado.getEmail() != null) {
-      txtEmail.setText(empleado.getEmail());
+    txtTelefono.setText(empleadoDetalle.telefono());
+    if (empleadoDetalle.email() != null) {
+      txtEmail.setText(empleadoDetalle.email());
     }
-    if (empleado.getDireccion() != null) {
-      txtDireccion.setText(empleado.getDireccion());
+    if (empleadoDetalle.direccion() != null) {
+      txtDireccion.setText(empleadoDetalle.direccion());
     }
 
     // Cargar información laboral
-    if (empleado.getCargo() != null) {
+    if (empleadoDetalle.cargo() != null) {
       for (int i = 0; i < cmbCargo.getItemCount(); i++) {
         CargoWrapper wrapper = cmbCargo.getItemAt(i);
-        if (wrapper.cargo.getId().equals(empleado.getCargo().getId())) {
+        if (wrapper.cargo.getId().equals(empleadoDetalle.cargo().id())) {
           cmbCargo.setSelectedIndex(i);
           break;
         }
       }
     }
 
-    if (empleado.getFechaIngreso() != null) {
-      dateFechaIngreso.setSelectedDate(empleado.getFechaIngreso());
+    if (empleadoDetalle.fechaIngreso() != null) {
+      dateFechaIngreso.setSelectedDate(empleadoDetalle.fechaIngreso());
     }
 
-    if (empleado.getTipoContrato() != null) {
-      cmbTipoContrato.setSelectedItem(empleado.getTipoContrato());
+    if (empleadoDetalle.tipoContrato() != null) {
+      cmbTipoContrato.setSelectedItem(empleadoDetalle.tipoContrato());
+    }
+
+    // Cargar estado y fecha de salida
+    if (empleadoDetalle.estado() != null) {
+      cmbEstado.setSelectedItem(empleadoDetalle.estado());
     }
   }
 
@@ -407,51 +411,43 @@ public class UpdatePersonal extends JPanel {
     }
 
     try {
-      // Actualizar datos del empleado
-      empleado.setNombres(txtNombres.getText().trim());
-      empleado.setApellidos(txtApellidos.getText().trim());
-      empleado.setCedula(txtCedula.getText().trim());
-      empleado.setGenero((Genero) cmbGenero.getSelectedItem());
-      empleado.setTelefono(txtTelefono.getText().trim());
+      // Construir DTO de actualización
+      CargoWrapper cargoWrapper = (CargoWrapper) cmbCargo.getSelectedItem();
+      Integer cargoId = (cargoWrapper != null) ? cargoWrapper.cargo.getId() : null;
 
       String email = txtEmail.getText().trim();
-      empleado.setEmail(email.isEmpty() ? null : email);
-
       String direccion = txtDireccion.getText().trim();
-      empleado.setDireccion(direccion.isEmpty() ? null : direccion);
 
-      CargoWrapper cargoWrapper = (CargoWrapper) cmbCargo.getSelectedItem();
-      if (cargoWrapper != null) {
-        empleado.setCargo(cargoWrapper.cargo);
-      }
-
-      LocalDate fechaIngreso = dateFechaIngreso.getSelectedDate();
-      if (fechaIngreso != null) {
-        empleado.setFechaIngreso(fechaIngreso);
-      }
-
-      empleado.setTipoContrato((TipoContrato) cmbTipoContrato.getSelectedItem());
+      EmpleadoUpdateDTO updateDTO =
+          new EmpleadoUpdateDTO(
+              txtNombres.getText().trim(),
+              txtApellidos.getText().trim(),
+              txtCedula.getText().trim(),
+              (Genero) cmbGenero.getSelectedItem(),
+              txtTelefono.getText().trim(),
+              direccion.isEmpty() ? null : direccion,
+              email.isEmpty() ? null : email,
+              cargoId,
+              (TipoContrato) cmbTipoContrato.getSelectedItem(),
+              dateFechaIngreso.getSelectedDate(),
+              empleadoDetalle.fechaSalida(), // Mantener fecha de salida existente
+              cmbEstado != null
+                  ? (EstadoEmpleado) cmbEstado.getSelectedItem()
+                  : EstadoEmpleado.ACTIVO);
 
       LOGGER.info(
-          "Intentando actualizar empleado: "
-              + empleado.getNombres()
-              + " "
-              + empleado.getApellidos());
+          "Intentando actualizar empleado: " + updateDTO.nombres() + " " + updateDTO.apellidos());
 
-      boolean success = controller.updateEmpleado(empleado);
+      var empleadoActualizado = controller.updateEmpleado(empleadoDetalle.id(), updateDTO);
 
-      if (success) {
-        LOGGER.info("Empleado actualizado exitosamente con ID: " + empleado.getId());
-        JOptionPane.showMessageDialog(
-            this,
-            "Los datos han sido guardados correctamente",
-            "Éxito",
-            JOptionPane.INFORMATION_MESSAGE);
-        return true;
-      } else {
-        showErrorMessage("Error al actualizar el empleado");
-        return false;
-      }
+      LOGGER.info("Empleado actualizado exitosamente con ID: " + empleadoActualizado.id());
+      JOptionPane.showMessageDialog(
+          this,
+          "Los datos han sido guardados correctamente",
+          "Éxito",
+          JOptionPane.INFORMATION_MESSAGE);
+      return true;
+
     } catch (IllegalArgumentException e) {
       String message = "Error de validación: " + e.getMessage();
       LOGGER.log(Level.WARNING, message, e);

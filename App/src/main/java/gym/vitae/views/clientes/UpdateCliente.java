@@ -2,7 +2,8 @@ package gym.vitae.views.clientes;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import gym.vitae.controller.ClienteController;
-import gym.vitae.model.Cliente;
+import gym.vitae.model.dtos.cliente.ClienteDetalleDTO;
+import gym.vitae.model.dtos.cliente.ClienteUpdateDTO;
 import gym.vitae.model.enums.EstadoCliente;
 import gym.vitae.model.enums.Genero;
 import gym.vitae.views.components.primitives.ButtonOutline;
@@ -20,8 +21,8 @@ public class UpdateCliente extends JPanel {
   private static final int MAX_TEXT_LENGTH = 100;
   private static final int MAX_NUMERIC_LENGTH = 10;
 
-  private final ClienteController controller;
-  private final Cliente clienteActual;
+  private final transient ClienteController controller;
+  private final transient ClienteDetalleDTO clienteDetalle;
 
   // Panel de contenido scrollable
   private JPanel contentPanel;
@@ -51,37 +52,61 @@ public class UpdateCliente extends JPanel {
   private ButtonOutline btnGuardar;
   private ButtonOutline btnCancelar;
 
-  public UpdateCliente(ClienteController controller, Cliente cliente) {
+  public UpdateCliente(ClienteController controller, ClienteDetalleDTO clienteDetalle) {
     this.controller = controller;
-    this.clienteActual = cliente;
+    this.clienteDetalle = clienteDetalle;
     init();
   }
 
   private void init() {
     setLayout(new BorderLayout());
-    setOpaque(false);
 
-    // Panel principal con scroll
-    contentPanel = new JPanel(new MigLayout("fillx,wrap,insets 20", "[fill]", "[]10[]"));
-    contentPanel.setOpaque(false);
-
-    // Label para errores
+    // Panel superior con mensaje de error
     lblError = new JLabel();
-    lblError.setForeground(new Color(220, 53, 69));
     lblError.setVisible(false);
-    contentPanel.add(lblError, "growx");
+    lblError.putClientProperty(
+        FlatClientProperties.STYLE, "foreground:#F44336;font:bold;border:0,0,10,0");
+
+    // Panel de contenido con scroll
+    contentPanel = new JPanel(new MigLayout("fillx,wrap,insets 0", "[fill]", ""));
+    JScrollPane scrollPane = new JScrollPane(contentPanel);
+    scrollPane.setBorder(null);
+    scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
+    // Panel de botones fijo en la parte inferior
+    JPanel buttonPanel = createButtonPanel();
+
+    // Ensamblar layout
+    JPanel topPanel = new JPanel(new MigLayout("fillx,wrap,insets 10 20 0 20", "[fill]"));
+    topPanel.add(lblError);
+
+    add(topPanel, BorderLayout.NORTH);
+    add(scrollPane, BorderLayout.CENTER);
+    add(buttonPanel, BorderLayout.SOUTH);
 
     initializeComponents();
     applyStyles();
     buildForm();
     loadClienteData();
+  }
 
-    JScrollPane scrollPane = new JScrollPane(contentPanel);
-    scrollPane.setBorder(BorderFactory.createEmptyBorder());
-    scrollPane.setOpaque(false);
-    scrollPane.getViewport().setOpaque(false);
+  private JPanel createButtonPanel() {
+    JPanel panel = new JPanel(new MigLayout("insets 15 20 20 20", "[grow][120][120]"));
+    panel.putClientProperty(
+        FlatClientProperties.STYLE,
+        "background:$Panel.background;border:1,0,0,0,$Component.borderColor");
 
-    add(scrollPane, BorderLayout.CENTER);
+    btnCancelar = new ButtonOutline("Cancelar");
+    btnCancelar.putClientProperty(FlatClientProperties.STYLE, "font:bold +1");
+
+    btnGuardar = new ButtonOutline("Guardar");
+    btnGuardar.putClientProperty(FlatClientProperties.STYLE, "foreground:#4CAF50;font:bold +1");
+
+    panel.add(new JLabel(), "grow");
+    panel.add(btnCancelar, "center");
+    panel.add(btnGuardar, "center");
+
+    return panel;
   }
 
   private void initializeComponents() {
@@ -103,10 +128,17 @@ public class UpdateCliente extends JPanel {
 
     cmbEstado = new JComboBox<>(EstadoCliente.values());
 
-    btnGuardar = new ButtonOutline();
-    btnCancelar = new ButtonOutline();
+    // Configurar DatePicker
+    dateFechaNacimiento.setEditor(new JFormattedTextField());
 
-    // Aplicar filtros
+    // El código no es editable
+    txtCodigoCliente.setEditable(false);
+
+    // NO aplicar filtros aquí - se aplicarán después de cargar datos
+  }
+
+  /** Aplica los filtros de entrada después de cargar los datos iniciales. */
+  private void applyInputFilters() {
     applyMaxLengthFilter(txtCodigoCliente, 20);
     applyLettersAndSpacesFilter(txtNombres, MAX_TEXT_LENGTH);
     applyLettersAndSpacesFilter(txtApellidos, MAX_TEXT_LENGTH);
@@ -116,12 +148,6 @@ public class UpdateCliente extends JPanel {
     applyMaxLengthFilter(txtDireccion, MAX_TEXT_LENGTH);
     applyLettersAndSpacesFilter(txtContactoEmergencia, MAX_TEXT_LENGTH);
     applyNumericFilter(txtTelefonoEmergencia, MAX_NUMERIC_LENGTH);
-
-    // Configurar DatePicker
-    dateFechaNacimiento.setEditor(new JFormattedTextField());
-
-    // El código no es editable
-    txtCodigoCliente.setEditable(false);
   }
 
   private void applyStyles() {
@@ -134,14 +160,6 @@ public class UpdateCliente extends JPanel {
         FlatClientProperties.PLACEHOLDER_TEXT, "correo@ejemplo.com (opcional)");
     txtDireccion.putClientProperty(
         FlatClientProperties.PLACEHOLDER_TEXT, "Dirección completa (opcional)");
-
-    txtCodigoCliente.putClientProperty(FlatClientProperties.STYLE, "arc:8");
-    txtNombres.putClientProperty(FlatClientProperties.STYLE, "arc:8");
-    txtApellidos.putClientProperty(FlatClientProperties.STYLE, "arc:8");
-    txtCedula.putClientProperty(FlatClientProperties.STYLE, "arc:8");
-    txtTelefono.putClientProperty(FlatClientProperties.STYLE, "arc:8");
-    txtEmail.putClientProperty(FlatClientProperties.STYLE, "arc:8");
-    txtDireccion.putClientProperty(FlatClientProperties.STYLE, "arc:8");
   }
 
   /** Aplica filtro para permitir solo letras y espacios. */
@@ -150,7 +168,8 @@ public class UpdateCliente extends JPanel {
         .setDocumentFilter(
             new DocumentFilter() {
               @Override
-              public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
+              public void insertString(
+                  FilterBypass fb, int offset, String string, AttributeSet attr)
                   throws BadLocationException {
                 if (string == null) return;
                 if (isValidLettersAndSpaces(string)
@@ -182,7 +201,8 @@ public class UpdateCliente extends JPanel {
         .setDocumentFilter(
             new DocumentFilter() {
               @Override
-              public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
+              public void insertString(
+                  FilterBypass fb, int offset, String string, AttributeSet attr)
                   throws BadLocationException {
                 if (string == null) return;
                 if (string.matches("\\d*")
@@ -210,7 +230,8 @@ public class UpdateCliente extends JPanel {
         .setDocumentFilter(
             new DocumentFilter() {
               @Override
-              public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
+              public void insertString(
+                  FilterBypass fb, int offset, String string, AttributeSet attr)
                   throws BadLocationException {
                 if (string == null) return;
                 if (fb.getDocument().getLength() + string.length() <= maxLength) {
@@ -288,32 +309,35 @@ public class UpdateCliente extends JPanel {
   }
 
   public void loadClienteData() {
-    if (clienteActual == null) {
+    if (clienteDetalle == null) {
       throw new IllegalArgumentException("El cliente no puede ser nulo");
     }
 
-    txtCodigoCliente.setText(clienteActual.getCodigoCliente());
-    txtNombres.setText(clienteActual.getNombres());
-    txtApellidos.setText(clienteActual.getApellidos());
-    txtCedula.setText(clienteActual.getCedula());
-    cmbGenero.setSelectedItem(clienteActual.getGenero());
+    txtCodigoCliente.setText(clienteDetalle.codigoCliente());
+    txtNombres.setText(clienteDetalle.nombres());
+    txtApellidos.setText(clienteDetalle.apellidos());
+    txtCedula.setText(clienteDetalle.cedula());
+    cmbGenero.setSelectedItem(clienteDetalle.genero());
 
-    if (clienteActual.getFechaNacimiento() != null) {
-      dateFechaNacimiento.setSelectedDate(clienteActual.getFechaNacimiento());
+    if (clienteDetalle.fechaNacimiento() != null) {
+      dateFechaNacimiento.setSelectedDate(clienteDetalle.fechaNacimiento());
     }
 
-    txtTelefono.setText(clienteActual.getTelefono());
-    txtEmail.setText(clienteActual.getEmail() != null ? clienteActual.getEmail() : "");
-    txtDireccion.setText(clienteActual.getDireccion() != null ? clienteActual.getDireccion() : "");
+    txtTelefono.setText(clienteDetalle.telefono());
+    txtEmail.setText(clienteDetalle.email() != null ? clienteDetalle.email() : "");
+    txtDireccion.setText(clienteDetalle.direccion() != null ? clienteDetalle.direccion() : "");
 
     txtContactoEmergencia.setText(
-        clienteActual.getContactoEmergencia() != null ? clienteActual.getContactoEmergencia() : "");
+        clienteDetalle.contactoEmergencia() != null ? clienteDetalle.contactoEmergencia() : "");
     txtTelefonoEmergencia.setText(
-        clienteActual.getTelefonoEmergencia() != null ? clienteActual.getTelefonoEmergencia() : "");
+        clienteDetalle.telefonoEmergencia() != null ? clienteDetalle.telefonoEmergencia() : "");
 
-    cmbEstado.setSelectedItem(clienteActual.getEstado());
+    cmbEstado.setSelectedItem(clienteDetalle.estado());
 
     hideError();
+
+    // Aplicar filtros DESPUÉS de cargar los datos
+    applyInputFilters();
   }
 
   public boolean validateForm() {
@@ -373,46 +397,31 @@ public class UpdateCliente extends JPanel {
   }
 
   public boolean updateCliente() {
-    if (clienteActual == null) {
+    if (clienteDetalle == null) {
       showErrorMessage("No hay cliente cargado para actualizar");
       return false;
     }
 
     try {
-      // Actualizar datos del cliente
-      clienteActual.setNombres(txtNombres.getText().trim());
-      clienteActual.setApellidos(txtApellidos.getText().trim());
-      clienteActual.setCedula(txtCedula.getText().trim());
-      clienteActual.setGenero((Genero) cmbGenero.getSelectedItem());
+      ClienteUpdateDTO updateDTO =
+          new ClienteUpdateDTO(
+              txtNombres.getText().trim(),
+              txtApellidos.getText().trim(),
+              txtCedula.getText().trim(),
+              (Genero) cmbGenero.getSelectedItem(),
+              txtTelefono.getText().trim(),
+              txtDireccion.getText().trim().isEmpty() ? null : txtDireccion.getText().trim(),
+              txtEmail.getText().trim().isEmpty() ? null : txtEmail.getText().trim(),
+              dateFechaNacimiento.getSelectedDate(),
+              txtContactoEmergencia.getText().trim().isEmpty()
+                  ? null
+                  : txtContactoEmergencia.getText().trim(),
+              txtTelefonoEmergencia.getText().trim().isEmpty()
+                  ? null
+                  : txtTelefonoEmergencia.getText().trim(),
+              (EstadoCliente) cmbEstado.getSelectedItem());
 
-      // Fecha de nacimiento
-      if (dateFechaNacimiento.getSelectedDate() != null) {
-        clienteActual.setFechaNacimiento(dateFechaNacimiento.getSelectedDate());
-      } else {
-        clienteActual.setFechaNacimiento(null);
-      }
-
-      // Contacto
-      clienteActual.setTelefono(txtTelefono.getText().trim());
-
-      String email = txtEmail.getText().trim();
-      clienteActual.setEmail(email.isEmpty() ? null : email);
-
-      String direccion = txtDireccion.getText().trim();
-      clienteActual.setDireccion(direccion.isEmpty() ? null : direccion);
-
-      // Emergencia
-      String contactoEmergencia = txtContactoEmergencia.getText().trim();
-      clienteActual.setContactoEmergencia(contactoEmergencia.isEmpty() ? null : contactoEmergencia);
-
-      String telefonoEmergencia = txtTelefonoEmergencia.getText().trim();
-      clienteActual.setTelefonoEmergencia(
-          telefonoEmergencia.isEmpty() ? null : telefonoEmergencia);
-
-      // Estado
-      clienteActual.setEstado((EstadoCliente) cmbEstado.getSelectedItem());
-
-      controller.updateCliente(clienteActual);
+      controller.updateCliente(clienteDetalle.id(), updateDTO);
 
       JOptionPane.showMessageDialog(
           this, "Cliente actualizado exitosamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
@@ -444,9 +453,5 @@ public class UpdateCliente extends JPanel {
 
   public ButtonOutline getBtnCancelar() {
     return btnCancelar;
-  }
-
-  public Cliente getClienteActual() {
-    return clienteActual;
   }
 }

@@ -2,7 +2,7 @@ package gym.vitae.views.personal;
 
 import gym.vitae.controller.PersonalController;
 import gym.vitae.model.Cargo;
-import gym.vitae.model.Empleado;
+import gym.vitae.model.dtos.empleado.EmpleadoListadoDTO;
 import gym.vitae.views.components.tables.BaseTablePanel;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -17,14 +17,14 @@ import raven.modal.option.Option;
 
 /**
  * Panel de tabla específico para gestión de empleados. Extiende BaseTablePanel con lógica
- * personalizada para Empleado.
+ * personalizada para EmpleadoListadoDTO.
  */
-public class EmpleadoTablePanel extends BaseTablePanel<Empleado> {
+public class EmpleadoTablePanel extends BaseTablePanel<EmpleadoListadoDTO> {
 
   private static final Logger LOGGER = Logger.getLogger(EmpleadoTablePanel.class.getName());
   private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-  private transient PersonalController controller;
+  private final transient PersonalController controller;
   private JComboBox<String> cmbCargo;
   private JComboBox<String> cmbGenero;
 
@@ -52,34 +52,35 @@ public class EmpleadoTablePanel extends BaseTablePanel<Empleado> {
   }
 
   @Override
-  protected Object[] entityToRow(Empleado emp, int rowNumber) {
+  protected Object[] entityToRow(EmpleadoListadoDTO emp, int rowNumber) {
     return new Object[] {
       false,
       rowNumber,
-      emp.getCodigoEmpleado(),
-      emp.getNombres(),
-      emp.getApellidos(),
-      emp.getCedula(),
-      emp.getTelefono(),
-      emp.getGenero() != null ? emp.getGenero().name() : "",
-      emp.getEmail() != null ? emp.getEmail() : "",
-      emp.getFechaIngreso() != null ? emp.getFechaIngreso().format(DATE_FORMATTER) : "",
-      emp.getTipoContrato() != null ? emp.getTipoContrato().name().replace("_", " ") : ""
+      emp.codigoEmpleado(),
+      emp.nombres(),
+      emp.apellidos(),
+      emp.cedula(),
+      emp.telefono(),
+      emp.genero() != null ? emp.genero().name() : "",
+      emp.email() != null ? emp.email() : "",
+      emp.fechaIngreso() != null ? emp.fechaIngreso().format(DATE_FORMATTER) : "",
+      emp.tipoContrato() != null ? emp.tipoContrato().name().replace("_", " ") : ""
     };
   }
 
   @Override
   protected boolean usesServerPagination() {
-    return true;
+    return true; // Usar filtrado desde el servidor
   }
 
   @Override
-  protected List<Empleado> fetchPagedData(int offset, int limit) {
+  protected List<EmpleadoListadoDTO> fetchPagedData(int offset, int limit) {
     return controller.getEmpleados(offset, limit);
   }
 
   @Override
-  protected List<Empleado> fetchPagedDataWithFilters(String searchText, int offset, int limit) {
+  protected List<EmpleadoListadoDTO> fetchPagedDataWithFilters(
+      String searchText, int offset, int limit) {
     Integer cargoId = getSelectedCargoId();
     String genero = getSelectedGenero();
     return controller.getEmpleadosWithFilters(searchText, cargoId, genero, offset, limit);
@@ -98,7 +99,7 @@ public class EmpleadoTablePanel extends BaseTablePanel<Empleado> {
   }
 
   @Override
-  protected List<Empleado> fetchAllData() {
+  protected List<EmpleadoListadoDTO> fetchAllData() {
     return controller.getEmpleados();
   }
 
@@ -138,39 +139,39 @@ public class EmpleadoTablePanel extends BaseTablePanel<Empleado> {
   }
 
   @Override
-  protected boolean filterEntity(Empleado emp, String searchText) {
+  protected boolean filterEntity(EmpleadoListadoDTO emp, String searchText) {
     return matchesSearchText(emp, searchText) && matchesCargo(emp) && matchesGenero(emp);
   }
 
   /** Verifica si el empleado coincide con el texto de búsqueda. */
-  private boolean matchesSearchText(Empleado emp, String searchText) {
+  private boolean matchesSearchText(EmpleadoListadoDTO emp, String searchText) {
     if (searchText.isEmpty()) {
       return true;
     }
-    String fullName = (emp.getNombres() + " " + emp.getApellidos()).toLowerCase();
+    String fullName = (emp.nombres() + " " + emp.apellidos()).toLowerCase();
     return fullName.contains(searchText.toLowerCase());
   }
 
   /** Verifica si el empleado coincide con el filtro de cargo. */
-  private boolean matchesCargo(Empleado emp) {
+  private boolean matchesCargo(EmpleadoListadoDTO emp) {
     if (cmbCargo == null || cmbCargo.getSelectedIndex() <= 0) {
       return true;
     }
     String selectedCargo = (String) cmbCargo.getSelectedItem();
-    return emp.getCargo() != null && emp.getCargo().getNombre().equals(selectedCargo);
+    return emp.cargoNombre() != null && emp.cargoNombre().equals(selectedCargo);
   }
 
   /** Verifica si el empleado coincide con el filtro de género. */
-  private boolean matchesGenero(Empleado emp) {
+  private boolean matchesGenero(EmpleadoListadoDTO emp) {
     if (cmbGenero == null || cmbGenero.getSelectedIndex() <= 0) {
       return true;
     }
-    if (emp.getGenero() == null) {
+    if (emp.genero() == null) {
       return false;
     }
 
     String selectedGenero = (String) cmbGenero.getSelectedItem();
-    String empGenero = emp.getGenero().name();
+    String empGenero = emp.genero().name();
 
     assert selectedGenero != null;
     if (selectedGenero.equalsIgnoreCase("Masculino")) {
@@ -218,17 +219,14 @@ public class EmpleadoTablePanel extends BaseTablePanel<Empleado> {
               }
             });
 
-    registerForm
-        .getBtnCancelar()
-        .addOnClick(
-            e ->
-              ModalDialog.closeAllModal()
-            );
+    registerForm.getBtnCancelar().addOnClick(e -> ModalDialog.closeAllModal());
   }
 
   @Override
-  protected void onUpdateEntity(Empleado empleado) {
-    UpdatePersonal updateForm = new UpdatePersonal(controller, empleado);
+  protected void onUpdateEntity(EmpleadoListadoDTO empleadoDTO) {
+    // Cargar el empleado completo para edición
+    var empleadoDetalle = controller.getEmpleadoById(empleadoDTO.id());
+    UpdatePersonal updateForm = new UpdatePersonal(controller, empleadoDetalle);
 
     Option option = ModalDialog.createOption();
     option
@@ -259,16 +257,11 @@ public class EmpleadoTablePanel extends BaseTablePanel<Empleado> {
               }
             });
 
-    updateForm
-        .getBtnCancelar()
-        .addOnClick(
-            e ->
-              ModalDialog.closeAllModal()
-            );
+    updateForm.getBtnCancelar().addOnClick(e -> ModalDialog.closeAllModal());
   }
 
   @Override
-  protected void onDeleteEntities(List<Empleado> empleados) {
+  protected void onDeleteEntities(List<EmpleadoListadoDTO> empleados) {
     showInfoMessage("Eliminación de " + empleados.size() + " empleado(s) en desarrollo");
   }
 

@@ -3,8 +3,7 @@ package gym.vitae.views.personal;
 import com.formdev.flatlaf.FlatClientProperties;
 import gym.vitae.controller.PersonalController;
 import gym.vitae.model.Cargo;
-import gym.vitae.model.Empleado;
-import gym.vitae.model.enums.EstadoEmpleado;
+import gym.vitae.model.dtos.empleado.EmpleadoCreateDTO;
 import gym.vitae.model.enums.Genero;
 import gym.vitae.model.enums.TipoContrato;
 import gym.vitae.views.components.primitives.ButtonOutline;
@@ -18,7 +17,7 @@ import javax.swing.text.*;
 import net.miginfocom.swing.MigLayout;
 import raven.datetime.DatePicker;
 
-/** Formulario para registrar un nuevo empleado. */
+/** Modal para registrar un nuevo empleado del gimnasio. */
 public class RegisterPersonal extends JPanel {
 
   private static final Logger LOGGER = Logger.getLogger(RegisterPersonal.class.getName());
@@ -46,7 +45,6 @@ public class RegisterPersonal extends JPanel {
   private JComboBox<CargoWrapper> cmbCargo;
   private DatePicker dateFechaIngreso;
   private JComboBox<TipoContrato> cmbTipoContrato;
-  private JComboBox<EstadoEmpleado> cmbEstado;
 
   // Botones
   private ButtonOutline btnGuardar;
@@ -136,21 +134,14 @@ public class RegisterPersonal extends JPanel {
     dateFechaIngreso = new DatePicker();
     dateFechaIngreso.setSelectedDate(LocalDate.now());
     cmbTipoContrato = new JComboBox<>(TipoContrato.values());
-    cmbEstado = new JComboBox<>(EstadoEmpleado.values());
-    cmbEstado.setSelectedItem(EstadoEmpleado.ACTIVO);
-    cmbEstado.setEnabled(false); // Auto-generado
 
     applyStyles();
   }
 
   private void applyStyles() {
     // Placeholders
-    txtNombres.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Solo letras y espacios");
-    txtApellidos.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Solo letras y espacios");
-    txtCedula.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "10 dígitos");
-    txtTelefono.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "10 dígitos");
-    txtEmail.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "ejemplo@gymvitae.com");
-    txtDireccion.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Máximo 100 caracteres");
+    UpdatePersonal.componentStyles(
+        txtNombres, txtApellidos, txtCedula, txtTelefono, txtEmail, txtDireccion);
   }
 
   /** Aplica filtro para permitir solo letras y espacios. */
@@ -273,8 +264,6 @@ public class RegisterPersonal extends JPanel {
     contentPanel.add(dateFechaIngreso);
     contentPanel.add(new JLabel("Tipo de Contrato *"), "gapy 5 0");
     contentPanel.add(cmbTipoContrato);
-    contentPanel.add(new JLabel("Estado"), "gapy 5 0");
-    contentPanel.add(cmbEstado);
 
     // Espacio adicional al final para scroll
     contentPanel.add(new JLabel(), "height 20");
@@ -358,17 +347,12 @@ public class RegisterPersonal extends JPanel {
     }
 
     try {
-      Empleado empleado = buildEmpleadoFromForm();
-      LOGGER.info(
-          "Intentando guardar empleado: " + empleado.getNombres() + " " + empleado.getApellidos());
+      EmpleadoCreateDTO dto = buildEmpleadoDTOFromForm();
+      LOGGER.info("Intentando guardar empleado: " + dto.nombres() + " " + dto.apellidos());
 
-      Empleado saved = controller.createEmpleado(empleado);
+      var saved = controller.createEmpleado(dto);
 
-      LOGGER.info(
-          "Empleado guardado exitosamente con ID: "
-              + saved.getId()
-              + " y código: "
-              + saved.getCodigoEmpleado());
+      LOGGER.info("Empleado guardado exitosamente con ID: " + saved.id());
 
       // Mostrar mensaje de éxito
       JOptionPane.showMessageDialog(
@@ -391,40 +375,25 @@ public class RegisterPersonal extends JPanel {
     }
   }
 
-  private Empleado buildEmpleadoFromForm() {
-    Empleado empleado = new Empleado();
-
-    // El código de empleado será auto-generado por la base de datos
-    empleado.setNombres(txtNombres.getText().trim());
-    empleado.setApellidos(txtApellidos.getText().trim());
-    empleado.setCedula(txtCedula.getText().trim());
-    empleado.setGenero((Genero) cmbGenero.getSelectedItem());
-    empleado.setTelefono(txtTelefono.getText().trim());
-
+  private EmpleadoCreateDTO buildEmpleadoDTOFromForm() {
     String email = txtEmail.getText().trim();
-    if (!email.isEmpty()) {
-      empleado.setEmail(email);
-    }
-
     String direccion = txtDireccion.getText().trim();
-    if (!direccion.isEmpty()) {
-      empleado.setDireccion(direccion);
-    }
 
     CargoWrapper cargoWrapper = (CargoWrapper) cmbCargo.getSelectedItem();
-    if (cargoWrapper != null) {
-      empleado.setCargo(cargoWrapper.cargo());
-    }
+    Integer cargoId = cargoWrapper != null ? cargoWrapper.cargo().getId() : null;
 
-    LocalDate fechaIngreso = dateFechaIngreso.getSelectedDate();
-    if (fechaIngreso != null) {
-      empleado.setFechaIngreso(fechaIngreso);
-    }
-
-    empleado.setTipoContrato((TipoContrato) cmbTipoContrato.getSelectedItem());
-    empleado.setEstado((EstadoEmpleado) cmbEstado.getSelectedItem());
-
-    return empleado;
+    return new EmpleadoCreateDTO(
+        txtNombres.getText().trim(),
+        txtApellidos.getText().trim(),
+        txtCedula.getText().trim(),
+        (Genero) cmbGenero.getSelectedItem(),
+        txtTelefono.getText().trim(),
+        direccion.isEmpty() ? null : direccion,
+        email.isEmpty() ? null : email,
+        cargoId,
+        (TipoContrato) cmbTipoContrato.getSelectedItem(),
+        dateFechaIngreso.getSelectedDate(),
+        gym.vitae.model.enums.EstadoEmpleado.ACTIVO);
   }
 
   private void clearForm() {
@@ -438,7 +407,6 @@ public class RegisterPersonal extends JPanel {
     txtDireccion.setText("");
     dateFechaIngreso.setSelectedDate(LocalDate.now());
     cmbTipoContrato.setSelectedIndex(0);
-    cmbEstado.setSelectedItem(EstadoEmpleado.ACTIVO);
 
     if (cmbCargo.getItemCount() > 0) {
       cmbCargo.setSelectedIndex(0);
