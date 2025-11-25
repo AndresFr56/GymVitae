@@ -1,6 +1,11 @@
 package gym.vitae.controller;
 
+import gym.vitae.mapper.ClaseMapper;
 import gym.vitae.model.Clase;
+import gym.vitae.model.dtos.clase.ClaseCreateDTO;
+import gym.vitae.model.dtos.clase.ClaseDetalleDTO;
+import gym.vitae.model.dtos.clase.ClaseListadoDTO;
+import gym.vitae.model.dtos.clase.ClaseUpdateDTO;
 import gym.vitae.model.enums.NivelClase;
 import gym.vitae.repositories.ClaseRepository;
 import java.util.List;
@@ -26,12 +31,12 @@ public class ClasesController extends BaseController {
   }
 
   /**
-   * Obtiene todas las clases.
+   * Obtiene todas las clases como DTOs de listado.
    *
-   * @return Lista de clases.
+   * @return Lista de ClaseListadoDTO.
    */
-  public List<Clase> getClases() {
-    return repository.findAll();
+  public List<ClaseListadoDTO> getClases() {
+    return repository.findAllListado();
   }
 
   /**
@@ -41,14 +46,14 @@ public class ClasesController extends BaseController {
    * @param limit Cantidad de registros.
    * @return Lista de clases paginada.
    */
-  public List<Clase> getClases(int offset, int limit) {
+  public List<ClaseListadoDTO> getClases(int offset, int limit) {
     if (offset < 0) {
       throw new IllegalArgumentException("El offset no puede ser negativo");
     }
     if (limit <= 0) {
       throw new IllegalArgumentException("El limit debe ser mayor a 0");
     }
-    return repository.findAll(offset, limit);
+    return repository.findAllListado(offset, limit);
   }
 
   /**
@@ -56,66 +61,108 @@ public class ClasesController extends BaseController {
    *
    * @return Lista de clases activas.
    */
-  public List<Clase> getClasesActivas() {
-    return repository.findActive();
+  public List<ClaseListadoDTO> getClasesActivas() {
+    return repository.findActivosListado();
   }
 
   /**
    * Obtiene una clase por ID.
    *
    * @param id ID de la clase.
-   * @return Clase encontrada.
+   * @return ClaseDetalleDTO encontrada.
    * @throws IllegalArgumentException si no se encuentra la clase.
    */
-  public Clase getClaseById(int id) {
+  public ClaseDetalleDTO getClaseById(int id) {
     if (id <= 0) {
       throw new IllegalArgumentException("El ID debe ser mayor a 0");
     }
     return repository
-        .findById(id)
+        .findByIdDetalle(id)
         .orElseThrow(() -> new IllegalArgumentException("Clase no encontrada con ID: " + id));
+  }
+
+  /**
+   * Obtiene clases con filtros y paginación.
+   *
+   * @param searchText Texto de búsqueda en nombre (puede ser null).
+   * @param nivel Nivel para filtrar (puede ser null).
+   * @param conCupos Filtrar solo clases con cupos disponibles (puede ser null).
+   * @param offset Posición inicial.
+   * @param limit Cantidad de registros.
+   * @return Lista de clases que coinciden con los filtros.
+   */
+  public List<ClaseListadoDTO> getClasesWithFilters(
+      String searchText, String nivel, Boolean conCupos, int offset, int limit) {
+    return repository.findAllListadoWithFilters(searchText, nivel, conCupos, offset, limit);
+  }
+
+  /**
+   * Cuenta clases con filtros.
+   *
+   * @param searchText Texto de búsqueda en nombre (puede ser null).
+   * @param nivel Nivel para filtrar (puede ser null).
+   * @param conCupos Filtrar solo clases con cupos disponibles (puede ser null).
+   * @return Cantidad de clases que coinciden con los filtros.
+   */
+  public long countClasesWithFilters(String searchText, String nivel, Boolean conCupos) {
+    return repository.countWithFilters(searchText, nivel, conCupos);
+  }
+
+  /**
+   * Obtiene el total de clases.
+   *
+   * @return Cantidad total de clases.
+   */
+  public long countClases() {
+    return repository.count();
   }
 
   /**
    * Crea una nueva clase.
    *
-   * @param clase Clase a crear.
-   * @return Clase creada.
+   * @param dto DTO con datos de la clase a crear.
+   * @return ClaseDetalleDTO creada.
    * @throws IllegalArgumentException si las validaciones fallan.
    */
-  public Clase createClase(Clase clase) {
-    validateClase(clase);
+  public ClaseDetalleDTO createClase(ClaseCreateDTO dto) {
+    validateClaseCreate(dto);
+    validateNombreNoDuplicado(dto.nombre(), null);
 
-    // Establecer valores por defecto
-    if (clase.getNivel() == null) {
-      clase.setNivel(NivelClase.TODOS);
-    }
-    if (clase.getActiva() == null) {
-      clase.setActiva(true);
-    }
+    Clase clase = ClaseMapper.toEntity(dto);
+    Clase saved = repository.save(clase);
 
-    return repository.save(clase);
+    return repository
+        .findByIdDetalle(saved.getId())
+        .orElseThrow(() -> new IllegalStateException("Error al recuperar clase creada"));
   }
 
   /**
    * Actualiza una clase existente.
    *
-   * @param clase Clase con datos actualizados.
-   * @return true si se actualizó correctamente.
+   * @param id ID de la clase a actualizar.
+   * @param dto DTO con datos actualizados.
+   * @return ClaseDetalleDTO actualizada.
    * @throws IllegalArgumentException si las validaciones fallan.
    */
-  public boolean updateClase(Clase clase) {
-    if (clase.getId() == null || clase.getId() <= 0) {
+  public ClaseDetalleDTO updateClase(int id, ClaseUpdateDTO dto) {
+    if (id <= 0) {
       throw new IllegalArgumentException("ID de clase inválido");
     }
 
-    // Verificar que existe
-    if (!repository.existsById(clase.getId())) {
-      throw new IllegalArgumentException("Clase no encontrada con ID: " + clase.getId());
-    }
+    Clase clase =
+        repository
+            .findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Clase no encontrada con ID: " + id));
 
-    validateClase(clase);
-    return repository.update(clase);
+    validateClaseUpdate(dto);
+    validateNombreNoDuplicado(dto.nombre(), id);
+
+    ClaseMapper.updateEntity(clase, dto);
+    repository.update(clase);
+
+    return repository
+        .findByIdDetalle(id)
+        .orElseThrow(() -> new IllegalStateException("Error al recuperar clase actualizada"));
   }
 
   /**
@@ -135,47 +182,55 @@ public class ClasesController extends BaseController {
   }
 
   /**
-   * Obtiene el total de clases.
-   *
-   * @return Cantidad total de clases.
-   */
-  public long countClases() {
-    return repository.count();
-  }
-
-  /**
    * Activa o desactiva una clase.
    *
    * @param id ID de la clase.
    * @param activa Estado activo/inactivo.
-   * @return true si se actualizó correctamente.
+   * @return ClaseDetalleDTO actualizada.
    */
-  public boolean cambiarEstadoClase(int id, boolean activa) {
-    Clase clase = getClaseById(id);
+  public ClaseDetalleDTO cambiarEstadoClase(int id, boolean activa) {
+    Clase clase =
+        repository
+            .findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Clase no encontrada con ID: " + id));
+
     clase.setActiva(activa);
-    return repository.update(clase);
+    repository.update(clase);
+
+    return repository
+        .findByIdDetalle(id)
+        .orElseThrow(() -> new IllegalStateException("Error al recuperar clase actualizada"));
   }
 
-  /**
-   * Valida los datos de una clase.
-   *
-   * @param clase Clase a validar.
-   * @throws IllegalArgumentException si alguna validación falla.
-   */
-  private void validateClase(Clase clase) {
-    if (clase == null) {
-      throw new IllegalArgumentException("La clase no puede ser nula");
+  private void validateClaseCreate(ClaseCreateDTO dto) {
+    if (dto == null) {
+      throw new IllegalArgumentException("Los datos de la clase no pueden ser nulos");
     }
 
-    validateNombre(clase.getNombre(), clase.getId());
-    validateDuracion(clase.getDuracionMinutos());
-    validateCapacidad(clase.getCapacidadMaxima());
-    validateNivel(clase.getNivel());
-    validateDescripcion(clase.getDescripcion());
+    validateNombre(dto.nombre());
+    validateDuracion(dto.duracionMinutos());
+    validateCapacidad(dto.capacidadMaxima());
+    validateDescripcion(dto.descripcion());
+  }
+
+  private void validateClaseUpdate(ClaseUpdateDTO dto) {
+    if (dto == null) {
+      throw new IllegalArgumentException("Los datos de la clase no pueden ser nulos");
+    }
+
+    validateNombre(dto.nombre());
+    validateDuracion(dto.duracionMinutos());
+    validateCapacidad(dto.capacidadMaxima());
+    validateNivel(dto.nivel());
+    validateDescripcion(dto.descripcion());
+
+    if (dto.activa() == null) {
+      throw new IllegalArgumentException("El estado activo es obligatorio");
+    }
   }
 
   /** Valida el nombre de la clase. */
-  private void validateNombre(String nombre, Integer idActual) {
+  private void validateNombre(String nombre) {
     if (nombre == null || nombre.trim().isEmpty()) {
       throw new IllegalArgumentException("El nombre de la clase es obligatorio");
     }
@@ -187,20 +242,15 @@ public class ClasesController extends BaseController {
     if (!nombre.matches("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$")) {
       throw new IllegalArgumentException("El nombre solo puede contener letras y espacios");
     }
-
-    // Validar que no esté duplicado
-    validateNombreNoDuplicado(nombre.trim(), idActual);
   }
 
   /** Valida que el nombre no esté duplicado. */
   private void validateNombreNoDuplicado(String nombre, Integer idActual) {
-    List<Clase> clases = repository.findAll();
+    // Buscar por nombre existente excluyendo el ID actual
+    List<ClaseListadoDTO> clases = repository.findAllListado();
     boolean existe =
         clases.stream()
-            .anyMatch(
-                c ->
-                    c.getNombre().equalsIgnoreCase(nombre)
-                        && (!c.getId().equals(idActual)));
+            .anyMatch(c -> c.nombre().equalsIgnoreCase(nombre.trim()) && !c.id().equals(idActual));
 
     if (existe) {
       throw new IllegalArgumentException("Ya existe una clase con el nombre: " + nombre);

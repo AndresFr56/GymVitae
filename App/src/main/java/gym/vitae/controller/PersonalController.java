@@ -1,13 +1,20 @@
 package gym.vitae.controller;
 
+import static gym.vitae.controller.ValidationUtils.*;
+
+import gym.vitae.mapper.EmpleadoMapper;
 import gym.vitae.model.Cargo;
 import gym.vitae.model.Empleado;
+import gym.vitae.model.dtos.empleado.EmpleadoCreateDTO;
+import gym.vitae.model.dtos.empleado.EmpleadoDetalleDTO;
+import gym.vitae.model.dtos.empleado.EmpleadoListadoDTO;
+import gym.vitae.model.dtos.empleado.EmpleadoUpdateDTO;
 import gym.vitae.model.enums.EstadoEmpleado;
 import gym.vitae.repositories.CargoRepository;
 import gym.vitae.repositories.EmpleadoRepository;
-import java.time.LocalDate;
 import java.util.List;
 
+/** Controlador de Personal (Empleados). */
 public class PersonalController extends BaseController {
 
   private final EmpleadoRepository empleadoRepository;
@@ -25,390 +32,234 @@ public class PersonalController extends BaseController {
     this.cargoRepository = cargoRepository;
   }
 
-  /**
-   * Obtiene todos los empleados
-   *
-   * @return Lista de empleados
-   */
-  public List<Empleado> getEmpleados() {
-    return empleadoRepository.findAll();
+  // ==================== CONSULTAS ====================
+
+  public List<EmpleadoListadoDTO> getEmpleados() {
+    return empleadoRepository.findAllListado();
+  }
+
+  /** Obtiene empleados con paginación. */
+  public List<EmpleadoListadoDTO> getEmpleados(int offset, int limit) {
+    return empleadoRepository.findAllListado(offset, limit);
   }
 
   /**
-   * Obtiene todos los cargos
+   * Obtiene empleados con filtros y paginación.
    *
-   * @return Lista de cargos
+   * @param searchText texto de búsqueda (nombres/apellidos)
+   * @param cargoId id de cargo (nullable)
+   * @param genero género como string (nullable)
+   * @param offset inicio
+   * @param limit cantidad
    */
+  public List<EmpleadoListadoDTO> getEmpleadosWithFilters(
+      String searchText, Integer cargoId, String genero, int offset, int limit) {
+    return empleadoRepository.findAllListadoWithFilters(searchText, cargoId, genero, offset, limit);
+  }
+
+  /** Cuenta empleados totales. */
+  public long countEmpleados() {
+    return empleadoRepository.count();
+  }
+
+  /** Cuenta empleados con filtros. */
+  public long countEmpleadosWithFilters(String searchText, Integer cargoId, String genero) {
+    return empleadoRepository.countWithFilters(searchText, cargoId, genero);
+  }
+
+  public List<EmpleadoListadoDTO> getEmpleadosActivos() {
+    return empleadoRepository.findActivosListado();
+  }
+
+  public EmpleadoDetalleDTO getEmpleadoById(int id) {
+    validateId(id);
+    return empleadoRepository
+        .findByIdDetalle(id)
+        .orElseThrow(() -> new IllegalArgumentException("Empleado no encontrado con ID: " + id));
+  }
+
   public List<Cargo> getCargos() {
     return cargoRepository.findAll();
   }
 
-  /**
-   * Obtiene empleados con paginación
-   *
-   * @param offset Posición inicial
-   * @param limit Cantidad de registros
-   * @return Lista de empleados paginada
-   */
-  public List<Empleado> getEmpleados(int offset, int limit) {
-    if (offset < 0) {
-      throw new IllegalArgumentException("El offset no puede ser negativo");
-    }
-    if (limit <= 0) {
-      throw new IllegalArgumentException("El limit debe ser mayor a 0");
-    }
-    return empleadoRepository.findAll(offset, limit);
-  }
+  // ==================== OPERACIONES CRUD ====================
 
-  /**
-   * Obtiene un empleado por ID
-   *
-   * @param id ID del empleado
-   * @return Empleado encontrado
-   * @throws IllegalArgumentException si no se encuentra el empleado
-   */
-  public Empleado getEmpleadoById(int id) {
-    if (id <= 0) {
-      throw new IllegalArgumentException("El ID debe ser mayor a 0");
-    }
-    return empleadoRepository
-        .findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Empleado no encontrado con ID: " + id));
-  }
+  public EmpleadoDetalleDTO createEmpleado(EmpleadoCreateDTO dto) {
+    validateEmpleadoCreate(dto);
 
-  /**
-   * Crea un nuevo empleado
-   *
-   * @param empleado Empleado a crear
-   * @return Empleado creado
-   * @throws IllegalArgumentException si las validaciones fallan
-   */
-  public Empleado createEmpleado(Empleado empleado) {
-    validateEmpleado(empleado);
-
-    // Validar que el cargo exista y esté activo
-    if (empleado.getCargo() == null || empleado.getCargo().getId() == null) {
-      throw new IllegalArgumentException("El cargo es obligatorio");
-    }
     Cargo cargo =
         cargoRepository
-            .findById(empleado.getCargo().getId())
+            .findById(dto.cargoId())
             .orElseThrow(
-                () ->
-                    new IllegalArgumentException(
-                        "Cargo no encontrado con ID: " + empleado.getCargo().getId()));
+                () -> new IllegalArgumentException("Cargo no encontrado con ID: " + dto.cargoId()));
 
-    empleado.setCargo(cargo);
+    String codigoEmpleado = generateCodigoEmpleado();
+    Empleado empleado = EmpleadoMapper.toEntity(dto, cargo, codigoEmpleado);
+    Empleado saved = empleadoRepository.save(empleado);
 
-    // Generar código de empleado automáticamente si no existe
-    if (empleado.getCodigoEmpleado() == null || empleado.getCodigoEmpleado().trim().isEmpty()) {
-      empleado.setCodigoEmpleado(generateCodigoEmpleado());
-    }
-
-    // Establecer estado inicial si no se proporciona
-    if (empleado.getEstado() == null) {
-      empleado.setEstado(EstadoEmpleado.ACTIVO);
-    }
-
-    return empleadoRepository.save(empleado);
+    return empleadoRepository
+        .findByIdDetalle(saved.getId())
+        .orElseThrow(() -> new IllegalStateException("Error al recuperar empleado creado"));
   }
 
-  /**
-   * Genera un código único para el empleado basado en el año actual y el contador.
-   *
-   * @return Código generado en formato EMP-YYYYNNN
-   */
-  private String generateCodigoEmpleado() {
-    long count = empleadoRepository.count();
-    int year = java.time.Year.now().getValue();
-    return String.format("EMP-%d%03d", year, count + 1);
+  public EmpleadoDetalleDTO updateEmpleado(int id, EmpleadoUpdateDTO dto) {
+    validateId(id);
+    validateEmpleadoUpdate(dto);
+
+    Empleado empleado =
+        empleadoRepository
+            .findById(id)
+            .orElseThrow(
+                () -> new IllegalArgumentException("Empleado no encontrado con ID: " + id));
+
+    Cargo cargo =
+        cargoRepository
+            .findById(dto.cargoId())
+            .orElseThrow(
+                () -> new IllegalArgumentException("Cargo no encontrado con ID: " + dto.cargoId()));
+
+    EmpleadoMapper.updateEntity(empleado, dto, cargo);
+    empleadoRepository.update(empleado);
+
+    return empleadoRepository
+        .findByIdDetalle(id)
+        .orElseThrow(() -> new IllegalStateException("Error al recuperar empleado actualizado"));
   }
 
-  /**
-   * Actualiza un empleado existente
-   *
-   * @param empleado Empleado con datos actualizados
-   * @return true si se actualizó correctamente
-   * @throws IllegalArgumentException si las validaciones fallan
-   */
-  public boolean updateEmpleado(Empleado empleado) {
-    if (empleado.getId() == null || empleado.getId() <= 0) {
-      throw new IllegalArgumentException("ID de empleado inválido");
-    }
-
-    // Verificar que existe
-    if (!empleadoRepository.existsById(empleado.getId())) {
-      throw new IllegalArgumentException("Empleado no encontrado con ID: " + empleado.getId());
-    }
-
-    validateEmpleado(empleado);
-
-    // Validar que el cargo exista y esté activo
-    if (empleado.getCargo() != null && empleado.getCargo().getId() != null) {
-      Cargo cargo =
-          cargoRepository
-              .findById(empleado.getCargo().getId())
-              .orElseThrow(
-                  () ->
-                      new IllegalArgumentException(
-                          "Cargo no encontrado con ID: " + empleado.getCargo().getId()));
-
-      empleado.setCargo(cargo);
-    }
-
-    return empleadoRepository.update(empleado);
-  }
-
-  /**
-   * Elimina un empleado (soft delete - cambia estado a INACTIVO)
-   *
-   * @param id ID del empleado a eliminar
-   * @throws IllegalArgumentException si el empleado no existe
-   */
   public void deleteEmpleado(int id) {
-    if (id <= 0) {
-      throw new IllegalArgumentException("El ID debe ser mayor a 0");
-    }
+    validateId(id);
     if (!empleadoRepository.existsById(id)) {
       throw new IllegalArgumentException("Empleado no encontrado con ID: " + id);
     }
     empleadoRepository.delete(id);
   }
 
-  /**
-   * Obtiene el total de empleados
-   *
-   * @return Cantidad total de empleados
-   */
-  public long countEmpleados() {
-    return empleadoRepository.count();
-  }
-
-  /**
-   * Obtiene empleados con filtros y paginación.
-   *
-   * @param searchText Texto de búsqueda (puede ser null)
-   * @param cargoId ID del cargo (puede ser null)
-   * @param genero Género (puede ser null)
-   * @param offset Posición inicial
-   * @param limit Cantidad de registros
-   * @return Lista de empleados filtrada y paginada
-   */
-  public List<Empleado> getEmpleadosWithFilters(
-      String searchText, Integer cargoId, String genero, int offset, int limit) {
-    if (offset < 0) {
-      throw new IllegalArgumentException("El offset no puede ser negativo");
-    }
-    if (limit <= 0) {
-      throw new IllegalArgumentException("El limit debe ser mayor a 0");
-    }
-    return empleadoRepository.findAllWithFilters(searchText, cargoId, genero, offset, limit);
-  }
-
-  /**
-   * Cuenta empleados con filtros.
-   *
-   * @param searchText Texto de búsqueda (puede ser null)
-   * @param cargoId ID del cargo (puede ser null)
-   * @param genero Género (puede ser null)
-   * @return Cantidad de empleados que coinciden con los filtros
-   */
-  public long countEmpleadosWithFilters(String searchText, Integer cargoId, String genero) {
-    return empleadoRepository.countWithFilters(searchText, cargoId, genero);
-  }
-
-  /**
-   * Cambia el estado de un empleado
-   *
-   * @param id ID del empleado
-   * @param nuevoEstado Nuevo estado
-   * @return true si se actualizó correctamente
-   */
-  public boolean cambiarEstadoEmpleado(int id, EstadoEmpleado nuevoEstado) {
+  public EmpleadoDetalleDTO cambiarEstadoEmpleado(int id, EstadoEmpleado nuevoEstado) {
     if (nuevoEstado == null) {
       throw new IllegalArgumentException("El estado no puede ser nulo");
     }
-    Empleado empleado = getEmpleadoById(id);
+
+    Empleado empleado =
+        empleadoRepository
+            .findById(id)
+            .orElseThrow(
+                () -> new IllegalArgumentException("Empleado no encontrado con ID: " + id));
+
     empleado.setEstado(nuevoEstado);
-    return empleadoRepository.update(empleado);
+    empleadoRepository.update(empleado);
+
+    return empleadoRepository
+        .findByIdDetalle(id)
+        .orElseThrow(() -> new IllegalStateException("Error al recuperar empleado actualizado"));
   }
 
   /**
-   * Valida los datos de un empleado
+   * Da de baja a un empleado, cambiando su estado a INACTIVO y estableciendo la fecha de salida.
    *
-   * @param empleado Empleado a validar
-   * @throws IllegalArgumentException si alguna validación falla
+   * @param id ID del empleado
+   * @return EmpleadoDetalleDTO actualizado
    */
-  private void validateEmpleado(Empleado empleado) {
-    if (empleado == null) {
-      throw new IllegalArgumentException("El empleado no puede ser nulo");
+  public EmpleadoDetalleDTO darDeBajaEmpleado(int id) {
+    validateId(id);
+
+    Empleado empleado =
+        empleadoRepository
+            .findById(id)
+            .orElseThrow(
+                () -> new IllegalArgumentException("Empleado no encontrado con ID: " + id));
+
+    if (empleado.getEstado() == EstadoEmpleado.INACTIVO) {
+      throw new IllegalArgumentException("El empleado ya está inactivo");
     }
 
-    validateEmpleadoDatosBasicos(empleado);
-    validateEmpleadoDatosContacto(empleado);
-    validateEmpleadoFechas(empleado);
-    validateEmpleadoContrato(empleado);
+    empleado.setEstado(EstadoEmpleado.INACTIVO);
+    empleado.setFechaSalida(java.time.LocalDate.now());
+    empleadoRepository.update(empleado);
+
+    return empleadoRepository
+        .findByIdDetalle(id)
+        .orElseThrow(() -> new IllegalStateException("Error al recuperar empleado actualizado"));
   }
 
   /**
-   * Valida los datos básicos del empleado
+   * Reactiva un empleado, cambiando su estado a ACTIVO y limpiando la fecha de salida.
    *
-   * @param empleado Empleado a validar
-   * @throws IllegalArgumentException si alguna validación falla
+   * @param id ID del empleado
+   * @return EmpleadoDetalleDTO actualizado
    */
-  private void validateEmpleadoDatosBasicos(Empleado empleado) {
-    validateCodigoEmpleado(empleado.getCodigoEmpleado());
-    validateNombres(empleado.getNombres());
-    validateApellidos(empleado.getApellidos());
-    validateCedula(empleado.getCedula());
+  public EmpleadoDetalleDTO reactivarEmpleado(int id) {
+    validateId(id);
 
-    if (empleado.getGenero() == null) {
+    Empleado empleado =
+        empleadoRepository
+            .findById(id)
+            .orElseThrow(
+                () -> new IllegalArgumentException("Empleado no encontrado con ID: " + id));
+
+    if (empleado.getEstado() != EstadoEmpleado.INACTIVO) {
+      throw new IllegalArgumentException("Solo se pueden reactivar empleados inactivos");
+    }
+
+    empleado.setEstado(EstadoEmpleado.ACTIVO);
+    empleado.setFechaSalida(null);
+    empleadoRepository.update(empleado);
+
+    return empleadoRepository
+        .findByIdDetalle(id)
+        .orElseThrow(() -> new IllegalStateException("Error al recuperar empleado actualizado"));
+  }
+
+  private String generateCodigoEmpleado() {
+    long count = empleadoRepository.count();
+    int year = java.time.Year.now().getValue();
+    return String.format("EMP-%d%03d", year, count + 1);
+  }
+
+  private void validateEmpleadoCreate(EmpleadoCreateDTO dto) {
+    if (dto == null) {
+      throw new IllegalArgumentException("Los datos del empleado no pueden ser nulos");
+    }
+
+    validateNombres(dto.nombres());
+    validateApellidos(dto.apellidos());
+    validateCedula(dto.cedula());
+    validateTelefono(dto.telefono());
+    validateEmail(dto.email());
+    validateDireccion(dto.direccion());
+    validateFechaIngreso(dto.fechaIngreso());
+    validateCargoId(dto.cargoId());
+
+    if (dto.genero() == null) {
       throw new IllegalArgumentException("El género es obligatorio");
     }
-  }
-
-  /**
-   * Valida los datos de contacto del empleado
-   *
-   * @param empleado Empleado a validar
-   * @throws IllegalArgumentException si alguna validación falla
-   */
-  private void validateEmpleadoDatosContacto(Empleado empleado) {
-    validateTelefono(empleado.getTelefono());
-    validateEmail(empleado.getEmail());
-    validateDireccion(empleado.getDireccion());
-  }
-
-  /**
-   * Valida las fechas del empleado
-   *
-   * @param empleado Empleado a validar
-   * @throws IllegalArgumentException si alguna validación falla
-   */
-  private void validateEmpleadoFechas(Empleado empleado) {
-    if (empleado.getFechaIngreso() == null) {
-      throw new IllegalArgumentException("La fecha de ingreso es obligatoria");
-    }
-    if (empleado.getFechaIngreso().isAfter(LocalDate.now())) {
-      throw new IllegalArgumentException("La fecha de ingreso no puede ser futura");
-    }
-
-    if (empleado.getFechaSalida() != null
-        && empleado.getFechaSalida().isBefore(empleado.getFechaIngreso())) {
-      throw new IllegalArgumentException(
-          "La fecha de salida no puede ser anterior a la fecha de ingreso");
-    }
-  }
-
-  /**
-   * Valida los datos del contrato del empleado
-   *
-   * @param empleado Empleado a validar
-   * @throws IllegalArgumentException si alguna validación falla
-   */
-  private void validateEmpleadoContrato(Empleado empleado) {
-    if (empleado.getTipoContrato() == null) {
+    if (dto.tipoContrato() == null) {
       throw new IllegalArgumentException("El tipo de contrato es obligatorio");
     }
   }
 
-  /**
-   * Valida el código de empleado
-   *
-   * @param codigoEmpleado Código a validar
-   * @throws IllegalArgumentException si la validación falla
-   */
-  private void validateCodigoEmpleado(String codigoEmpleado) {
-    // El código de empleado es auto-generado, solo validar si ya existe
-    if (codigoEmpleado != null && codigoEmpleado.length() > 20) {
-      throw new IllegalArgumentException("El código de empleado no puede exceder 20 caracteres");
+  private void validateEmpleadoUpdate(EmpleadoUpdateDTO dto) {
+    if (dto == null) {
+      throw new IllegalArgumentException("Los datos del empleado no pueden ser nulos");
     }
-  }
 
-  /**
-   * Valida los nombres
-   *
-   * @param nombres Nombres a validar
-   * @throws IllegalArgumentException si la validación falla
-   */
-  private void validateNombres(String nombres) {
-    if (nombres == null || nombres.trim().isEmpty()) {
-      throw new IllegalArgumentException("Los nombres son obligatorios");
-    }
-    if (nombres.length() > 100) {
-      throw new IllegalArgumentException("Los nombres no pueden exceder 100 caracteres");
-    }
-  }
+    validateNombres(dto.nombres());
+    validateApellidos(dto.apellidos());
+    validateCedula(dto.cedula());
+    validateTelefono(dto.telefono());
+    validateEmail(dto.email());
+    validateDireccion(dto.direccion());
+    validateFechaIngreso(dto.fechaIngreso());
+    validateFechaSalida(dto.fechaIngreso(), dto.fechaSalida());
+    validateCargoId(dto.cargoId());
 
-  /**
-   * Valida los apellidos
-   *
-   * @param apellidos Apellidos a validar
-   * @throws IllegalArgumentException si la validación falla
-   */
-  private void validateApellidos(String apellidos) {
-    if (apellidos == null || apellidos.trim().isEmpty()) {
-      throw new IllegalArgumentException("Los apellidos son obligatorios");
+    if (dto.genero() == null) {
+      throw new IllegalArgumentException("El género es obligatorio");
     }
-    if (apellidos.length() > 100) {
-      throw new IllegalArgumentException("Los apellidos no pueden exceder 100 caracteres");
+    if (dto.tipoContrato() == null) {
+      throw new IllegalArgumentException("El tipo de contrato es obligatorio");
     }
-  }
-
-  /**
-   * Valida la cédula
-   *
-   * @param cedula Cédula a validar
-   * @throws IllegalArgumentException si la validación falla
-   */
-  private void validateCedula(String cedula) {
-    if (cedula == null || cedula.trim().isEmpty()) {
-      throw new IllegalArgumentException("La cédula es obligatoria");
-    }
-    if (!cedula.matches("\\d{10}")) {
-      throw new IllegalArgumentException("La cédula debe tener exactamente 10 dígitos numéricos");
-    }
-  }
-
-  /**
-   * Valida el teléfono
-   *
-   * @param telefono Teléfono a validar
-   * @throws IllegalArgumentException si la validación falla
-   */
-  private void validateTelefono(String telefono) {
-    if (telefono == null || telefono.trim().isEmpty()) {
-      throw new IllegalArgumentException("El teléfono es obligatorio");
-    }
-    if (!telefono.matches("\\d{10}")) {
-      throw new IllegalArgumentException("El teléfono debe tener exactamente 10 dígitos numéricos");
-    }
-  }
-
-  /**
-   * Valida el email
-   *
-   * @param email Email a validar
-   * @throws IllegalArgumentException si la validación falla
-   */
-  private void validateEmail(String email) {
-    if (email != null && !email.trim().isEmpty() && !email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-      throw new IllegalArgumentException("El formato del email no es válido");
-    }
-    if (email != null && email.length() > 100) {
-      throw new IllegalArgumentException("El email no puede exceder 100 caracteres");
-    }
-  }
-
-  /**
-   * Valida la dirección
-   *
-   * @param direccion Dirección a validar
-   * @throws IllegalArgumentException si la validación falla
-   */
-  private void validateDireccion(String direccion) {
-    if (direccion != null && direccion.length() > 100) {
-      throw new IllegalArgumentException("La dirección no puede exceder 100 caracteres");
+    if (dto.estado() == null) {
+      throw new IllegalArgumentException("El estado es obligatorio");
     }
   }
 }

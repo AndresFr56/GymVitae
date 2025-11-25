@@ -2,9 +2,9 @@ package gym.vitae.controller;
 
 import gym.vitae.core.SessionManager;
 import gym.vitae.model.Empleado;
+import gym.vitae.model.dtos.empleado.EmpleadoAuthDTO;
 import gym.vitae.model.enums.EstadoEmpleado;
 import gym.vitae.repositories.EmpleadoRepository;
-import java.util.List;
 
 /** Controlador de Autenticación. */
 public class AuthController extends BaseController {
@@ -45,15 +45,20 @@ public class AuthController extends BaseController {
   public boolean login(String emailOrUsername, String cedula) {
     validateLoginCredentials(emailOrUsername, cedula);
 
-    Empleado empleado = findEmpleadoByEmailOrUsername(emailOrUsername);
+    EmpleadoAuthDTO empleadoDTO =
+        empleadoRepository
+            .findByEmailOrUsernameForAuth(emailOrUsername)
+            .orElseThrow(() -> new IllegalArgumentException("Credenciales inválidas"));
 
-    if (empleado == null) {
-      throw new IllegalArgumentException("Credenciales inválidas");
-    }
+    validateCedula(empleadoDTO, cedula);
+    validateEmpleadoActivo(empleadoDTO);
+    validateCargo(empleadoDTO);
 
-    validateCedula(empleado, cedula);
-    validateEmpleadoActivo(empleado);
-    validateCargo(empleado);
+    // Cargar entidad completa para sesión (SessionManager aún usa Entity)
+    Empleado empleado =
+        empleadoRepository
+            .findById(empleadoDTO.id())
+            .orElseThrow(() -> new IllegalStateException("Error al cargar empleado"));
 
     sessionManager.setEmpleadoActual(empleado);
     return true;
@@ -99,45 +104,14 @@ public class AuthController extends BaseController {
   }
 
   /**
-   * Busca un empleado por correo electrónico o nombre completo.
-   *
-   * @param emailOrUsername Correo o nombre completo.
-   * @return Empleado encontrado o null.
-   */
-  private Empleado findEmpleadoByEmailOrUsername(String emailOrUsername) {
-    String searchTerm = emailOrUsername.trim();
-    List<Empleado> empleados = empleadoRepository.findAll();
-
-    return empleados.stream()
-        .filter(
-            emp ->
-                (emp.getEmail() != null && emp.getEmail().equalsIgnoreCase(searchTerm))
-                    || matchesFullName(emp, searchTerm))
-        .findFirst()
-        .orElse(null);
-  }
-
-  /**
-   * Verifica si el nombre completo del empleado coincide con el término de búsqueda.
-   *
-   * @param empleado Empleado a verificar.
-   * @param searchTerm Término de búsqueda.
-   * @return true si coincide.
-   */
-  private boolean matchesFullName(Empleado empleado, String searchTerm) {
-    String fullName = empleado.getNombres() + " " + empleado.getApellidos();
-    return fullName.equalsIgnoreCase(searchTerm);
-  }
-
-  /**
    * Valida que la cédula coincida con la del empleado.
    *
-   * @param empleado Empleado a validar.
+   * @param empleadoDTO DTO del empleado a validar.
    * @param cedula Cédula proporcionada.
    * @throws IllegalArgumentException si la cédula no coincide.
    */
-  private void validateCedula(Empleado empleado, String cedula) {
-    if (!empleado.getCedula().equals(cedula.trim())) {
+  private void validateCedula(EmpleadoAuthDTO empleadoDTO, String cedula) {
+    if (!empleadoDTO.cedula().equals(cedula.trim())) {
       throw new IllegalArgumentException("Credenciales inválidas");
     }
   }
@@ -145,28 +119,28 @@ public class AuthController extends BaseController {
   /**
    * Valida que el empleado esté activo.
    *
-   * @param empleado Empleado a validar.
+   * @param empleadoDTO DTO del empleado a validar.
    * @throws IllegalArgumentException si el empleado no está activo.
    */
-  private void validateEmpleadoActivo(Empleado empleado) {
-    if (empleado.getEstado() != EstadoEmpleado.ACTIVO) {
+  private void validateEmpleadoActivo(EmpleadoAuthDTO empleadoDTO) {
+    if (empleadoDTO.estado() != EstadoEmpleado.ACTIVO) {
       throw new IllegalArgumentException(
-          "El empleado no está activo. Estado actual: " + empleado.getEstado());
+          "El empleado no está activo. Estado actual: " + empleadoDTO.estado());
     }
   }
 
   /**
    * Valida que el empleado tenga un cargo autorizado (Recepcionista o Administración).
    *
-   * @param empleado Empleado a validar.
+   * @param empleadoDTO DTO del empleado a validar.
    * @throws IllegalArgumentException si el cargo no está autorizado.
    */
-  private void validateCargo(Empleado empleado) {
-    if (empleado.getCargo() == null) {
+  private void validateCargo(EmpleadoAuthDTO empleadoDTO) {
+    if (empleadoDTO.cargo() == null) {
       throw new IllegalArgumentException("El empleado no tiene un cargo asignado");
     }
 
-    String nombreCargo = empleado.getCargo().getNombre();
+    String nombreCargo = empleadoDTO.cargo().nombre();
     if (!CARGO_ADMINISTRACION.equalsIgnoreCase(nombreCargo)
         && !CARGO_RECEPCIONISTA.equalsIgnoreCase(nombreCargo)) {
       throw new IllegalArgumentException(
