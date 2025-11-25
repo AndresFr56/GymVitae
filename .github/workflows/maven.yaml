@@ -7,7 +7,7 @@ on:
     branches: ["main"]
 
 jobs:
-  jdk-maven-dependencies:
+  dependencies-run-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -23,15 +23,7 @@ jobs:
         run: mvn clean install --batch-mode --update-snapshots verify
         working-directory: ./App
 
-  check-pass-testing:
-    needs: jdk-maven-dependencies
-
-    if: ${{success()}}
-
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: run test
+      - name: run test controllers
         run: mvn test
         working-directory: ./App
 
@@ -45,3 +37,16 @@ jobs:
         with:
           name: Package
           path: staging
+
+  realise-jar-actions:
+    needs: jdk-maven-dependencies
+
+    if: ${{success()}}
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: download binary jar
+        uses: actions/download-artifact@v4
+        with:
+          name: Package
