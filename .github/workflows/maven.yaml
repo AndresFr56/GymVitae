@@ -39,7 +39,7 @@ jobs:
           path: staging
 
   realise-jar-actions:
-    needs: jdk-maven-dependencies
+    needs: dependencies-run-tests
 
     if: ${{success()}}
 
