@@ -1,0 +1,48 @@
+name: Java-Maven-Workflow
+
+on:
+  push:
+    branches: ["main", "testing"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  jdk-maven-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: defined sdk
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "temurin"
+          architecture: x64
+          cache: maven
+
+      - name: Maven install dependencies
+        run: mvn clean install --batch-mode --update-snapshots verify
+
+        working-directory: ./App
+
+  check-pass-testing:
+    needs: jdk-maven-dependencies
+
+    if: ${{success()}}
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: run test
+        run: nvm test
+        working-directory: ./App
+
+      - name: build
+        run: nvm clean package
+        working-directory: ./App
+
+      - name: upload-jar
+        run: mkdir staging && cp =r ./App/target/*.jar staging
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Package
+          path: staging
