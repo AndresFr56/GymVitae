@@ -25,9 +25,15 @@
 
         <properties>
             <property name="javax.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
-            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/gym_system"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/gym_system?useUnicode=true&amp;characterEncoding=UTF-8&amp;characterSetResults=UTF-8"/>
             <property name="javax.persistence.jdbc.user" value="gym_admin"/>
             <property name="javax.persistence.jdbc.password" value="gym_pass_2025"/>
+
+            <!-- Configuración de encoding para Hibernate -->
+            <property name="hibernate.connection.CharSet" value="utf8mb4"/>
+            <property name="hibernate.connection.characterEncoding" value="UTF-8"/>
+            <property name="hibernate.connection.useUnicode" value="true"/>
+
             <!-- Configuración de Hibernate -->
             <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL8Dialect"/>
 
@@ -48,6 +54,13 @@
             <property name="hibernate.c3p0.timeout" value="300"/>
             <property name="hibernate.c3p0.max_statements" value="50"/>
             <property name="hibernate.c3p0.idle_test_period" value="3000"/>
+
+            <!-- Batch Fetching - Optimización de queries -->
+            <property name="hibernate.default_batch_fetch_size" value="20"/>
+            <property name="hibernate.jdbc.batch_size" value="20"/>
+            <property name="hibernate.order_inserts" value="true"/>
+            <property name="hibernate.order_updates" value="true"/>
+            <property name="hibernate.jdbc.batch_versioned_data" value="true"/>
 
         </properties>
     </persistence-unit>
