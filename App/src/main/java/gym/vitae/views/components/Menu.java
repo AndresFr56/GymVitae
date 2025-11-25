@@ -11,6 +11,8 @@ import gym.vitae.views.common.ViewManager;
 import gym.vitae.views.components.primitives.Icons;
 import gym.vitae.views.personal.ViewPersonal;
 import javax.swing.*;
+
+import gym.vitae.views.proveedores.ViewProveedores;
 import raven.extras.AvatarIcon;
 import raven.modal.drawer.DrawerPanel;
 import raven.modal.drawer.data.Item;
@@ -55,7 +57,7 @@ public class Menu extends SimpleDrawerBuilder {
 
     MenuItem[] items =
         new MenuItem[] {
-          new Item.Label("Menu Principal"),
+          new Item.Label("Menu"),
           new Item("Inicio", "dashboard.svg"),
           new Item("Personal", "email.svg")
               .subMenu("Lista de Personal", ViewPersonal.class)
@@ -70,7 +72,9 @@ public class Menu extends SimpleDrawerBuilder {
           new Item("Membresias", "employee.svg")
               .subMenu("Listado de Membresias")
               .subMenu("Tipos de Membresias"),
-          new Item("Iventario", "pack.svg").subMenu("Productos y Equipos").subMenu("Proveedores"),
+          new Item("Iventario", "pack.svg")
+              .subMenu("Productos y Equipos")
+              .subMenu("Proveedores", ViewProveedores.class),
           new Item("Cerrar Session", "logout.svg")
         };
 

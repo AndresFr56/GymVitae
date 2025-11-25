@@ -183,9 +183,7 @@ public abstract class BaseTablePanel<T> extends JPanel {
     return actions;
   }
 
-  // ==================== CALLBACKS OPCIONALES ====================
 
-  /** Callback cuando se presiona el botón Agregar. */
   protected void onAdd() {
     showInfoMessage("Funcionalidad de agregar en desarrollo");
   }
