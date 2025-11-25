@@ -32,7 +32,7 @@ jobs:
         working-directory: ./App
 
       - name: upload-jar
-        run: mkdir staging && cp =r ./App/target/*.jar staging
+        run: mkdir staging && cp -r ./App/target/*.jar staging
       - uses: actions/upload-artifact@v4
         with:
           name: Package
