@@ -1,13 +1,7 @@
 package gym.vitae.core;
 
-import com.mysql.cj.log.Log;
-
-import java.lang.reflect.Field;
-import java.util.Collection;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.PersistenceException;
@@ -15,16 +9,24 @@ import javax.persistence.PersistenceException;
 /**
  * TransactionHandler es una clase utilitaria que facilita la gestión de transacciones con
  * EntityTransaction en JPA.
+ *
+ * <p>Esta clase gestiona automáticamente el ciclo de vida de transacciones y EntityManagers,
+ * incluyendo commit, rollback y cierre de recursos.
+ *
+ * <p><b>IMPORTANTE:</b> Esta versión NO utiliza reflexión ni inicialización forzada de relaciones
+ * lazy. Las queries deben usar JOIN FETCH o DTOs para cargar las relaciones necesarias.
  */
 public class TransactionHandler {
 
   private TransactionHandler() {}
 
   /**
-   * @param em EntityManager
-   * @param work Supplier<T> que contiene el trabajo a realizar en la transacción
-   * @return
-   * @param <T> Tipo de retorno de la transacción
+   * Ejecuta trabajo en una transacción usando un EntityManager existente.
+   *
+   * @param em EntityManager a usar
+   * @param work Supplier con el trabajo a realizar
+   * @return Resultado del trabajo
+   * @param <T> Tipo de retorno
    */
   public static <T> T inTransaction(EntityManager em, Supplier<T> work) {
 
@@ -32,7 +34,7 @@ public class TransactionHandler {
       DatabaseUnavailableException ex =
           new DatabaseUnavailableException(
               "Conexión a base de datos no disponible - No se puede iniciar transacción");
-      ErrorHandler.showDatabaseError(ex);
+      ErrorHandler.handleDatabaseError(ex);
       throw ex;
     }
 
@@ -56,13 +58,19 @@ public class TransactionHandler {
       if (ex instanceof PersistenceException
           || ex instanceof DatabaseUnavailableException
           || ex instanceof IllegalStateException) {
-        ErrorHandler.showDatabaseError(ex);
+        ErrorHandler.handleDatabaseError(ex);
       }
 
       throw ex;
     }
   }
 
+  /**
+   * Ejecuta trabajo en una transacción sin retornar valor.
+   *
+   * @param em EntityManager a usar
+   * @param work Runnable con el trabajo a realizar
+   */
   public static void inTransaction(EntityManager em, Runnable work) {
     inTransaction(
         em,
@@ -73,24 +81,22 @@ public class TransactionHandler {
   }
 
   /**
+   * Ejecuta trabajo en una transacción creando y cerrando un EntityManager automáticamente.
+   *
+   * <p><b>NOTA:</b> El EntityManager se cierra automáticamente al finalizar. Si necesitas
+   * relaciones lazy, debes cargarlas con JOIN FETCH en la query o usar DTOs.
+   *
    * @param db DBConnectionManager
-   * @param work Function<EntityManager, T> que recibe el EntityManager y retorna el resultado
-   * @return
-   * @param <T> Tipo de retorno de la transacción
+   * @param work Function que recibe el EntityManager y retorna el resultado
+   * @return Resultado del trabajo
+   * @param <T> Tipo de retorno
    */
   public static <T> T inTransaction(DBConnectionManager db, Function<EntityManager, T> work) {
     EntityManager em = null;
     try {
       em = db.getEntityManager();
       EntityManager finalEm = em;
-      T result = inTransaction(em, () -> work.apply(finalEm));
-
-      // Inicializar todas las relaciones lazy antes de cerrar el EM
-      if (result != null) {
-        initializeLazyRelations(result);
-      }
-
-      return result;
+      return inTransaction(em, () -> work.apply(finalEm));
     } finally {
       if (em != null && em.isOpen()) {
         try {
@@ -102,63 +108,24 @@ public class TransactionHandler {
     }
   }
 
-  /** Inicializa recursivamente las relaciones lazy de una entidad o colección. */
-  private static void initializeLazyRelations(Object obj) {
-    if (obj == null) return;
-
-    try {
-      if (obj instanceof Collection<?> collection) {
-        org.hibernate.Hibernate.initialize(collection);
-        collection.forEach(
-            item -> {
-              if (item != null) {
-                initializeEntityFields(item);
-              }
-            });
-      } else if (obj instanceof java.util.Optional) {
-        ((java.util.Optional<?>) obj)
-            .ifPresent(
-                item -> {
-                  org.hibernate.Hibernate.initialize(item);
-                  initializeEntityFields(item);
-                });
-      } else {
-        org.hibernate.Hibernate.initialize(obj);
-        initializeEntityFields(obj);
-      }
-    } catch (Exception e) {
-        Logger.getLogger(TransactionHandler.class.getName()).log(Level.SEVERE, null, e);
-    }
-  }
-
-  private static void initializeEntityFields(Object entity) {
-    if (entity == null) return;
-
-    try {
-      Class<?> clazz = entity.getClass();
-      // Evitar clases del sistema
-      if (clazz.getName().startsWith("java.") || clazz.getName().startsWith("javax.")) {
-        return;
-      }
-
-      for (Field field : clazz.getDeclaredFields()) {
-
-        field.setAccessible(true);
-        Object value = field.get(entity);
-
-        if (value != null) {
-          org.hibernate.Hibernate.initialize(value);
-        }
-      }
-    } catch (Exception e) {
-        Logger.getLogger(TransactionHandler.class.getName()).log(Level.SEVERE, null, e);
-    }
-  }
-
+  /**
+   * Ejecuta trabajo en una transacción usando Supplier.
+   *
+   * @param db DBConnectionManager
+   * @param work Supplier con el trabajo a realizar
+   * @return Resultado del trabajo
+   * @param <T> Tipo de retorno
+   */
   public static <T> T inTransaction(DBConnectionManager db, Supplier<T> work) {
     return inTransaction(db, (EntityManager em) -> work.get());
   }
 
+  /**
+   * Ejecuta trabajo en una transacción sin retornar valor.
+   *
+   * @param db DBConnectionManager
+   * @param work Runnable con el trabajo a realizar
+   */
   public static void inTransaction(DBConnectionManager db, Runnable work) {
     inTransaction(
         db,

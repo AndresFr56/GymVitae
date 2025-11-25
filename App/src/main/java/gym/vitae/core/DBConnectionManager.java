@@ -1,5 +1,6 @@
 package gym.vitae.core;
 
+import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -10,18 +11,18 @@ import javax.persistence.Persistence;
  */
 public class DBConnectionManager {
 
-  private static final String PERSISTANCE = "gym_vitaePU";
+  private static final String PERSISTENCE = "gym_vitaePU";
   private EntityManagerFactory emf;
   private volatile boolean connected = false;
 
   public synchronized void init() {
     try {
       if (emf != null && emf.isOpen()) return;
-      emf = Persistence.createEntityManagerFactory(PERSISTANCE);
+      emf = Persistence.createEntityManagerFactory(PERSISTENCE);
       connected = emf != null && emf.isOpen();
     } catch (RuntimeException ex) {
       connected = false;
-      System.err.println("DBConnectionManager.init() failed: " + ex.getMessage());
+      Logger.getLogger("DBConnectionManager.init() failed: " + ex.getMessage());
     }
   }
 
