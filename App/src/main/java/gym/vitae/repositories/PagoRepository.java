@@ -2,7 +2,10 @@ package gym.vitae.repositories;
 
 import gym.vitae.core.DBConnectionManager;
 import gym.vitae.core.TransactionHandler;
+import gym.vitae.mapper.PagoMapper;
 import gym.vitae.model.Pago;
+import gym.vitae.model.dtos.facturacion.PagoDetalleDTO;
+import gym.vitae.model.dtos.facturacion.PagoListadoDTO;
 import gym.vitae.model.enums.EstadoNomina;
 import java.util.List;
 import java.util.Optional;
@@ -89,5 +92,52 @@ public record PagoRepository(DBConnectionManager db) implements IRepository<Pago
   @Override
   public boolean existsById(int id) {
     return TransactionHandler.inTransaction(db, em -> em.find(Pago.class, id) != null);
+  }
+
+  /**
+   * Obtiene todos los pagos como DTOs de listado.
+   *
+   * @return Lista de PagoListadoDTO
+   */
+  public List<PagoListadoDTO> findAllListado() {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          TypedQuery<Pago> q = em.createQuery("from Pago p order by p.id", Pago.class);
+          return PagoMapper.toListadoDTOList(q.getResultList());
+        });
+  }
+
+  /**
+   * Obtiene pagos paginados como DTOs de listado.
+   *
+   * @param offset Posición inicial
+   * @param limit Cantidad de registros
+   * @return Lista de PagoListadoDTO
+   */
+  public List<PagoListadoDTO> findAllListadoPaginated(int offset, int limit) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          TypedQuery<Pago> q = em.createQuery("from Pago p order by p.id", Pago.class);
+          q.setFirstResult(offset);
+          q.setMaxResults(limit);
+          return PagoMapper.toListadoDTOList(q.getResultList());
+        });
+  }
+
+  /**
+   * Busca un pago por ID y retorna el DTO de detalle.
+   *
+   * @param id ID del pago
+   * @return Optional de PagoDetalleDTO
+   */
+  public Optional<PagoDetalleDTO> findDetalleById(int id) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          Pago pago = em.find(Pago.class, id);
+          return Optional.ofNullable(PagoMapper.toDetalleDTO(pago));
+        });
   }
 }

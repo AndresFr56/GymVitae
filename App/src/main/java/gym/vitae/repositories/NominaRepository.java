@@ -2,7 +2,10 @@ package gym.vitae.repositories;
 
 import gym.vitae.core.DBConnectionManager;
 import gym.vitae.core.TransactionHandler;
+import gym.vitae.mapper.NominaMapper;
 import gym.vitae.model.Nomina;
+import gym.vitae.model.dtos.nomina.NominaDetalleDTO;
+import gym.vitae.model.dtos.nomina.NominaListadoDTO;
 import gym.vitae.model.enums.EstadoNomina;
 import java.util.List;
 import java.util.Optional;
@@ -107,6 +110,53 @@ public record NominaRepository(DBConnectionManager db) implements IRepository<No
           q.setParameter("anio", anio);
           List<Nomina> res = q.getResultList();
           return res.isEmpty() ? Optional.empty() : Optional.of(res.get(0));
+        });
+  }
+
+  /**
+   * Obtiene todas las nóminas como DTOs de listado.
+   *
+   * @return Lista de NominaListadoDTO
+   */
+  public List<NominaListadoDTO> findAllListado() {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          TypedQuery<Nomina> q = em.createQuery("from Nomina n order by n.id", Nomina.class);
+          return NominaMapper.toListadoDTOList(q.getResultList());
+        });
+  }
+
+  /**
+   * Obtiene nóminas paginadas como DTOs de listado.
+   *
+   * @param offset Posición inicial
+   * @param limit Cantidad de registros
+   * @return Lista de NominaListadoDTO
+   */
+  public List<NominaListadoDTO> findAllListadoPaginated(int offset, int limit) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          TypedQuery<Nomina> q = em.createQuery("from Nomina n order by n.id", Nomina.class);
+          q.setFirstResult(offset);
+          q.setMaxResults(limit);
+          return NominaMapper.toListadoDTOList(q.getResultList());
+        });
+  }
+
+  /**
+   * Busca una nómina por ID y retorna el DTO de detalle.
+   *
+   * @param id ID de la nómina
+   * @return Optional de NominaDetalleDTO
+   */
+  public Optional<NominaDetalleDTO> findDetalleById(int id) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          Nomina nomina = em.find(Nomina.class, id);
+          return Optional.ofNullable(NominaMapper.toDetalleDTO(nomina));
         });
   }
 }

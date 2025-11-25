@@ -2,7 +2,11 @@ package gym.vitae.repositories;
 
 import gym.vitae.core.DBConnectionManager;
 import gym.vitae.core.TransactionHandler;
+import gym.vitae.mapper.EmpleadoMapper;
 import gym.vitae.model.Empleado;
+import gym.vitae.model.dtos.empleado.EmpleadoAuthDTO;
+import gym.vitae.model.dtos.empleado.EmpleadoDetalleDTO;
+import gym.vitae.model.dtos.empleado.EmpleadoListadoDTO;
 import gym.vitae.model.enums.EstadoEmpleado;
 import gym.vitae.model.enums.Genero;
 import java.util.List;
@@ -72,7 +76,9 @@ public record EmpleadoRepository(DBConnectionManager db) implements IRepository<
     return TransactionHandler.inTransaction(
         db,
         em -> {
-          TypedQuery<Empleado> q = em.createQuery("from Empleado e order by e.id", Empleado.class);
+          TypedQuery<Empleado> q =
+              em.createQuery(
+                  "SELECT e FROM Empleado e LEFT JOIN FETCH e.cargo ORDER BY e.id", Empleado.class);
           q.setFirstResult(offset);
           q.setMaxResults(limit);
           return q.getResultList();
@@ -110,7 +116,11 @@ public record EmpleadoRepository(DBConnectionManager db) implements IRepository<
         db,
         em -> {
           String jpql =
-              buildFilterQuery("SELECT e FROM Empleado e WHERE 1=1", searchText, cargoId, genero);
+              buildFilterQuery(
+                  "SELECT e FROM Empleado e LEFT JOIN FETCH e.cargo WHERE 1=1",
+                  searchText,
+                  cargoId,
+                  genero);
           jpql += " ORDER BY e.id";
 
           TypedQuery<Empleado> query = em.createQuery(jpql, Empleado.class);
@@ -182,19 +192,138 @@ public record EmpleadoRepository(DBConnectionManager db) implements IRepository<
   }
 
   /**
-   * Busca empleados con cargo cargado de forma EAGER para autenticación. Este método carga
-   * explícitamente la relación Cargo usando JOIN FETCH.
+   * Obtiene todos los empleados como DTOs de listado. Optimizado para tablas, solo carga los campos
+   * necesarios.
    *
-   * @return Lista de todos los empleados con sus cargos cargados
+   * @return Lista de EmpleadoListadoDTO
    */
-  public List<Empleado> findAllWithCargo() {
+  public List<EmpleadoListadoDTO> findAllListado() {
     return TransactionHandler.inTransaction(
         db,
         em -> {
           TypedQuery<Empleado> q =
               em.createQuery(
                   "SELECT e FROM Empleado e LEFT JOIN FETCH e.cargo ORDER BY e.id", Empleado.class);
-          return q.getResultList();
+          List<Empleado> empleados = q.getResultList();
+          return EmpleadoMapper.toListadoDTOList(empleados);
+        });
+  }
+
+  /**
+   * Obtiene empleados con paginación como DTOs de listado.
+   *
+   * @param offset Posición inicial
+   * @param limit Cantidad de registros
+   * @return Lista de EmpleadoListadoDTO
+   */
+  public List<EmpleadoListadoDTO> findAllListado(int offset, int limit) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          TypedQuery<Empleado> q =
+              em.createQuery(
+                  "SELECT e FROM Empleado e LEFT JOIN FETCH e.cargo ORDER BY e.id", Empleado.class);
+          q.setFirstResult(offset);
+          q.setMaxResults(limit);
+          List<Empleado> empleados = q.getResultList();
+          return EmpleadoMapper.toListadoDTOList(empleados);
+        });
+  }
+
+  /**
+   * Busca empleados con filtros opcionales y paginación, retornando DTOs.
+   *
+   * @param searchText Texto de búsqueda en nombres/apellidos (puede ser null)
+   * @param cargoId ID del cargo para filtrar (puede ser null)
+   * @param genero Género para filtrar (puede ser null)
+   * @param offset Posición inicial
+   * @param limit Cantidad de registros
+   * @return Lista de EmpleadoListadoDTO que coinciden con los filtros
+   */
+  public List<EmpleadoListadoDTO> findAllListadoWithFilters(
+      String searchText, Integer cargoId, String genero, int offset, int limit) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          String jpql =
+              buildFilterQuery(
+                  "SELECT e FROM Empleado e LEFT JOIN FETCH e.cargo WHERE 1=1",
+                  searchText,
+                  cargoId,
+                  genero);
+          jpql += " ORDER BY e.id";
+
+          TypedQuery<Empleado> query = em.createQuery(jpql, Empleado.class);
+          applyFilterParameters(query, searchText, cargoId, genero);
+
+          query.setFirstResult(offset);
+          query.setMaxResults(limit);
+
+          List<Empleado> empleados = query.getResultList();
+          return EmpleadoMapper.toListadoDTOList(empleados);
+        });
+  }
+
+  /**
+   * Busca un empleado por email o nombre completo para autenticación. Carga el cargo con JOIN
+   * FETCH.
+   *
+   * @param emailOrUsername Email o nombre completo del empleado
+   * @return Optional de EmpleadoAuthDTO
+   */
+  public Optional<EmpleadoAuthDTO> findByEmailOrUsernameForAuth(String emailOrUsername) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          String searchTerm = emailOrUsername.trim();
+          TypedQuery<Empleado> q =
+              em.createQuery(
+                  "SELECT e FROM Empleado e LEFT JOIN FETCH e.cargo "
+                      + "WHERE e.email = :search OR CONCAT(e.nombres, ' ', e.apellidos) = :search",
+                  Empleado.class);
+          q.setParameter("search", searchTerm);
+
+          return q.getResultStream().findFirst().map(EmpleadoMapper::toAuthDTO);
+        });
+  }
+
+  /**
+   * Busca un empleado por ID y retorna el DTO de detalle con cargo cargado.
+   *
+   * @param id ID del empleado
+   * @return Optional de EmpleadoDetalleDTO
+   */
+  public Optional<EmpleadoDetalleDTO> findByIdDetalle(int id) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          TypedQuery<Empleado> q =
+              em.createQuery(
+                  "SELECT e FROM Empleado e LEFT JOIN FETCH e.cargo WHERE e.id = :id",
+                  Empleado.class);
+          q.setParameter("id", id);
+
+          return q.getResultStream().findFirst().map(EmpleadoMapper::toDetalleDTO);
+        });
+  }
+
+  /**
+   * Busca empleados activos como DTOs de listado.
+   *
+   * @return Lista de EmpleadoListadoDTO solo con empleados activos
+   */
+  public List<EmpleadoListadoDTO> findActivosListado() {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          TypedQuery<Empleado> q =
+              em.createQuery(
+                  "SELECT e FROM Empleado e LEFT JOIN FETCH e.cargo "
+                      + "WHERE e.estado = :estado ORDER BY e.id",
+                  Empleado.class);
+          q.setParameter("estado", EstadoEmpleado.ACTIVO);
+          List<Empleado> empleados = q.getResultList();
+          return EmpleadoMapper.toListadoDTOList(empleados);
         });
   }
 }

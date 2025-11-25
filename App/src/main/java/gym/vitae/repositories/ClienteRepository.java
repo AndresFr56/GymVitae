@@ -2,7 +2,10 @@ package gym.vitae.repositories;
 
 import gym.vitae.core.DBConnectionManager;
 import gym.vitae.core.TransactionHandler;
+import gym.vitae.mapper.ClienteMapper;
 import gym.vitae.model.Cliente;
+import gym.vitae.model.dtos.cliente.ClienteDetalleDTO;
+import gym.vitae.model.dtos.cliente.ClienteListadoDTO;
 import gym.vitae.model.enums.EstadoCliente;
 import java.util.List;
 import java.util.Objects;
@@ -180,6 +183,103 @@ public record ClienteRepository(DBConnectionManager db) implements IRepository<C
           }
 
           return query.getSingleResult();
+        });
+  }
+
+  /**
+   * Obtiene todos los clientes como DTOs de listado.
+   *
+   * @return Lista de ClienteListadoDTO
+   */
+  public List<ClienteListadoDTO> findAllListado() {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          TypedQuery<Cliente> q =
+              em.createQuery("SELECT c FROM Cliente c ORDER BY c.id", Cliente.class);
+          List<Cliente> clientes = q.getResultList();
+          return ClienteMapper.toListadoDTOList(clientes);
+        });
+  }
+
+  /**
+   * Busca un cliente por ID y retorna el DTO de detalle.
+   *
+   * @param id ID del cliente
+   * @return Optional de ClienteDetalleDTO
+   */
+  public Optional<ClienteDetalleDTO> findByIdDetalle(int id) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          TypedQuery<Cliente> q =
+              em.createQuery("SELECT c FROM Cliente c WHERE c.id = :id", Cliente.class);
+          q.setParameter("id", id);
+
+          return q.getResultStream().findFirst().map(ClienteMapper::toDetalleDTO);
+        });
+  }
+
+  /**
+   * Busca clientes activos como DTOs de listado.
+   *
+   * @return Lista de ClienteListadoDTO solo con clientes activos
+   */
+  public List<ClienteListadoDTO> findActivosListado() {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          TypedQuery<Cliente> q =
+              em.createQuery(
+                  "SELECT c FROM Cliente c WHERE c.estado = :estado ORDER BY c.id", Cliente.class);
+          q.setParameter("estado", EstadoCliente.ACTIVO);
+          List<Cliente> clientes = q.getResultList();
+          return ClienteMapper.toListadoDTOList(clientes);
+        });
+  }
+
+  /**
+   * Busca clientes con filtros y retorna DTOs de listado.
+   *
+   * @param searchText Texto de búsqueda (puede ser null)
+   * @param estado Estado para filtrar (puede ser null)
+   * @param offset Posición inicial
+   * @param limit Cantidad de registros
+   * @return Lista de ClienteListadoDTO
+   */
+  public List<ClienteListadoDTO> findAllWithFiltersListado(
+      String searchText, String estado, int offset, int limit) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          StringBuilder jpql = new StringBuilder("SELECT c FROM Cliente c WHERE 1=1");
+
+          if (searchText != null && !searchText.trim().isEmpty()) {
+            jpql.append(
+                " AND (LOWER(c.nombres) LIKE :searchText OR LOWER(c.apellidos) LIKE :searchText OR c.cedula LIKE :searchText)");
+          }
+
+          if (estado != null && !estado.isEmpty()) {
+            jpql.append(" AND c.estado = :estado");
+          }
+
+          jpql.append(" ORDER BY c.id");
+
+          TypedQuery<Cliente> query = em.createQuery(jpql.toString(), Cliente.class);
+
+          if (searchText != null && !searchText.trim().isEmpty()) {
+            query.setParameter("searchText", "%" + searchText.toLowerCase() + "%");
+          }
+
+          if (estado != null && !estado.isEmpty()) {
+            query.setParameter("estado", EstadoCliente.valueOf(estado));
+          }
+
+          query.setFirstResult(offset);
+          query.setMaxResults(limit);
+
+          List<Cliente> clientes = query.getResultList();
+          return ClienteMapper.toListadoDTOList(clientes);
         });
   }
 

@@ -2,7 +2,10 @@ package gym.vitae.repositories;
 
 import gym.vitae.core.DBConnectionManager;
 import gym.vitae.core.TransactionHandler;
+import gym.vitae.mapper.HorarioMapper;
 import gym.vitae.model.Horario;
+import gym.vitae.model.dtos.horarios.HorarioDetalleDTO;
+import gym.vitae.model.dtos.horarios.HorarioListadoDTO;
 import java.util.List;
 import java.util.Optional;
 import javax.persistence.TypedQuery;
@@ -88,5 +91,52 @@ public record HorarioRepository(DBConnectionManager db) implements IRepository<H
   @Override
   public boolean existsById(int id) {
     return TransactionHandler.inTransaction(db, em -> em.find(Horario.class, id) != null);
+  }
+
+  /**
+   * Obtiene todos los horarios como DTOs de listado.
+   *
+   * @return Lista de HorarioListadoDTO
+   */
+  public List<HorarioListadoDTO> findAllListado() {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          TypedQuery<Horario> q = em.createQuery("from Horario h order by h.id", Horario.class);
+          return HorarioMapper.toListadoDTOList(q.getResultList());
+        });
+  }
+
+  /**
+   * Obtiene horarios paginados como DTOs de listado.
+   *
+   * @param offset Posición inicial
+   * @param limit Cantidad de registros
+   * @return Lista de HorarioListadoDTO
+   */
+  public List<HorarioListadoDTO> findAllListadoPaginated(int offset, int limit) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          TypedQuery<Horario> q = em.createQuery("from Horario h order by h.id", Horario.class);
+          q.setFirstResult(offset);
+          q.setMaxResults(limit);
+          return HorarioMapper.toListadoDTOList(q.getResultList());
+        });
+  }
+
+  /**
+   * Busca un horario por ID y retorna el DTO de detalle.
+   *
+   * @param id ID del horario
+   * @return Optional de HorarioDetalleDTO
+   */
+  public Optional<HorarioDetalleDTO> findDetalleById(int id) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          Horario horario = em.find(Horario.class, id);
+          return Optional.ofNullable(HorarioMapper.toDetalleDTO(horario));
+        });
   }
 }

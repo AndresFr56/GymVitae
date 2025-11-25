@@ -2,7 +2,10 @@ package gym.vitae.repositories;
 
 import gym.vitae.core.DBConnectionManager;
 import gym.vitae.core.TransactionHandler;
+import gym.vitae.mapper.ProveedorMapper;
 import gym.vitae.model.Proveedore;
+import gym.vitae.model.dtos.inventario.ProveedorDetalleDTO;
+import gym.vitae.model.dtos.inventario.ProveedorListadoDTO;
 import java.util.List;
 import java.util.Optional;
 import javax.persistence.TypedQuery;
@@ -90,5 +93,54 @@ public record ProveedoreRepository(DBConnectionManager db) implements IRepositor
   @Override
   public boolean existsById(int id) {
     return TransactionHandler.inTransaction(db, em -> em.find(Proveedore.class, id) != null);
+  }
+
+  /**
+   * Obtiene todos los proveedores como DTOs de listado.
+   *
+   * @return Lista de ProveedorListadoDTO
+   */
+  public List<ProveedorListadoDTO> findAllListado() {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          TypedQuery<Proveedore> q =
+              em.createQuery("from Proveedore p order by p.id", Proveedore.class);
+          return ProveedorMapper.toListadoDTOList(q.getResultList());
+        });
+  }
+
+  /**
+   * Obtiene proveedores paginados como DTOs de listado.
+   *
+   * @param offset Posición inicial
+   * @param limit Cantidad de registros
+   * @return Lista de ProveedorListadoDTO
+   */
+  public List<ProveedorListadoDTO> findAllListadoPaginated(int offset, int limit) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          TypedQuery<Proveedore> q =
+              em.createQuery("from Proveedore p order by p.id", Proveedore.class);
+          q.setFirstResult(offset);
+          q.setMaxResults(limit);
+          return ProveedorMapper.toListadoDTOList(q.getResultList());
+        });
+  }
+
+  /**
+   * Busca un proveedor por ID y retorna el DTO de detalle.
+   *
+   * @param id ID del proveedor
+   * @return Optional de ProveedorDetalleDTO
+   */
+  public Optional<ProveedorDetalleDTO> findDetalleById(int id) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          Proveedore proveedor = em.find(Proveedore.class, id);
+          return Optional.ofNullable(ProveedorMapper.toDetalleDTO(proveedor));
+        });
   }
 }

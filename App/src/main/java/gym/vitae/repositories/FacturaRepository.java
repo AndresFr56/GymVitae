@@ -2,7 +2,10 @@ package gym.vitae.repositories;
 
 import gym.vitae.core.DBConnectionManager;
 import gym.vitae.core.TransactionHandler;
+import gym.vitae.mapper.FacturaMapper;
 import gym.vitae.model.Factura;
+import gym.vitae.model.dtos.facturacion.FacturaDetalleDTO;
+import gym.vitae.model.dtos.facturacion.FacturaListadoDTO;
 import gym.vitae.model.enums.EstadoFactura;
 import java.util.List;
 import java.util.Optional;
@@ -90,5 +93,52 @@ public record FacturaRepository(DBConnectionManager db) implements IRepository<F
   @Override
   public boolean existsById(int id) {
     return TransactionHandler.inTransaction(db, em -> em.find(Factura.class, id) != null);
+  }
+
+  /**
+   * Obtiene todas las facturas como DTOs de listado.
+   *
+   * @return Lista de FacturaListadoDTO
+   */
+  public List<FacturaListadoDTO> findAllListado() {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          TypedQuery<Factura> q = em.createQuery("from Factura f order by f.id", Factura.class);
+          return FacturaMapper.toListadoDTOList(q.getResultList());
+        });
+  }
+
+  /**
+   * Obtiene facturas paginadas como DTOs de listado.
+   *
+   * @param offset Posición inicial
+   * @param limit Cantidad de registros
+   * @return Lista de FacturaListadoDTO
+   */
+  public List<FacturaListadoDTO> findAllListadoPaginated(int offset, int limit) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          TypedQuery<Factura> q = em.createQuery("from Factura f order by f.id", Factura.class);
+          q.setFirstResult(offset);
+          q.setMaxResults(limit);
+          return FacturaMapper.toListadoDTOList(q.getResultList());
+        });
+  }
+
+  /**
+   * Busca una factura por ID y retorna el DTO de detalle.
+   *
+   * @param id ID de la factura
+   * @return Optional de FacturaDetalleDTO
+   */
+  public Optional<FacturaDetalleDTO> findDetalleById(int id) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          Factura factura = em.find(Factura.class, id);
+          return Optional.ofNullable(FacturaMapper.toDetalleDTO(factura));
+        });
   }
 }

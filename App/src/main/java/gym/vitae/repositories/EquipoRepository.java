@@ -2,7 +2,10 @@ package gym.vitae.repositories;
 
 import gym.vitae.core.DBConnectionManager;
 import gym.vitae.core.TransactionHandler;
+import gym.vitae.mapper.EquipoMapper;
 import gym.vitae.model.Equipo;
+import gym.vitae.model.dtos.inventario.EquipoDetalleDTO;
+import gym.vitae.model.dtos.inventario.EquipoListadoDTO;
 import gym.vitae.model.enums.EstadoEquipo;
 import java.util.List;
 import java.util.Optional;
@@ -90,5 +93,52 @@ public record EquipoRepository(DBConnectionManager db) implements IRepository<Eq
   @Override
   public boolean existsById(int id) {
     return TransactionHandler.inTransaction(db, em -> em.find(Equipo.class, id) != null);
+  }
+
+  /**
+   * Obtiene todos los equipos como DTOs de listado.
+   *
+   * @return Lista de EquipoListadoDTO
+   */
+  public List<EquipoListadoDTO> findAllListado() {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          TypedQuery<Equipo> q = em.createQuery("from Equipo e order by e.id", Equipo.class);
+          return EquipoMapper.toListadoDTOList(q.getResultList());
+        });
+  }
+
+  /**
+   * Obtiene equipos paginados como DTOs de listado.
+   *
+   * @param offset Posición inicial
+   * @param limit Cantidad de registros
+   * @return Lista de EquipoListadoDTO
+   */
+  public List<EquipoListadoDTO> findAllListadoPaginated(int offset, int limit) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          TypedQuery<Equipo> q = em.createQuery("from Equipo e order by e.id", Equipo.class);
+          q.setFirstResult(offset);
+          q.setMaxResults(limit);
+          return EquipoMapper.toListadoDTOList(q.getResultList());
+        });
+  }
+
+  /**
+   * Busca un equipo por ID y retorna el DTO de detalle.
+   *
+   * @param id ID del equipo
+   * @return Optional de EquipoDetalleDTO
+   */
+  public Optional<EquipoDetalleDTO> findDetalleById(int id) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          Equipo equipo = em.find(Equipo.class, id);
+          return Optional.ofNullable(EquipoMapper.toDetalleDTO(equipo));
+        });
   }
 }
