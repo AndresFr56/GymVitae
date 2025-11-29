@@ -4,6 +4,7 @@ import com.formdev.flatlaf.FlatClientProperties;
 import gym.vitae.controller.PersonalController;
 import gym.vitae.model.Cargo;
 import gym.vitae.model.dtos.empleado.EmpleadoCreateDTO;
+import gym.vitae.model.enums.EstadoEmpleado;
 import gym.vitae.model.enums.Genero;
 import gym.vitae.model.enums.TipoContrato;
 import gym.vitae.views.components.primitives.ButtonOutline;
@@ -393,7 +394,7 @@ public class RegisterPersonal extends JPanel {
         cargoId,
         (TipoContrato) cmbTipoContrato.getSelectedItem(),
         dateFechaIngreso.getSelectedDate(),
-        gym.vitae.model.enums.EstadoEmpleado.ACTIVO);
+        null);
   }
 
   private void clearForm() {

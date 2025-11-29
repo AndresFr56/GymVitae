@@ -32,7 +32,6 @@ public class PersonalController extends BaseController {
     this.cargoRepository = cargoRepository;
   }
 
-  // ==================== CONSULTAS ====================
 
   public List<EmpleadoListadoDTO> getEmpleados() {
     return empleadoRepository.findAllListado();
@@ -82,7 +81,6 @@ public class PersonalController extends BaseController {
     return cargoRepository.findAll();
   }
 
-  // ==================== OPERACIONES CRUD ====================
 
   public EmpleadoDetalleDTO createEmpleado(EmpleadoCreateDTO dto) {
     validateEmpleadoCreate(dto);
@@ -215,7 +213,7 @@ public class PersonalController extends BaseController {
     return String.format("EMP-%d%03d", year, count + 1);
   }
 
-  private void validateEmpleadoCreate(EmpleadoCreateDTO dto) {
+  public void validateEmpleadoCreate(EmpleadoCreateDTO dto) {
     if (dto == null) {
       throw new IllegalArgumentException("Los datos del empleado no pueden ser nulos");
     }
