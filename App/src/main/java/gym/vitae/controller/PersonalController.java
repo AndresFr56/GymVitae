@@ -245,7 +245,6 @@ public class PersonalController extends BaseController {
     validateEmail(dto.email());
     validateDireccion(dto.direccion());
     validateFechaIngreso(dto.fechaIngreso());
-    validateFechaSalida(dto.fechaIngreso(), dto.fechaSalida());
     validateCargoId(dto.cargoId());
 
     if (dto.genero() == null) {

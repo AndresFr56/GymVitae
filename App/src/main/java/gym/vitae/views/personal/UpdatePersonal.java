@@ -430,7 +430,6 @@ public class UpdatePersonal extends JPanel {
               cargoId,
               (TipoContrato) cmbTipoContrato.getSelectedItem(),
               dateFechaIngreso.getSelectedDate(),
-              empleadoDetalle.fechaSalida(), // Mantener fecha de salida existente
               cmbEstado != null
                   ? (EstadoEmpleado) cmbEstado.getSelectedItem()
                   : EstadoEmpleado.ACTIVO);
