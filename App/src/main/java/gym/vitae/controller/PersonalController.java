@@ -99,8 +99,7 @@ public class PersonalController extends BaseController {
   }
 
   public EmpleadoDetalleDTO updateEmpleado(int id, EmpleadoUpdateDTO dto) {
-    validateId(id);
-    validateEmpleadoUpdate(dto);
+    validateEmpleadoUpdate(id, dto);
 
     Empleado empleado =
         empleadoRepository
@@ -233,10 +232,13 @@ public class PersonalController extends BaseController {
     }
   }
 
-  private void validateEmpleadoUpdate(EmpleadoUpdateDTO dto) {
+  public void validateEmpleadoUpdate(int id, EmpleadoUpdateDTO dto) {
+
     if (dto == null) {
       throw new IllegalArgumentException("Los datos del empleado no pueden ser nulos");
     }
+
+    validateId(id);
 
     validateNombres(dto.nombres());
     validateApellidos(dto.apellidos());
