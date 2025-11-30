@@ -32,8 +32,6 @@ public class PersonalController extends BaseController {
     this.cargoRepository = cargoRepository;
   }
 
-  // ==================== CONSULTAS ====================
-
   public List<EmpleadoListadoDTO> getEmpleados() {
     return empleadoRepository.findAllListado();
   }
@@ -82,8 +80,6 @@ public class PersonalController extends BaseController {
     return cargoRepository.findAll();
   }
 
-  // ==================== OPERACIONES CRUD ====================
-
   public EmpleadoDetalleDTO createEmpleado(EmpleadoCreateDTO dto) {
     validateEmpleadoCreate(dto);
 
@@ -103,8 +99,7 @@ public class PersonalController extends BaseController {
   }
 
   public EmpleadoDetalleDTO updateEmpleado(int id, EmpleadoUpdateDTO dto) {
-    validateId(id);
-    validateEmpleadoUpdate(dto);
+    validateEmpleadoUpdate(id, dto);
 
     Empleado empleado =
         empleadoRepository
@@ -215,7 +210,7 @@ public class PersonalController extends BaseController {
     return String.format("EMP-%d%03d", year, count + 1);
   }
 
-  private void validateEmpleadoCreate(EmpleadoCreateDTO dto) {
+  public void validateEmpleadoCreate(EmpleadoCreateDTO dto) {
     if (dto == null) {
       throw new IllegalArgumentException("Los datos del empleado no pueden ser nulos");
     }
@@ -237,10 +232,13 @@ public class PersonalController extends BaseController {
     }
   }
 
-  private void validateEmpleadoUpdate(EmpleadoUpdateDTO dto) {
+  public void validateEmpleadoUpdate(int id, EmpleadoUpdateDTO dto) {
+
     if (dto == null) {
       throw new IllegalArgumentException("Los datos del empleado no pueden ser nulos");
     }
+
+    validateId(id);
 
     validateNombres(dto.nombres());
     validateApellidos(dto.apellidos());
@@ -249,7 +247,6 @@ public class PersonalController extends BaseController {
     validateEmail(dto.email());
     validateDireccion(dto.direccion());
     validateFechaIngreso(dto.fechaIngreso());
-    validateFechaSalida(dto.fechaIngreso(), dto.fechaSalida());
     validateCargoId(dto.cargoId());
 
     if (dto.genero() == null) {

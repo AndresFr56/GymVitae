@@ -393,7 +393,7 @@ public class RegisterPersonal extends JPanel {
         cargoId,
         (TipoContrato) cmbTipoContrato.getSelectedItem(),
         dateFechaIngreso.getSelectedDate(),
-        gym.vitae.model.enums.EstadoEmpleado.ACTIVO);
+        null);
   }
 
   private void clearForm() {

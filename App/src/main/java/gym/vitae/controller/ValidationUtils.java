@@ -34,8 +34,6 @@ public final class ValidationUtils {
     }
   }
 
-  // ==================== VALIDACIONES ESPECÍFICAS ====================
-
   public static void validateCedula(String cedula) {
     if (cedula == null || cedula.trim().isEmpty()) {
       throw new IllegalArgumentException("La cédula es obligatoria");
@@ -88,8 +86,6 @@ public final class ValidationUtils {
     validateOptionalString(direccion, "La dirección", 100);
   }
 
-  // ==================== VALIDACIONES DE FECHAS ====================
-
   public static void validateFechaIngreso(LocalDate fechaIngreso) {
     if (fechaIngreso == null) {
       throw new IllegalArgumentException("La fecha de ingreso es obligatoria");
@@ -115,11 +111,9 @@ public final class ValidationUtils {
     }
   }
 
-  // ==================== VALIDACIONES DE IDS ====================
-
   public static void validateId(int id) {
     if (id <= 0) {
-      throw new IllegalArgumentException("El ID debe ser mayor a 0");
+      throw new IllegalArgumentException("El ID no es valido");
     }
   }
 
@@ -128,8 +122,6 @@ public final class ValidationUtils {
       throw new IllegalArgumentException("El cargo es obligatorio");
     }
   }
-
-  // ==================== VALIDACIONES DE PAGINACIÓN ====================
 
   public static void validatePagination(int offset, int limit) {
     if (offset < 0) {
