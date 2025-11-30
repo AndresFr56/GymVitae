@@ -32,7 +32,6 @@ public class PersonalController extends BaseController {
     this.cargoRepository = cargoRepository;
   }
 
-
   public List<EmpleadoListadoDTO> getEmpleados() {
     return empleadoRepository.findAllListado();
   }
@@ -80,7 +79,6 @@ public class PersonalController extends BaseController {
   public List<Cargo> getCargos() {
     return cargoRepository.findAll();
   }
-
 
   public EmpleadoDetalleDTO createEmpleado(EmpleadoCreateDTO dto) {
     validateEmpleadoCreate(dto);
