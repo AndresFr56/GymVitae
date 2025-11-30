@@ -4,26 +4,26 @@ import static gym.vitae.controller.ValidationUtils.*;
 
 import gym.vitae.mapper.MembresiaBeneficioMapper;
 import gym.vitae.model.Beneficio;
-import gym.vitae.model.Membresia;
 import gym.vitae.model.MembresiaBeneficio;
+import gym.vitae.model.TiposMembresia;
 import gym.vitae.model.dtos.membresias.MembresiaBeneficioCreateDTO;
 import gym.vitae.model.dtos.membresias.MembresiaBeneficioDetalleDTO;
 import gym.vitae.model.dtos.membresias.MembresiaBeneficioListadoDTO;
 import gym.vitae.repositories.BeneficioRepository;
 import gym.vitae.repositories.MembresiaBeneficioRepository;
-import gym.vitae.repositories.MembresiaRepository;
+import gym.vitae.repositories.TiposMembresiaRepository;
 import java.util.List;
 
 public class MembresiaBeneficioController extends BaseController {
 
   private final MembresiaBeneficioRepository repository;
-  private final MembresiaRepository membresiaRepository;
+  private final TiposMembresiaRepository tiposRepository;
   private final BeneficioRepository beneficioRepository;
 
   public MembresiaBeneficioController() {
     super();
     this.repository = getRepository(MembresiaBeneficioRepository.class);
-    this.membresiaRepository = getRepository(MembresiaRepository.class);
+    this.tiposRepository = getRepository(TiposMembresiaRepository.class);
     this.beneficioRepository = getRepository(BeneficioRepository.class);
   }
 
@@ -42,13 +42,14 @@ public class MembresiaBeneficioController extends BaseController {
 
   // Crear asociación
   public MembresiaBeneficioDetalleDTO create(MembresiaBeneficioCreateDTO dto) {
+
     validateId(dto.getMembresiaId());
     validateId(dto.getBeneficioId());
 
-    Membresia membresia =
-        membresiaRepository
+    TiposMembresia tipo =
+        tiposRepository
             .findById(dto.getMembresiaId())
-            .orElseThrow(() -> new IllegalArgumentException("Membresía no encontrada"));
+            .orElseThrow(() -> new IllegalArgumentException("Tipo de membresía no encontrado"));
 
     Beneficio beneficio =
         beneficioRepository
@@ -56,7 +57,7 @@ public class MembresiaBeneficioController extends BaseController {
             .orElseThrow(() -> new IllegalArgumentException("Beneficio no encontrado"));
 
     MembresiaBeneficio entity =
-        MembresiaBeneficioMapper.toEntity(dto, membresia, beneficio);
+        MembresiaBeneficioMapper.toEntity(dto, tipo, beneficio);
 
     MembresiaBeneficio saved = repository.save(entity);
 

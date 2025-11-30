@@ -4,10 +4,10 @@ import static gym.vitae.controller.ValidationUtils.*;
 
 import gym.vitae.mapper.BeneficioMapper;
 import gym.vitae.model.Beneficio;
-import gym.vitae.model.dtos.beneficios.BeneficioCreateDTO;
-import gym.vitae.model.dtos.beneficios.BeneficioDetalleDTO;
-import gym.vitae.model.dtos.beneficios.BeneficioListadoDTO;
-import gym.vitae.model.dtos.beneficios.BeneficioUpdateDTO;
+import gym.vitae.model.dtos.membresias.BeneficioCreateDTO;
+import gym.vitae.model.dtos.membresias.BeneficioDetalleDTO;
+import gym.vitae.model.dtos.membresias.BeneficioListadoDTO;
+import gym.vitae.model.dtos.membresias.BeneficioUpdateDTO;
 import gym.vitae.repositories.BeneficioRepository;
 import java.util.List;
 
@@ -27,15 +27,16 @@ public class BeneficiosController extends BaseController {
 
   public BeneficioDetalleDTO getBeneficioById(int id) {
     validateId(id);
-    return beneficioRepository
+    return beneficioRepository 
         .findDetalleById(id)
         .orElseThrow(() -> new IllegalArgumentException("Beneficio no encontrado con ID: " + id));
   }
 
   // Crear
   public BeneficioDetalleDTO createBeneficio(BeneficioCreateDTO dto) {
-    if (dto == null || isNullOrEmpty(dto.getNombre())) {
-      throw new IllegalArgumentException("Los datos del beneficio son inválidos");
+      
+    if (dto == null || dto.getNombre() == null || dto.getNombre().trim().isEmpty()) {
+      throw new IllegalArgumentException("El nombre del beneficio es obligatorio");
     }
 
     Beneficio entity = BeneficioMapper.toEntity(dto);

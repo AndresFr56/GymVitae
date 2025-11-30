@@ -31,20 +31,24 @@ public class TiposMembresiaController extends BaseController {
         .findDetalleById(id)
         .orElseThrow(() -> new IllegalArgumentException("Tipo de membresía no encontrado: " + id));
   }
-
+  
   // Crear
   public TipoMembresiaDetalleDTO createTipo(TipoMembresiaCreateDTO dto) {
-    if (dto == null || isNullOrEmpty(dto.getNombre())) {
-      throw new IllegalArgumentException("Nombre del tipo es obligatorio");
-    }
-
-    TiposMembresia tipo = TipoMembresiaMapper.toEntity(dto);
-    TiposMembresia saved = repository.save(tipo);
-
-    return repository
-        .findDetalleById(saved.getId())
-        .orElseThrow(() -> new IllegalStateException("No se pudo recuperar el tipo creado"));
+  
+      if (dto == null) {
+          throw new IllegalArgumentException("Los datos del tipo de membresía son obligatorios");
+      }
+  
+      validateRequiredString(dto.getNombre(), "El nombre del tipo de membresía", 100);
+  
+      TiposMembresia tipo = TipoMembresiaMapper.toEntity(dto);
+      TiposMembresia saved = repository.save(tipo);
+  
+      return repository
+          .findDetalleById(saved.getId())
+          .orElseThrow(() -> new IllegalStateException("No se pudo recuperar el tipo creado"));
   }
+
 
   // Actualizar
   public TipoMembresiaDetalleDTO updateTipo(int id, TipoMembresiaUpdateDTO dto) {
