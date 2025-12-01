@@ -7,63 +7,46 @@ import gym.vitae.views.common.Metadata;
 import gym.vitae.views.common.ViewContainer;
 import gym.vitae.views.components.CeoHeader;
 import net.miginfocom.swing.MigLayout;
-import javax.swing.*;
 
 @Metadata(
-    name = "Vista de Membresías",
-    description = "Vista para gestionar las membresías del gimnasio")
+        name = "Vista de Membresías",
+        description = "Listado de Membresías del gimnasio")
 public class ViewMembresias extends ViewContainer {
-  
-  private transient MembresiaTablePanel membresiaTablePanel;
-  private transient TipoMembresiaTablePanel tipoMembresiaTablePanel;
-  private JTabbedPane tabbedPane;
 
-  @Override
-  protected void init() {
-    setLayout(new MigLayout("fillx,wrap", "[fill]", "[][fill,grow]"));
+    private MembresiaTablePanel membresiaTablePanel;
 
-    // Controladores
-    MembresiasController membresiaController = new MembresiasController();
-    TiposMembresiaController tipoController = new TiposMembresiaController();
-    ClienteController clienteController = new ClienteController();
+    @Override
+    protected void init() {
 
-    // Header
-    add(CeoHeader.createHeaderPanel(getClass().getAnnotation(Metadata.class)), "growx");
+        setLayout(new MigLayout("fillx,wrap", "[fill]", "[][fill,grow]"));
 
-    // Tabs
-    tabbedPane = new JTabbedPane();
-    
-    membresiaTablePanel = new MembresiaTablePanel(membresiaController, tipoController, clienteController);
-    tipoMembresiaTablePanel = new TipoMembresiaTablePanel(tipoController);
+        MembresiasController membresiaController = new MembresiasController();
+        TiposMembresiaController tipoController = new TiposMembresiaController();
+        ClienteController clienteController = new ClienteController();
 
-    tabbedPane.addTab("Membresías", membresiaTablePanel);
-    tabbedPane.addTab("Tipos de Membresía", tipoMembresiaTablePanel);
+        add(CeoHeader.createHeaderPanel(getClass().getAnnotation(Metadata.class)), "growx");
 
-    add(tabbedPane, "grow");
-  }
+        membresiaTablePanel = new MembresiaTablePanel(
+                membresiaController,
+                tipoController,
+                clienteController
+        );
 
-  @Override
-  protected void load() {
-    if (membresiaTablePanel != null) {
-      membresiaTablePanel.loadData();
+        add(membresiaTablePanel, "grow");
     }
-    if (tipoMembresiaTablePanel != null) {
-      tipoMembresiaTablePanel.loadData();
-    }
-  }
 
-  @Override
-  protected void open() {
-    load();
-  }
+    @Override
+    protected void load() {
+        if (membresiaTablePanel != null) membresiaTablePanel.loadData();
+    }
 
-  @Override
-  protected void refresh() {
-    if (membresiaTablePanel != null) {
-      membresiaTablePanel.refresh();
+    @Override
+    protected void open() {
+        load();
     }
-    if (tipoMembresiaTablePanel != null) {
-      tipoMembresiaTablePanel.refresh();
+
+    @Override
+    protected void refresh() {
+        if (membresiaTablePanel != null) membresiaTablePanel.refresh();
     }
-  }
 }

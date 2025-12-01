@@ -20,8 +20,8 @@ public class UpdateTipoMembresia extends JPanel {
   private static final Logger LOGGER = Logger.getLogger(UpdateTipoMembresia.class.getName());
   private static final int MAX_TEXT_LENGTH = 100;
 
-  private final transient TiposMembresiaController controller;
-  private final transient TipoMembresiaDetalleDTO tipoDetalle;
+  private final TiposMembresiaController controller;
+  private final TipoMembresiaDetalleDTO tipoDetalle;
 
   private JPanel contentPanel;
   private JLabel lblError;

@@ -22,10 +22,11 @@ import raven.datetime.DatePicker;
 public class RegisterMembresia extends JPanel {
 
   private static final Logger LOGGER = Logger.getLogger(RegisterMembresia.class.getName());
+  
+  private final MembresiasController controller;
+  private final TiposMembresiaController tipoController;
+  private final ClienteController clienteController;
 
-  private final transient MembresiasController controller;
-  private final transient TiposMembresiaController tipoController;
-  private final transient ClienteController clienteController;
 
   private JPanel contentPanel;
   private JLabel lblError;

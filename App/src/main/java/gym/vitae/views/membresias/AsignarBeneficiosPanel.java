@@ -22,9 +22,9 @@ public class AsignarBeneficiosPanel extends JPanel {
 
   private static final Logger LOGGER = Logger.getLogger(AsignarBeneficiosPanel.class.getName());
 
-  private final transient TiposMembresiaController tipoController;
-  private final transient BeneficiosController beneficioController;
-  private final transient MembresiaBeneficioController asociacionController;
+  private final TiposMembresiaController tipoController;
+  private final BeneficiosController beneficioController;
+  private final MembresiaBeneficioController asociacionController;
 
   private JPanel contentPanel;
   private JLabel lblError;

@@ -77,4 +77,13 @@ public class TiposMembresiaController extends BaseController {
 
     repository.delete(id);
   }
+
+  public List<TipoMembresiaListadoDTO> getPaged(int page, int size) {
+    int offset = page * size;
+    try {
+        return repository.findAllListadoPaginated(offset, size);
+    } catch (Exception e) {
+        return repository.findAllListado();
+    }}
+
 }

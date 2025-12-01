@@ -153,4 +153,12 @@ public class MembresiasController extends BaseController {
 
     membresiaRepository.delete(id); // cambia estado a CANCELADA
   }
+
+  public List<MembresiaListadoDTO> getPaged(int page, int size) {
+    var all = getMembresias();
+    int from = Math.min(page * size, all.size());
+    int to = Math.min(from + size, all.size());
+    return all.subList(from, to);
+  }
+
 }

@@ -3,12 +3,15 @@ package gym.vitae.views.components;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import gym.vitae.model.Empleado;
+import gym.vitae.model.dtos.membresias.TipoMembresiaListadoDTO;
 import gym.vitae.views.clases.ViewClases;
 import gym.vitae.views.clientes.ViewClientes;
 import gym.vitae.views.common.StateView;
 import gym.vitae.views.common.ViewContainer;
 import gym.vitae.views.common.ViewManager;
 import gym.vitae.views.components.primitives.Icons;
+import gym.vitae.views.membresias.ViewMembresias;
+import gym.vitae.views.membresias.ViewTiposMembresia;
 import gym.vitae.views.personal.ViewPersonal;
 import javax.swing.*;
 
@@ -70,8 +73,8 @@ public class Menu extends SimpleDrawerBuilder {
               .subMenu("Clases Programadas", ViewClases.class)
               .subMenu("Horrarios de Clases"),
           new Item("Membresias", "employee.svg")
-              .subMenu("Listado de Membresias")
-              .subMenu("Tipos de Membresias"),
+              .subMenu("Listado de Membresias", ViewMembresias.class)
+              .subMenu("Tipos de Membresias", ViewTiposMembresia.class),
           new Item("Iventario", "pack.svg")
               .subMenu("Productos y Equipos")
               .subMenu("Proveedores", ViewProveedores.class),

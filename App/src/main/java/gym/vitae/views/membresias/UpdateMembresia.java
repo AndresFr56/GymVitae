@@ -21,8 +21,8 @@ public class UpdateMembresia extends JPanel {
   private static final Logger LOGGER = Logger.getLogger(UpdateMembresia.class.getName());
   private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-  private final transient MembresiasController controller;
-  private final transient MembresiaDetalleDTO membresiaDetalle;
+  private final MembresiasController controller;
+  private final MembresiaDetalleDTO membresiaDetalle;
 
   private JPanel contentPanel;
   private JLabel lblError;
