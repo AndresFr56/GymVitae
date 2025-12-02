@@ -14,7 +14,11 @@ import raven.modal.component.SimpleModalBorder;
 import raven.modal.option.Location;
 import raven.modal.option.Option;
 
+/**
+ * Panel de tabla para la gestión de proveedores
+ */
 public class ProveedorTablePanel extends BaseTablePanel<ProveedorListadoDTO> {
+
   private final transient ProveedoresController controller;
   private JComboBox<String> cmbEstadoProveedor;
 
@@ -25,7 +29,7 @@ public class ProveedorTablePanel extends BaseTablePanel<ProveedorListadoDTO> {
 
   @Override
   protected String[] getColumnNames() {
-    return new String[] {
+    return new String[]{
         "SELECT", "#", "Código", "Nombre", "Contacto", "Teléfono", "Email", "Estado"
     };
   }
@@ -40,7 +44,7 @@ public class ProveedorTablePanel extends BaseTablePanel<ProveedorListadoDTO> {
         proveedor.getContacto(),
         proveedor.getTelefono(),
         proveedor.getEmail(),
-        proveedor.getActivo() ? "ACTIVO":"INACTIVO"
+        proveedor.getActivo() ? "ACTIVO" : "INACTIVO"
     };
   }
 
@@ -71,7 +75,7 @@ public class ProveedorTablePanel extends BaseTablePanel<ProveedorListadoDTO> {
 
   protected JPanel createCustomFilters() {
     JPanel filtersPanel = new JPanel(new MigLayout("insets 0", "[grow,fill]", "[]"));
-    cmbEstadoProveedor = new JComboBox<>(new String[] {"Todos", "ACTIVO", "INACTIVO"});
+    cmbEstadoProveedor = new JComboBox<>(new String[]{"Todos", "ACTIVO", "INACTIVO"});
     cmbEstadoProveedor.addActionListener(e -> loadData());
 
     filtersPanel.add(new JLabel("Estado:"));
@@ -106,19 +110,21 @@ public class ProveedorTablePanel extends BaseTablePanel<ProveedorListadoDTO> {
 
   private boolean matchesEstado(ProveedorListadoDTO proveedor) {
     String selectedEstado = getSelectedEstado();
-    if (selectedEstado == null) return true;
+    if (selectedEstado == null) {
+      return true;
+    }
     boolean activo = proveedor.getActivo();
 
-    if(selectedEstado.equals("ACTIVO")) {
+    if (selectedEstado.equals("ACTIVO")) {
       return activo;
-    } else if(selectedEstado.equals("INACTIVO")) {
+    } else if (selectedEstado.equals("INACTIVO")) {
       return !activo;
     }
     return true;
   }
 
   @Override
-  protected void onAdd(){
+  protected void onAdd() {
     RegisterProveedor registerForm = new RegisterProveedor(controller);
     Option option = ModalDialog.createOption();
     option
@@ -145,7 +151,9 @@ public class ProveedorTablePanel extends BaseTablePanel<ProveedorListadoDTO> {
             refresh();
           }
         });
-    registerForm.getBtnCancelar().addOnClick(e -> {ModalDialog.closeAllModal();});
+    registerForm.getBtnCancelar().addOnClick(e -> {
+      ModalDialog.closeAllModal();
+    });
   }
 
   @Override
@@ -170,7 +178,7 @@ public class ProveedorTablePanel extends BaseTablePanel<ProveedorListadoDTO> {
             }),
         option);
 
-    //Configurar listeners de botones
+    // Configurar listeners de botones
     updateForm
         .getBtnGuardar()
         .addOnClick(
@@ -184,9 +192,17 @@ public class ProveedorTablePanel extends BaseTablePanel<ProveedorListadoDTO> {
     updateForm.getBtnCancelar().addOnClick(e -> ModalDialog.closeAllModal());
   }
 
-  //Hacer el soft delete
-  private void onDeleteEntity(List<ProveedorListadoDTO> proveedor) {
-
+  @Override
+  protected void onDeleteEntities(List<ProveedorListadoDTO> proveedores) {
+    try {
+      for (ProveedorListadoDTO p : proveedores) {
+        controller.logicalDeleteProveedor(p.getId());
+      }
+      showInfoMessage("Proveedor(es) dados de baja correctamente");
+      refresh();
+    } catch (Exception e) {
+      showError("Error al dar de baja los proveedores " + e.getMessage());
+    }
   }
 
   private String getSelectedEstado() {
@@ -196,5 +212,4 @@ public class ProveedorTablePanel extends BaseTablePanel<ProveedorListadoDTO> {
     String selectedEstado = cmbEstadoProveedor.getSelectedItem().toString();
     return (selectedEstado == null || selectedEstado.equals("Todos")) ? null : selectedEstado;
   }
-
 }

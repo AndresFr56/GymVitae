@@ -21,7 +21,11 @@ import javax.swing.text.DocumentFilter;
 import javax.swing.text.JTextComponent;
 import net.miginfocom.swing.MigLayout;
 
+/**
+ * Formulario para actualización del proveedor
+ */
 public class UpdateProveedor extends JPanel {
+
   private static final Logger LOGGER = Logger.getLogger(UpdateProveedor.class.getName());
   private static final int MAX_TEXT_LENGTH = 100;
   private static final int MAX_NUMERIC_LENGTH = 10;
@@ -115,9 +119,8 @@ public class UpdateProveedor extends JPanel {
     txtCodigoProveedor.setEditable(false);
   }
 
-  private void applyInputFilters(){
-    applyMaxLengthFilter(txtCodigoProveedor, 20);
-    applyLettersAndSpacesFilter(txtNombreProveedor, MAX_TEXT_LENGTH);
+  private void applyInputFilters() {
+    applyCompanyNameFilter(txtNombreProveedor, MAX_TEXT_LENGTH);
     applyLettersAndSpacesFilter(txtContactoProveedor, MAX_TEXT_LENGTH);
     applyNumericFilter(txtTelefonoProveedor, MAX_NUMERIC_LENGTH);
     applyMaxLengthFilter(txtEmailProveedor, MAX_TEXT_LENGTH);
@@ -125,16 +128,15 @@ public class UpdateProveedor extends JPanel {
   }
 
   private void applyStyles() {
-    txtCodigoProveedor.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ej: PROV-001");
     txtNombreProveedor.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT,
-        "Nombre del proveedor");
+        "Ej: Suplementos Ecuador S.A.");
     txtContactoProveedor.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT,
-        "Contacto del proveedor");
-    txtTelefonoProveedor.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "10 dígitos");
+        "Ej: María Fabiani");
+    txtTelefonoProveedor.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ej: 0998765432");
     txtEmailProveedor.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT,
-        "correo@ejemplo.com");
+        "Ej: ventas@proveedor.com");
     txtDireccionProveedor.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT,
-        "Dirección del proveedor");
+        "Ej: Av. Barcelona y República");
   }
 
   private void applyMaxLengthFilter(JTextComponent textComponent, int maxLength) {
@@ -145,7 +147,9 @@ public class UpdateProveedor extends JPanel {
               public void insertString(
                   FilterBypass fb, int offset, String string, AttributeSet attr)
                   throws BadLocationException {
-                if (string == null) return;
+                if (string == null) {
+                  return;
+                }
                 if (fb.getDocument().getLength() + string.length() <= maxLength) {
                   super.insertString(fb, offset, string, attr);
                 }
@@ -155,7 +159,9 @@ public class UpdateProveedor extends JPanel {
               public void replace(
                   FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
                   throws BadLocationException {
-                if (text == null) return;
+                if (text == null) {
+                  return;
+                }
                 if (fb.getDocument().getLength() - length + text.length() <= maxLength) {
                   super.replace(fb, offset, length, text, attrs);
                 }
@@ -197,6 +203,34 @@ public class UpdateProveedor extends JPanel {
                 return text.matches("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]*$");
               }
             });
+  }
+
+  private void applyCompanyNameFilter(JTextField textField, int maxLength) {
+    ((AbstractDocument) textField.getDocument())
+        .setDocumentFilter(new DocumentFilter() {
+          @Override
+          public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
+              throws BadLocationException {
+            if (string != null && isValidCompanyName(string)
+                && fb.getDocument().getLength() + string.length() <= maxLength) {
+              super.insertString(fb, offset, string, attr);
+            }
+          }
+
+          @Override
+          public void replace(FilterBypass fb, int offset, int length, String text,
+              AttributeSet attrs)
+              throws BadLocationException {
+            if (text != null && isValidCompanyName(text)
+                && fb.getDocument().getLength() - length + text.length() <= maxLength) {
+              super.replace(fb, offset, length, text, attrs);
+            }
+          }
+
+          private boolean isValidCompanyName(String text) {
+            return text.matches("^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ .,&\\-]*$");
+          }
+        });
   }
 
   private void applyNumericFilter(JTextField textField, int maxLength) {
@@ -257,7 +291,7 @@ public class UpdateProveedor extends JPanel {
     contentPanel.add(new JLabel("* Campos obligatorios"), "gapy 0");
   }
 
-  public void loadProveedorData(){
+  public void loadProveedorData() {
     if (proveedorDetalle == null) {
       throw new IllegalArgumentException("El proveedor no puede ser nulo");
     }
@@ -287,7 +321,7 @@ public class UpdateProveedor extends JPanel {
       }
 
       if (txtContactoProveedor.getText().trim().isEmpty()) {
-        showErrorMessage("El contacto proveedor es obligatorio");
+        showErrorMessage("El contacto del proveedor es obligatorio");
         txtContactoProveedor.requestFocus();
         return false;
       }
@@ -311,8 +345,8 @@ public class UpdateProveedor extends JPanel {
         return false;
       }
 
-      if(txtDireccionProveedor.getText().trim().isEmpty()){
-        showErrorMessage("El direccion del proveedor es obligatorio");
+      if (txtDireccionProveedor.getText().trim().isEmpty()) {
+        showErrorMessage("La direccion del proveedor es obligatoria");
         txtDireccionProveedor.requestFocus();
         return false;
       }
@@ -323,13 +357,13 @@ public class UpdateProveedor extends JPanel {
     }
   }
 
-  public boolean updateProveedor(){
+  public boolean updateProveedor() {
     if (proveedorDetalle == null) {
       showErrorMessage("No se ha cargado el cliente a actualizar");
       return false;
     }
 
-    try{
+    try {
       ProveedorUpdateDTO updateDTO = new ProveedorUpdateDTO(
           txtNombreProveedor.getText().trim(),
           txtContactoProveedor.getText().trim(),
@@ -343,10 +377,10 @@ public class UpdateProveedor extends JPanel {
           "Éxito",
           JOptionPane.INFORMATION_MESSAGE);
       return true;
-    }catch(IllegalArgumentException e){
+    } catch (IllegalArgumentException e) {
       showErrorMessage(e.getMessage());
       return false;
-    }catch(Exception e){
+    } catch (Exception e) {
       LOGGER.severe("Error al actualizar al proveedor: " + e.getMessage());
       showErrorMessage("Error al actualizar al proveedor: " + e.getMessage());
       return false;
