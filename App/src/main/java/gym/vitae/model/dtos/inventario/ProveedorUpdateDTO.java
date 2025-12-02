@@ -21,7 +21,6 @@ public class ProveedorUpdateDTO {
 
   /**
    * Constructor para actualizar datos del proveedor. El código del proveedor no es modificable, el
-   * estado no se puede cambiar al actualizar, solo al dar de baja
    *
    * @param nombre del proveedor
    * @param contacto del proveedor
@@ -34,12 +33,14 @@ public class ProveedorUpdateDTO {
       String contacto,
       String telefono,
       String email,
-      String direccion) {
+      String direccion,
+      Boolean activo) {
     this.nombre = nombre;
     this.contacto = contacto;
     this.telefono = telefono;
     this.email = email;
     this.direccion = direccion;
+    this.activo = activo;
   }
 
   public String getCodigo() {
