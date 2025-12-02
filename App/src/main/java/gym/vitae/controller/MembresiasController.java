@@ -44,20 +44,20 @@ public class MembresiasController extends BaseController {
     }
     
     MembresiasController(
-                MembresiaRepository membresiaRepository,
-                ClienteRepository clienteRepository,
-                TiposMembresiaRepository tiposMembresiaRepository,
-                FacturaRepository facturaRepository,
-                DetallesFacturaRepository detallesFacturaRepository,
-                AuthController authController) { 
-            super(null);
-            this.membresiaRepository = membresiaRepository;
-            this.clienteRepository = clienteRepository;
-            this.tiposMembresiaRepository = tiposMembresiaRepository;
-            this.facturaRepository = facturaRepository;
-            this.detallesFacturaRepository = detallesFacturaRepository;
-            this.authController = authController;
-        }
+                        MembresiaRepository membresiaRepository,
+                        ClienteRepository clienteRepository,
+                        TiposMembresiaRepository tiposMembresiaRepository,
+                        FacturaRepository facturaRepository,
+                        DetallesFacturaRepository detallesFacturaRepository,
+                        AuthController authController) { 
+                    super(null);
+                    this.membresiaRepository = membresiaRepository;
+                    this.clienteRepository = clienteRepository;
+                    this.tiposMembresiaRepository = tiposMembresiaRepository;
+                    this.facturaRepository = facturaRepository;
+                    this.detallesFacturaRepository = detallesFacturaRepository;
+                    this.authController = authController;
+                }
     
 
 
@@ -85,6 +85,8 @@ public class MembresiasController extends BaseController {
         if (dto.getFechaInicio() == null || dto.getFechaFin() == null) {
             throw new IllegalArgumentException("Las fechas de inicio y fin son obligatorias");
         }
+        
+        validateFechaSalida(dto.getFechaInicio(), dto.getFechaFin());
 
         if (dto.getPrecioPagado() == null || dto.getPrecioPagado().doubleValue() <= 0) {
             throw new IllegalArgumentException("El precio pagado debe ser mayor a 0");
@@ -162,7 +164,6 @@ public class MembresiasController extends BaseController {
                         .findById(id)
                         .orElseThrow(
                                 () -> new IllegalArgumentException("Membresía no encontrada con ID: " + id));
-
 
         MembresiaMapper.updateEntity(membresia, dto);
         membresiaRepository.update(membresia);
