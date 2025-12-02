@@ -8,6 +8,7 @@ import gym.vitae.views.components.primitives.ButtonOutline;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.util.logging.Logger;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -44,6 +45,9 @@ public class UpdateProveedor extends JPanel {
   private JTextField txtTelefonoProveedor;
   private JTextField txtEmailProveedor;
   private JTextArea txtDireccionProveedor;
+
+  //Estado del proveedor
+  private JComboBox<String> cmbEstadoProveedor;
 
   //Botones
   private ButtonOutline btnGuardar;
@@ -115,7 +119,7 @@ public class UpdateProveedor extends JPanel {
     txtDireccionProveedor = new JTextArea(2, 20);
     txtDireccionProveedor.setLineWrap(true);
     txtDireccionProveedor.setWrapStyleWord(true);
-
+    cmbEstadoProveedor = new JComboBox<>(new String[]{"ACTIVO", "INACTIVO"});
     txtCodigoProveedor.setEditable(false);
   }
 
@@ -287,6 +291,9 @@ public class UpdateProveedor extends JPanel {
     scrollDir.setPreferredSize(new Dimension(0, 60));
     contentPanel.add(scrollDir);
 
+    contentPanel.add(new JLabel("Estado del Proveedor *"));
+    contentPanel.add(cmbEstadoProveedor);
+
     contentPanel.add(new JLabel(" "), "gapy 10");
     contentPanel.add(new JLabel("* Campos obligatorios"), "gapy 0");
   }
@@ -301,6 +308,7 @@ public class UpdateProveedor extends JPanel {
     txtTelefonoProveedor.setText(proveedorDetalle.getTelefono());
     txtEmailProveedor.setText(proveedorDetalle.getEmail());
     txtDireccionProveedor.setText(proveedorDetalle.getDireccion());
+    cmbEstadoProveedor.setSelectedItem(proveedorDetalle.getActivo() ? "ACTIVO" : "INACTIVO");
     hideErrors();
     applyInputFilters();
   }
@@ -369,7 +377,8 @@ public class UpdateProveedor extends JPanel {
           txtContactoProveedor.getText().trim(),
           txtTelefonoProveedor.getText().trim(),
           txtEmailProveedor.getText().trim(),
-          txtDireccionProveedor.getText().trim());
+          txtDireccionProveedor.getText().trim(),
+          "ACTIVO".equals(cmbEstadoProveedor.getSelectedItem()));
       controller.updateProveedor(proveedorDetalle.getId(), updateDTO);
       JOptionPane.showMessageDialog(
           this,
