@@ -14,8 +14,7 @@ import gym.vitae.model.TiposMembresia;
 import gym.vitae.model.dtos.membresias.MembresiaCreateDTO;
 import gym.vitae.model.dtos.membresias.MembresiaDetalleDTO;
 import gym.vitae.model.dtos.membresias.MembresiaUpdateDTO;
-import gym.vitae.model.enums.EstadoFactura;
-import gym.vitae.model.enums.EstadoMembresia; // Importación necesaria
+import gym.vitae.model.enums.EstadoMembresia; 
 import gym.vitae.repositories.ClienteRepository;
 import gym.vitae.repositories.DetallesFacturaRepository;
 import gym.vitae.repositories.FacturaRepository;
