@@ -843,15 +843,23 @@ VALUES ('PROV-001', 'Suplementos Ecuador S.A.', 'Carlos López', '042345678', 'v
        ('PROV-005', 'Maquinarias Gym Import', 'Roberto Silva', '042789012', 'importaciones@gymimport.com',
         'Puerto Marítimo Zona Industrial', TRUE);
 
+-- Facturas para membresías (insertar ANTES de las membresías)
+INSERT INTO facturas (numero_factura, cliente_id, empleado_responsable_id, fecha_emision, tipo_venta, total, estado)
+VALUES
+    ('FAC-202511000001', 1, 3, '2025-11-01', 'MEMBRESIA', 50.00, 'PAGADA'),
+    ('FAC-202510000002', 2, 3, '2025-10-15', 'MEMBRESIA', 135.00, 'PAGADA'),
+    ('FAC-202509000003', 3, 3, '2025-09-01', 'MEMBRESIA', 480.00, 'PAGADA'),
+    ('FAC-202511000004', 4, 3, '2025-11-05', 'MEMBRESIA', 50.00, 'PAGADA'),
+    ('FAC-202511000005', 5, 3, '2025-11-10', 'MEMBRESIA', 35.00, 'PAGADA');
 
--- Membresías activas
-INSERT INTO membresias (cliente_id, tipo_membresia_id, fecha_inicio, fecha_fin, precio_pagado, estado)
-VALUES (1, 2, '2025-11-01', '2025-11-30', 50.00, 'ACTIVA'),
-       (2, 3, '2025-10-15', '2026-01-15', 135.00, 'ACTIVA'),
-       (3, 5, '2025-09-01', '2026-08-31', 480.00, 'ACTIVA'),
-       (4, 2, '2025-11-05', '2025-12-05', 50.00, 'ACTIVA'),
-       (5, 1, '2025-11-10', '2025-12-10', 35.00, 'ACTIVA');
-
+-- Membresías activas (con factura_id)
+INSERT INTO membresias (cliente_id, tipo_membresia_id, factura_id, fecha_inicio, fecha_fin, precio_pagado, estado)
+VALUES (1, 2, 1, '2025-11-01', '2025-11-30', 50.00, 'ACTIVA'),
+       (2, 3, 2, '2025-10-15', '2026-01-15', 135.00, 'ACTIVA'),
+       (3, 5, 3, '2025-09-01', '2026-08-31', 480.00, 'ACTIVA'),
+       (4, 2, 4, '2025-11-05', '2025-12-05', 50.00, 'ACTIVA'),
+       (5, 1, 5, '2025-11-10', '2025-12-10', 35.00, 'ACTIVA');
+  
 
 -- ============================================
 -- VISTAS
