@@ -19,7 +19,6 @@ import java.time.LocalDate;
  * @param cargoId ID del cargo
  * @param tipoContrato Tipo de contrato
  * @param fechaIngreso Fecha de ingreso
- * @param fechaSalida Fecha de salida (puede ser null)
  * @param estado Estado del empleado
  */
 public record EmpleadoUpdateDTO(
@@ -33,5 +32,4 @@ public record EmpleadoUpdateDTO(
     Integer cargoId,
     TipoContrato tipoContrato,
     LocalDate fechaIngreso,
-    LocalDate fechaSalida,
     EstadoEmpleado estado) {}

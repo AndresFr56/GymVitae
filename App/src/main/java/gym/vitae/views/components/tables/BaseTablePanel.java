@@ -183,7 +183,6 @@ public abstract class BaseTablePanel<T> extends JPanel {
     return actions;
   }
 
-
   protected void onAdd() {
     showInfoMessage("Funcionalidad de agregar en desarrollo");
   }

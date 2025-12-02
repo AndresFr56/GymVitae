@@ -13,9 +13,8 @@ import gym.vitae.views.components.primitives.Icons;
 import gym.vitae.views.membresias.ViewMembresias;
 import gym.vitae.views.membresias.ViewTiposMembresia;
 import gym.vitae.views.personal.ViewPersonal;
-import javax.swing.*;
-
 import gym.vitae.views.proveedores.ViewProveedores;
+import javax.swing.*;
 import raven.extras.AvatarIcon;
 import raven.modal.drawer.DrawerPanel;
 import raven.modal.drawer.data.Item;

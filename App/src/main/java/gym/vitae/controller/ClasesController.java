@@ -291,7 +291,7 @@ public class ClasesController extends BaseController {
 
   /** Valida la descripción (opcional). */
   private void validateDescripcion(String descripcion) {
-    if (descripcion != null && descripcion.length() > 500) {
+    if (descripcion != null && descripcion.length() > 200) {
       throw new IllegalArgumentException("La descripción no puede exceder 500 caracteres");
     }
   }

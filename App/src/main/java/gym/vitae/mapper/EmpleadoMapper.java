@@ -195,7 +195,6 @@ public class EmpleadoMapper {
     empleado.setCargo(cargo);
     empleado.setTipoContrato(dto.tipoContrato());
     empleado.setFechaIngreso(dto.fechaIngreso());
-    empleado.setFechaSalida(dto.fechaSalida());
     empleado.setEstado(dto.estado());
   }
 }
