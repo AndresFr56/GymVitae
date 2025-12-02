@@ -1,6 +1,7 @@
 package gym.vitae.model.dtos.membresias;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class TipoMembresiaCreateDTO {
 
@@ -9,7 +10,7 @@ public class TipoMembresiaCreateDTO {
   private Integer duracionDias;
   private BigDecimal costo;
   private Boolean accesoCompleto;
-
+  private List<Integer> beneficiosIds;
   public TipoMembresiaCreateDTO() {}
 
   public TipoMembresiaCreateDTO(
