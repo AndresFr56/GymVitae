@@ -14,7 +14,8 @@ import gym.vitae.model.TiposMembresia;
 import gym.vitae.model.dtos.membresias.MembresiaCreateDTO;
 import gym.vitae.model.dtos.membresias.MembresiaDetalleDTO;
 import gym.vitae.model.dtos.membresias.MembresiaUpdateDTO;
-import gym.vitae.model.enums.EstadoMembresia; 
+import gym.vitae.model.enums.EstadoFactura;
+import gym.vitae.model.enums.EstadoMembresia;
 import gym.vitae.repositories.ClienteRepository;
 import gym.vitae.repositories.DetallesFacturaRepository;
 import gym.vitae.repositories.FacturaRepository;
@@ -42,9 +43,14 @@ class MembresiasControllerTest {
     @Mock private DetallesFacturaRepository detallesFacturaRepository;
     @Mock private AuthController authController;
     
+    // CORRECCIÓN: @InjectMocks se encarga de inyectar los Mocks de arriba
     @InjectMocks
     private MembresiasController controller; 
-  
+
+    // **NOTA:** Se eliminó el constructor de prueba manual y el método setUp().
+
+    // --- Data de prueba simulada ---
+    
     private MembresiaCreateDTO createValidDTO() {
         return new MembresiaCreateDTO(
             10, 
@@ -53,7 +59,7 @@ class MembresiasControllerTest {
             LocalDate.now(), 
             LocalDate.now().plusMonths(1), 
             new BigDecimal("60.00"),
-            null 
+            null
         );
     }
     
@@ -83,22 +89,26 @@ class MembresiasControllerTest {
         dto.setFechaInicio(LocalDate.now());
         dto.setFechaFin(LocalDate.now().plusMonths(1));
         dto.setPrecioPagado(new BigDecimal("60.00"));
-        dto.setEstado(EstadoMembresia.ACTIVA); 
+        dto.setEstado(EstadoMembresia.ACTIVA);
         return dto;
     }
 
+    // --- Tests de Creación (Validaciones) ---
 
     @Test
     @DisplayName("RC-CEV-01: Creación válida y flujo completo de factura")
     void createMembresia_validDto_success() {
+        // Arrange
         MembresiaCreateDTO dto = createValidDTO();
         int savedMembresiaId = 1;
         int savedFacturaId = 5;
         
+        // Mocks de existencias
         when(clienteRepository.findById(dto.getClienteId())).thenReturn(Optional.of(createCliente(dto.getClienteId())));
         when(tiposMembresiaRepository.findById(dto.getTipoMembresiaId())).thenReturn(Optional.of(createTipoMembresia(dto.getTipoMembresiaId())));
         when(authController.getEmpleadoActual()).thenReturn(createEmpleado(50));
         
+        // Mocks de guardado (Factura -> Membresia)
         Factura savedFactura = new Factura();
         savedFactura.setId(savedFacturaId);
         when(facturaRepository.save(any(Factura.class))).thenReturn(savedFactura);
@@ -107,10 +117,13 @@ class MembresiasControllerTest {
         savedMembresia.setId(savedMembresiaId);
         when(membresiaRepository.save(any(Membresia.class))).thenReturn(savedMembresia);
         
+        // Mock de retorno final
         when(membresiaRepository.findDetalleById(savedMembresiaId)).thenReturn(Optional.of(createDetalleDTO(savedMembresiaId)));
 
+        // Act
         MembresiaDetalleDTO result = controller.createMembresia(dto);
 
+        // Assert
         assertNotNull(result);
         assertEquals(savedMembresiaId, result.getId());
         
@@ -123,10 +136,12 @@ class MembresiasControllerTest {
     @Test
     @DisplayName("RC-CEI-02: Fechas de inicio/fin nulas")
     void createMembresia_nullDates_throwsException() {
+        // Arrange
         MembresiaCreateDTO dto = createValidDTO();
         dto.setFechaInicio(null);
         dto.setFechaFin(null);
         
+        // Act & Assert
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class, 
             () -> controller.createMembresia(dto)
@@ -138,14 +153,17 @@ class MembresiasControllerTest {
     @Test
     @DisplayName("RC-CEI-03: Fecha de inicio es posterior a fecha de fin")
     void createMembresia_inicioAfterFin_throwsException() {
+        // Arrange
         MembresiaCreateDTO dto = createValidDTO();
         dto.setFechaInicio(LocalDate.now().plusDays(10));
-        dto.setFechaFin(LocalDate.now().plusDays(5)); 
+        dto.setFechaFin(LocalDate.now().plusDays(5)); // Fin antes de inicio
         
+        // Mocks de existencias
         when(clienteRepository.findById(dto.getClienteId())).thenReturn(Optional.of(createCliente(dto.getClienteId())));
         when(tiposMembresiaRepository.findById(dto.getTipoMembresiaId())).thenReturn(Optional.of(createTipoMembresia(dto.getTipoMembresiaId())));
         when(authController.getEmpleadoActual()).thenReturn(createEmpleado(50));
         
+        // Act & Assert
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class, 
             () -> controller.createMembresia(dto)
@@ -157,9 +175,11 @@ class MembresiasControllerTest {
     @ParameterizedTest(name = "RC-CEI-04: Precio pagado inválido: {0}")
     @ValueSource(doubles = {0.0, -10.0})
     void createMembresia_invalidPrecioPagado_throwsException(double precio) {
+        // Arrange
         MembresiaCreateDTO dto = createValidDTO();
         dto.setPrecioPagado(BigDecimal.valueOf(precio));
         
+        // Act & Assert
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class, 
             () -> controller.createMembresia(dto)
@@ -171,9 +191,11 @@ class MembresiasControllerTest {
     @Test
     @DisplayName("RC-CEI-05: Cliente no encontrado")
     void createMembresia_clienteNotFound_throwsException() {
+        // Arrange
         MembresiaCreateDTO dto = createValidDTO();
         when(clienteRepository.findById(dto.getClienteId())).thenReturn(Optional.empty());
         
+        // Act & Assert
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class, 
             () -> controller.createMembresia(dto)
@@ -184,12 +206,14 @@ class MembresiasControllerTest {
     @Test
     @DisplayName("RC-CEI-06: Empleado no logueado")
     void createMembresia_noLoggedInEmployee_throwsException() {
+        // Arrange
         MembresiaCreateDTO dto = createValidDTO();
         
         when(clienteRepository.findById(dto.getClienteId())).thenReturn(Optional.of(createCliente(dto.getClienteId())));
         when(tiposMembresiaRepository.findById(dto.getTipoMembresiaId())).thenReturn(Optional.of(createTipoMembresia(dto.getTipoMembresiaId())));
         when(authController.getEmpleadoActual()).thenReturn(null);
         
+        // Act & Assert
         IllegalStateException ex = assertThrows(
             IllegalStateException.class, 
             () -> controller.createMembresia(dto)
@@ -198,10 +222,12 @@ class MembresiasControllerTest {
         verify(membresiaRepository, never()).save(any());
     }
 
+    // --- Tests de Actualización ---
 
     @Test
     @DisplayName("RC-AEV-01: Actualización válida")
     void updateMembresia_validDto_success() {
+        // Arrange
         int id = 1;
         
         MembresiaUpdateDTO updateDto = new MembresiaUpdateDTO();
@@ -215,21 +241,26 @@ class MembresiasControllerTest {
         when(membresiaRepository.findById(id)).thenReturn(Optional.of(existingMembresia));
         when(membresiaRepository.findDetalleById(id)).thenReturn(Optional.of(createDetalleDTO(id)));
         
+        // Act
         MembresiaDetalleDTO result = controller.updateMembresia(id, updateDto);
         
+        // Assert
         assertNotNull(result);
         verify(membresiaRepository).findById(id);
         verify(membresiaRepository).update(any(Membresia.class));
         verify(membresiaRepository).findDetalleById(id);
     }
     
+    // --- Tests de Cancelación ---
     
     @Test
     void cancelarMembresia_exists_success() {
+        // Arrange
         int id = 1;
         when(membresiaRepository.existsById(id)).thenReturn(true);
         doNothing().when(membresiaRepository).delete(id);
         
+        // Act & Assert
         assertDoesNotThrow(() -> controller.cancelarMembresia(id));
         verify(membresiaRepository).existsById(id);
         verify(membresiaRepository).delete(id);
@@ -237,9 +268,11 @@ class MembresiasControllerTest {
 
     @Test
     void cancelarMembresia_notExists_throwsException() {
+        // Arrange
         int id = 99;
         when(membresiaRepository.existsById(id)).thenReturn(false);
         
+        // Act & Assert
         assertThrows(IllegalArgumentException.class, () -> controller.cancelarMembresia(id));
         verify(membresiaRepository).existsById(id);
         verify(membresiaRepository, never()).delete(anyInt());

@@ -27,13 +27,16 @@ class BeneficiosControllerTest {
     @Mock
     private BeneficioRepository beneficioRepository;
     
+    // CORRECCIÓN: Esto es correcto, Mockito se encarga de la inicialización
     @InjectMocks
     private BeneficiosController controller;
 
+    // **NOTA:** Se eliminó el constructor de prueba manual y el método setUp().
+    
     private BeneficioCreateDTO createValidCreateDTO() {
         BeneficioCreateDTO dto = new BeneficioCreateDTO();
         dto.setNombre("Acceso a Sauna");
-        dto.setDescripcion("Acceso ilimitado a la sauna");
+        dto.setDescripcion("Entrada gratuita a la sauna");
         dto.setActivo(true);
         return dto;
     }
@@ -47,17 +50,18 @@ class BeneficiosControllerTest {
     }
 
     private Beneficio createEntity(int id, String nombre) {
-        Beneficio entity = new Beneficio();
-        entity.setId(id);
-        entity.setNombre(nombre);
-        return entity;
+        Beneficio b = new Beneficio();
+        b.setId(id);
+        b.setNombre(nombre);
+        b.setActivo(true);
+        return b;
     }
 
     private BeneficioDetalleDTO createDetalleDTO(int id) {
         BeneficioDetalleDTO dto = new BeneficioDetalleDTO();
         dto.setId(id);
         dto.setNombre("Acceso a Sauna");
-        dto.setDescripcion("Acceso ilimitado a la sauna");
+        dto.setDescripcion("Entrada gratuita a la sauna");
         dto.setActivo(true);
         return dto;
     }
@@ -106,7 +110,7 @@ class BeneficiosControllerTest {
     
     @ParameterizedTest(name = "RC-CEI-02: Nombre inválido: {0}")
     @NullAndEmptySource
-    @ValueSource(strings = {"  ", "123", "Piscina!"})
+    @ValueSource(strings = {"  ", "123", "Piscina!"})
     void createBeneficio_nombreInvalido_throwsException(String nombre) {
         BeneficioCreateDTO dto = createValidCreateDTO();
         dto.setNombre(nombre); 

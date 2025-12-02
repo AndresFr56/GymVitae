@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
+import gym.vitae.mapper.TipoMembresiaMapper; // <-- ¡Faltaba la importación!
 import gym.vitae.model.TiposMembresia;
 import gym.vitae.model.dtos.membresias.MembresiaBeneficioCreateDTO;
 import gym.vitae.model.dtos.membresias.TipoMembresiaCreateDTO;
@@ -21,7 +22,6 @@ import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.InjectMocks; 
-
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,6 +33,9 @@ class TiposMembresiaControllerTest {
     
     @Mock
     private MembresiaBeneficioController asociacionController;
+    
+    @Mock // <-- ¡Faltaba el mock para el mapper!
+    private TipoMembresiaMapper mapper;
 
     @InjectMocks
     private TiposMembresiaController controller;
@@ -43,14 +46,18 @@ class TiposMembresiaControllerTest {
 
 
     private TipoMembresiaCreateDTO createValidDTO() {
-        return new TipoMembresiaCreateDTO(
-            "Mensual Estandar", 
-            "Acceso un mes", 
-            30, 
-            new BigDecimal("50.00"), 
-            true, 
-            List.of()
-        );
+        TipoMembresiaCreateDTO dto = new TipoMembresiaCreateDTO();
+        dto.setNombre("Premium");
+        dto.setDescripcion("Acceso total");
+        dto.setDuracionDias(30);
+        
+        // CORRECCIÓN CLAVE: Usar setCosto en lugar de setPrecioBase
+        dto.setCosto(new BigDecimal("100.00")); 
+        
+        dto.setAccesoCompleto(true);
+        // Usar un listado de beneficios por defecto para que las pruebas funcionen
+        dto.setBeneficiosIds(List.of(10, 20)); 
+        return dto;
     }
     
     private TiposMembresia createEntity(int id, String nombre) {
@@ -63,10 +70,10 @@ class TiposMembresiaControllerTest {
     private TipoMembresiaDetalleDTO createDetalleDTO(int id) {
         TipoMembresiaDetalleDTO dto = new TipoMembresiaDetalleDTO();
         dto.setId(id);
-        dto.setNombre("Mensual Estandar");
-        dto.setDescripcion("Acceso un mes");
+        dto.setNombre("Premium");
+        dto.setDescripcion("Acceso total");
         dto.setDuracionDias(30);
-        dto.setCosto(new BigDecimal("50.00"));
+        dto.setCosto(new BigDecimal("100.00")); // Costo consistente
         dto.setAccesoCompleto(true);
         dto.setActivo(true); 
         return dto;
@@ -101,10 +108,15 @@ class TiposMembresiaControllerTest {
     @DisplayName("RC-CEV-01: Creación válida (datos correctos)")
     void createTipo_validDto_success() {
         TipoMembresiaCreateDTO dto = createValidDTO();
+        // Cambiamos a un DTO sin beneficios para este test específico, si es necesario,
+        // o asumimos que el controller puede manejar la lista de beneficios vacía/null en este punto.
+        dto.setBeneficiosIds(List.of()); 
         TiposMembresia savedEntity = createEntity(1, dto.getNombre());
         TipoMembresiaDetalleDTO expectedDetalle = createDetalleDTO(1);
 
         when(repository.save(any(TiposMembresia.class))).thenReturn(savedEntity);
+        // Usamos el mapper para el flujo si el controller lo utiliza internamente antes de findDetalleById
+        when(mapper.toDetalleDTO(any(TiposMembresia.class))).thenReturn(expectedDetalle); 
         when(repository.findDetalleById(1)).thenReturn(Optional.of(expectedDetalle));
 
         TipoMembresiaDetalleDTO result = controller.createTipo(dto);
@@ -163,6 +175,7 @@ class TiposMembresiaControllerTest {
     @DisplayName("RC-AEV-01: Actualización válida")
     void updateTipo_validDto_success() {
         int id = 1;
+        // Usando el constructor de TipoMembresiaUpdateDTO
         TipoMembresiaUpdateDTO updateDto = new TipoMembresiaUpdateDTO(
             "Premium Actualizado", "Descripcion", 90, new BigDecimal("100.00"), true, true 
         );
@@ -170,7 +183,8 @@ class TiposMembresiaControllerTest {
         TipoMembresiaDetalleDTO expectedDetalle = createDetalleDTO(id);
         
         when(repository.findById(id)).thenReturn(Optional.of(existingEntity));
-        when(repository.findDetalleById(id)).thenReturn(Optional.of(expectedDetalle));
+        // Se asume que el controller usa el mapper.update
+        when(repository.findDetalleById(id)).thenReturn(Optional.of(expectedDetalle)); 
         
         TipoMembresiaDetalleDTO result = controller.updateTipo(id, updateDto);
         
@@ -235,19 +249,25 @@ class TiposMembresiaControllerTest {
     @Test
     @DisplayName("RC-CEV-05: Creación válida con beneficios")
     void createTipoConBeneficios_validDto_success() {
+        // Arrange
         TipoMembresiaCreateDTO dto = createValidDTO();
-        dto.setBeneficiosIds(List.of(10, 11)); // Beneficios a asociar
+        dto.setBeneficiosIds(List.of(10, 11)); // Beneficios a asociar (usando una lista con 2 elementos)
         TiposMembresia savedEntity = createEntity(1, dto.getNombre());
         TipoMembresiaDetalleDTO expectedDetalle = createDetalleDTO(1);
 
         when(repository.save(any(TiposMembresia.class))).thenReturn(savedEntity);
+        // Simular el mapeo antes de la búsqueda final
+        when(mapper.toDetalleDTO(any(TiposMembresia.class))).thenReturn(expectedDetalle);
         when(repository.findDetalleById(1)).thenReturn(Optional.of(expectedDetalle));
         doNothing().when(asociacionController).create(any(MembresiaBeneficioCreateDTO.class)); 
 
+        // Act
         TipoMembresiaDetalleDTO result = controller.createTipoConBeneficios(dto);
 
+        // Assert
         assertNotNull(result);
         verify(repository).save(any(TiposMembresia.class));
+        // Se espera que se llame dos veces por los dos beneficios
         verify(asociacionController, times(2)).create(any(MembresiaBeneficioCreateDTO.class)); 
         verify(repository).findDetalleById(1);
     }
@@ -255,18 +275,23 @@ class TiposMembresiaControllerTest {
     @Test
     @DisplayName("RC-CEI-06: Creación con beneficios (un beneficio inválido ignora error)")
     void createTipoConBeneficios_oneInvalidBeneficio_logsAndContinues() {
+        // Arrange
         TipoMembresiaCreateDTO dto = createValidDTO();
         dto.setBeneficiosIds(List.of(10, 99)); // Beneficio 99 es inválido
         TiposMembresia savedEntity = createEntity(1, dto.getNombre());
         TipoMembresiaDetalleDTO expectedDetalle = createDetalleDTO(1);
 
         when(repository.save(any(TiposMembresia.class))).thenReturn(savedEntity);
+        when(mapper.toDetalleDTO(any(TiposMembresia.class))).thenReturn(expectedDetalle);
         when(repository.findDetalleById(1)).thenReturn(Optional.of(expectedDetalle));
         
+        // Simular que el primer llamado pasa y el segundo falla (Beneficio 99)
         doNothing()
             .doThrow(new IllegalArgumentException("Beneficio ID 99 no válido"))
             .when(asociacionController).create(any(MembresiaBeneficioCreateDTO.class)); 
 
+        // Act & Assert
+        // El controlador principal debe ignorar la excepción y devolver el DTO
         assertDoesNotThrow(() -> controller.createTipoConBeneficios(dto));
 
         verify(repository).save(any(TiposMembresia.class));
