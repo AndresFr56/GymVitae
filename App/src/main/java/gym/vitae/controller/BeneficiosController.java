@@ -39,15 +39,12 @@ public class BeneficiosController extends BaseController {
             throw new IllegalArgumentException("El nombre del beneficio es obligatorio");
         }
 
-        // 1. Nombre: Obligatorio, Máximo 50 caracteres
         validateRequiredString(dto.getNombre(), "El nombre del beneficio", 50);
 
-        // 2. Nombre: Solo letras y espacios (Validación manual)
         if (!dto.getNombre().matches("^[a-zA-Z\\s]+$")) {
             throw new IllegalArgumentException("El nombre del beneficio solo debe contener letras y espacios.");
         }
         
-        // 3. Descripción: Opcional, Máximo 200 caracteres
         validateOptionalString(dto.getDescripcion(), "La descripción del beneficio", 200);
         
         Beneficio entity = BeneficioMapper.toEntity(dto);
@@ -67,15 +64,12 @@ public class BeneficiosController extends BaseController {
                 .findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Beneficio no encontrado con ID: " + id));
 
-        // 1. Nombre: Obligatorio, Máximo 50 caracteres
         validateRequiredString(dto.getNombre(), "El nombre del beneficio", 50);
 
-        // 2. Nombre: Solo letras y espacios (Validación manual)
         if (!dto.getNombre().matches("^[a-zA-Z\\s]+$")) {
             throw new IllegalArgumentException("El nombre del beneficio solo debe contener letras y espacios.");
         }
         
-        // 3. Descripción: Opcional, Máximo 200 caracteres
         validateOptionalString(dto.getDescripcion(), "La descripción del beneficio", 200);
         
         BeneficioMapper.updateEntity(beneficio, dto);
