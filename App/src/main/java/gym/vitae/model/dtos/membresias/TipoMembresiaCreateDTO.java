@@ -64,4 +64,6 @@ public class TipoMembresiaCreateDTO {
   public void setAccesoCompleto(Boolean accesoCompleto) {
     this.accesoCompleto = accesoCompleto;
   }
+
+  
 }

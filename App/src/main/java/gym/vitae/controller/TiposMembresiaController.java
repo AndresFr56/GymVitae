@@ -67,7 +67,7 @@ public class TiposMembresiaController extends BaseController {
         .orElseThrow(() -> new IllegalStateException("Error al recuperar el tipo actualizado"));
   }
 
-  // Eliminar (soft delete: activo = false)
+  // Eliminar
   public void deleteTipo(int id) {
     validateId(id);
 

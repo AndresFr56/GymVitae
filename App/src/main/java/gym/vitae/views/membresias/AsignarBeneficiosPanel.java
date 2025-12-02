@@ -75,7 +75,6 @@ public class AsignarBeneficiosPanel extends JPanel {
   }
 
   private void initializeComponents() {
-    // ComboBox de tipos de membresía
     cmbTipoMembresia = new JComboBox<>();
     cmbTipoMembresia.setRenderer(new DefaultListCellRenderer() {
       @Override
@@ -90,7 +89,6 @@ public class AsignarBeneficiosPanel extends JPanel {
     });
     cmbTipoMembresia.addActionListener(e -> cargarBeneficios());
 
-    // Tabla de beneficios asignados
     modelAsignados = new DefaultTableModel(
         new Object[]{"ID", "Beneficio", "Descripción"}, 0) {
       @Override
@@ -101,7 +99,6 @@ public class AsignarBeneficiosPanel extends JPanel {
     tableBeneficiosAsignados = new JTable(modelAsignados);
     tableBeneficiosAsignados.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-    // Lista de beneficios disponibles
     modelDisponibles = new DefaultListModel<>();
     listBeneficiosDisponibles = new JList<>(modelDisponibles);
     listBeneficiosDisponibles.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -135,27 +132,23 @@ public class AsignarBeneficiosPanel extends JPanel {
 
     createTitle("Gestión de Beneficios");
 
-    // Panel dividido
     JPanel splitPanel = new JPanel(new MigLayout(
         "fill,insets 0", 
         "[fill,grow][100][fill,grow]", 
         "[fill,grow]"));
 
-    // Panel izquierdo - Beneficios disponibles
     JPanel leftPanel = new JPanel(new BorderLayout());
     leftPanel.add(new JLabel("Beneficios Disponibles"), BorderLayout.NORTH);
     JScrollPane scrollDisponibles = new JScrollPane(listBeneficiosDisponibles);
     scrollDisponibles.setPreferredSize(new Dimension(250, 300));
     leftPanel.add(scrollDisponibles, BorderLayout.CENTER);
 
-    // Panel central - Botones
     JPanel centerPanel = new JPanel(new MigLayout("fill,insets 0", "[fill]", "[][][grow][]"));
     centerPanel.add(new JLabel(" "), "grow");
     centerPanel.add(btnAgregar, "center");
     centerPanel.add(new JLabel(" "), "grow");
     centerPanel.add(btnEliminar, "center");
 
-    // Panel derecho - Beneficios asignados
     JPanel rightPanel = new JPanel(new BorderLayout());
     rightPanel.add(new JLabel("Beneficios Asignados"), BorderLayout.NORTH);
     JScrollPane scrollAsignados = new JScrollPane(tableBeneficiosAsignados);
@@ -211,11 +204,10 @@ public class AsignarBeneficiosPanel extends JPanel {
         modelAsignados.addRow(new Object[]{
             asoc.getId(),
             asoc.getBeneficioNombre(),
-            "" // Descripción si la necesitas
+            "" 
         });
       }
 
-      // Cargar beneficios disponibles (todos menos los ya asignados)
       List<String> beneficiosAsignados = asociaciones.stream()
           .map(MembresiaBeneficioListadoDTO::getBeneficioNombre)
           .toList();

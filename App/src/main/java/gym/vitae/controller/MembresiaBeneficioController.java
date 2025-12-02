@@ -40,7 +40,7 @@ public class MembresiaBeneficioController extends BaseController {
         .orElseThrow(() -> new IllegalArgumentException("Asociación no encontrada: " + id));
   }
 
-  // Crear asociación
+  // Crea asociación
   public MembresiaBeneficioDetalleDTO create(MembresiaBeneficioCreateDTO dto) {
 
     validateId(dto.getMembresiaId());
