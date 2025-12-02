@@ -25,7 +25,7 @@ public class TipoMembresiaTablePanel extends BaseTablePanel<TipoMembresiaListado
 
     @Override
     protected List<TipoMembresiaListadoDTO> fetchAllData() {
-        return controller.getTipos(); // <-- ESTE SÍ EXISTE
+        return controller.getTipos();
     }
 
     @Override

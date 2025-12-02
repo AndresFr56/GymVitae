@@ -27,7 +27,7 @@ public class UpdateMembresia extends JPanel {
   private JPanel contentPanel;
   private JLabel lblError;
 
-  // Campos informativos (no editables)
+  // Campos
   private JTextField txtCliente;
   private JTextField txtTipoMembresia;
   private JTextField txtFechaInicio;
@@ -205,7 +205,6 @@ public class UpdateMembresia extends JPanel {
         return false;
       }
 
-      // Validar que la fecha de fin no sea anterior a la fecha de inicio
       if (dateFechaFin.getSelectedDate().isBefore(membresiaDetalle.getFechaInicio())) {
         showErrorMessage("La fecha de fin no puede ser anterior a la fecha de inicio");
         return false;

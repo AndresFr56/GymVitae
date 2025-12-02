@@ -31,7 +31,6 @@ public class RegisterTipoMembresia extends JPanel {
   private JTextField txtCosto;
   private JCheckBox chkAccesoCompleto;
 
-  // Botones
   private ButtonOutline btnGuardar;
   private ButtonOutline btnCancelar;
 
@@ -98,7 +97,7 @@ public class RegisterTipoMembresia extends JPanel {
     chkAccesoCompleto = new JCheckBox("El cliente tendrá acceso completo al gimnasio");
     chkAccesoCompleto.setSelected(true);
 
-    // Aplicar filtros
+    //filtros
     applyMaxLengthFilter(txtNombre, 50);
     applyMaxLengthFilter(txtDescripcion, 255);
     applyNumericFilter(txtDuracionDias, 5);
