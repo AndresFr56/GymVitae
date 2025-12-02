@@ -47,4 +47,13 @@ public class BeneficioListadoDTO {
   public void setActivo(Boolean activo) {
     this.activo = activo;
   }
+
+  /**
+   * Sobrescribe el método toString para devolver el nombre del beneficio.
+   * Esto soluciona el problema de visualización en componentes de Swing como JList o JComboBox.
+   */
+  @Override
+  public String toString() {
+    return nombre;
+  }
 }

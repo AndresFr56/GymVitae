@@ -26,20 +26,16 @@ public class UpdateMembresia extends JPanel {
 
   private JPanel contentPanel;
   private JLabel lblError;
-
-  // Campos
   private JTextField txtCliente;
   private JTextField txtTipoMembresia;
   private JTextField txtFechaInicio;
   private JTextField txtPrecioPagado;
   private JTextField txtFactura;
 
-  // Campos editables
   private DatePicker dateFechaFin;
   private JComboBox<EstadoMembresia> cmbEstado;
   private JTextArea txtObservaciones;
 
-  // Botones
   private ButtonOutline btnGuardar;
   private ButtonOutline btnCancelar;
 
@@ -97,7 +93,6 @@ public class UpdateMembresia extends JPanel {
   }
 
   private void initializeComponents() {
-    // Campos informativos (solo lectura)
     txtCliente = new JTextField();
     txtCliente.setEditable(false);
     
@@ -113,7 +108,6 @@ public class UpdateMembresia extends JPanel {
     txtFactura = new JTextField();
     txtFactura.setEditable(false);
 
-    // Campos editables
     dateFechaFin = new DatePicker();
     dateFechaFin.setEditor(new JFormattedTextField());
 

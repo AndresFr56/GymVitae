@@ -31,7 +31,6 @@ public class RegisterMembresia extends JPanel {
     private JPanel contentPanel;
     private JLabel lblError;
 
-    // Campos del formulario
     private JComboBox<ClienteListadoDTO> cmbCliente;
     private JComboBox<TipoMembresiaListadoDTO> cmbTipoMembresia;
     private DatePicker dateFechaInicio;
@@ -39,7 +38,6 @@ public class RegisterMembresia extends JPanel {
     private JTextField txtPrecioPagado;
     private JTextArea txtObservaciones;
 
-    // Botones
     private ButtonOutline btnGuardar;
     private ButtonOutline btnCancelar;
 
@@ -116,7 +114,6 @@ public class RegisterMembresia extends JPanel {
             }
         });
 
-        // Carga tipos de membresía activos
         var tipos = tipoController.getTipos().stream()
                 .filter(TipoMembresiaListadoDTO::getActivo)
                 .toArray(TipoMembresiaListadoDTO[]::new);

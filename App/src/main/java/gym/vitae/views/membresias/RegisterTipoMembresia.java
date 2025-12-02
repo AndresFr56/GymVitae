@@ -1,13 +1,15 @@
 package gym.vitae.views.membresias;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import gym.vitae.controller.BeneficiosController;
 import gym.vitae.controller.TiposMembresiaController;
+import gym.vitae.model.dtos.membresias.BeneficioListadoDTO;
 import gym.vitae.model.dtos.membresias.TipoMembresiaCreateDTO;
 import gym.vitae.views.components.primitives.ButtonOutline;
 import java.awt.*;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.text.*;
@@ -22,23 +24,31 @@ public class RegisterTipoMembresia extends JPanel {
   private static final int MAX_TEXT_LENGTH = 100;
 
   private final TiposMembresiaController controller;
+  private final BeneficiosController beneficioController;
 
   private JPanel contentPanel;
   private JLabel lblError;
 
-  // Campos del formulario
   private JTextField txtNombre;
   private JTextArea txtDescripcion;
   private JTextField txtDuracionDias;
   private JTextField txtCosto;
+  private JList<BeneficioListadoDTO> listBeneficios;
+  private DefaultListModel<BeneficioListadoDTO> listModelBeneficios;
+  private JScrollPane scrollBeneficios;
   private JCheckBox chkAccesoCompleto;
 
   private ButtonOutline btnGuardar;
   private ButtonOutline btnCancelar;
 
-  public RegisterTipoMembresia(TiposMembresiaController controller) {
+  public RegisterTipoMembresia(TiposMembresiaController controller, BeneficiosController beneficioController) {
     this.controller = controller;
-    init();
+    this.beneficioController = beneficioController;
+    this.listModelBeneficios = new DefaultListModel<>();
+    this.listBeneficios = new JList<>(listModelBeneficios);
+
+    init(); 
+    loadBeneficios();
   }
 
   private void init() {
@@ -89,17 +99,17 @@ public class RegisterTipoMembresia extends JPanel {
 
   private void initializeComponents() {
     txtNombre = new JTextField();
-    
+
     txtDescripcion = new JTextArea(3, 20);
     txtDescripcion.setLineWrap(true);
     txtDescripcion.setWrapStyleWord(true);
-    
+
     txtDuracionDias = new JTextField();
     txtCosto = new JTextField();
+    scrollBeneficios = new JScrollPane(listBeneficios);
     chkAccesoCompleto = new JCheckBox("El cliente tendrá acceso completo al gimnasio");
     chkAccesoCompleto.setSelected(true);
-
-    //filtros
+    
     applyMaxLengthFilter(txtNombre, 50);
     applyMaxLengthFilter(txtDescripcion, 255);
     applyNumericFilter(txtDuracionDias, 5);
@@ -215,6 +225,10 @@ public class RegisterTipoMembresia extends JPanel {
 
     contentPanel.add(new JLabel(" "));
     contentPanel.add(chkAccesoCompleto);
+    
+    createTitle("Beneficios Disponibles (Selección Múltiple)");
+    scrollBeneficios.setPreferredSize(new Dimension(0, 150));
+    contentPanel.add(scrollBeneficios);
 
     contentPanel.add(new JLabel(" "), "gapy 10");
     contentPanel.add(new JLabel("* Campos obligatorios"), "gapy 0");
@@ -282,20 +296,28 @@ public class RegisterTipoMembresia extends JPanel {
   }
 
   public boolean saveTipoMembresia() {
+    if (!validateForm()) return false;
+
     try {
-      TipoMembresiaCreateDTO dto = new TipoMembresiaCreateDTO(
+      List<Integer> beneficiosSeleccionadosIds = listBeneficios.getSelectedValuesList()
+          .stream()
+          .map(BeneficioListadoDTO::getId)
+          .collect(Collectors.toList());
+
+      TipoMembresiaCreateDTO tipoDto = new TipoMembresiaCreateDTO(
           txtNombre.getText().trim(),
           txtDescripcion.getText().trim().isEmpty() ? null : txtDescripcion.getText().trim(),
           Integer.parseInt(txtDuracionDias.getText().trim()),
           new BigDecimal(txtCosto.getText().trim()),
-          chkAccesoCompleto.isSelected()
+          chkAccesoCompleto.isSelected(),
+          beneficiosSeleccionadosIds
       );
 
-      controller.createTipo(dto);
+      controller.createTipoConBeneficios(tipoDto);
 
       JOptionPane.showMessageDialog(
           this,
-          "Tipo de membresía registrado exitosamente",
+          "Tipo de membresía registrado correctamente",
           "Éxito",
           JOptionPane.INFORMATION_MESSAGE);
 
@@ -303,33 +325,53 @@ public class RegisterTipoMembresia extends JPanel {
       return true;
 
     } catch (IllegalArgumentException e) {
-        showErrorMessage(e.getMessage());
-        return false;
+      showErrorMessage(e.getMessage());
+      return false;
     } catch (Exception e) {
-        LOGGER.severe("Error al guardar el tipo de membresía: " + e.getMessage());
-        showErrorMessage("Error al guardar: " + e.getMessage());
-        return false;
-    } }
-    private void clearForm() {
-        txtNombre.setText("");
-        txtDescripcion.setText("");
-        txtDuracionDias.setText("");
-        txtCosto.setText("");
-        chkAccesoCompleto.setSelected(true);
-        hideError();
+      LOGGER.severe("Error al guardar el tipo de membresía y beneficios: " + e.getMessage());
+      showErrorMessage("Error al guardar: " + e.getMessage());
+      return false;
     }
-    
-    private void showErrorMessage(String message) {
-        lblError.setText(message);
-        lblError.setVisible(true);
-        }
-        private void hideError() {
-        lblError.setVisible(false);
-        }
-        public ButtonOutline getBtnGuardar() {
-        return btnGuardar;
-        }
-        public ButtonOutline getBtnCancelar() {
-        return btnCancelar;
-        }
+  }
+
+  private void clearForm() {
+    txtNombre.setText("");
+    txtDescripcion.setText("");
+    txtDuracionDias.setText("");
+    txtCosto.setText("");
+    chkAccesoCompleto.setSelected(true);
+    listBeneficios.clearSelection(); 
+    hideError();
+  }
+
+  private void showErrorMessage(String message) {
+    lblError.setText(message);
+    lblError.setVisible(true);
+  }
+
+  private void hideError() {
+    lblError.setVisible(false);
+  }
+
+  public ButtonOutline getBtnGuardar() {
+    return btnGuardar;
+  }
+
+  public ButtonOutline getBtnCancelar() {
+    return btnCancelar;
+  }
+
+  private void loadBeneficios() {
+    try {
+      listModelBeneficios.clear();
+      List<BeneficioListadoDTO> beneficios = beneficioController.getBeneficios();
+      for (BeneficioListadoDTO b : beneficios) {
+        listModelBeneficios.addElement(b);
+      }
+    } catch (Exception e) {
+      LOGGER.severe("Error al cargar beneficios disponibles: " + e.getMessage());
+      showErrorMessage("Error al cargar la lista de beneficios");
     }
+  }
+
+}

@@ -1,6 +1,7 @@
 package gym.vitae.views.membresias;
 
 import gym.vitae.controller.TiposMembresiaController;
+import gym.vitae.controller.BeneficiosController;
 import gym.vitae.views.common.Metadata;
 import gym.vitae.views.common.ViewContainer;
 import gym.vitae.views.components.CeoHeader;
@@ -19,11 +20,10 @@ public class ViewTiposMembresia extends ViewContainer {
         setLayout(new MigLayout("fillx,wrap", "[fill]", "[][fill,grow]"));
 
         TiposMembresiaController tipoController = new TiposMembresiaController();
-
+        BeneficiosController beneficioController = new BeneficiosController(); // NUEVA INSTANCIA
         add(CeoHeader.createHeaderPanel(getClass().getAnnotation(Metadata.class)), "growx");
 
-        tipoMembresiaTablePanel = new TipoMembresiaTablePanel(tipoController);
-
+tipoMembresiaTablePanel = new TipoMembresiaTablePanel(tipoController, beneficioController);
         add(tipoMembresiaTablePanel, "grow");
     }
 

@@ -7,7 +7,6 @@ import gym.vitae.controller.TiposMembresiaController;
 import gym.vitae.model.dtos.membresias.*;
 import gym.vitae.views.components.primitives.ButtonOutline;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import javax.swing.*;
@@ -16,7 +15,7 @@ import net.miginfocom.swing.MigLayout;
 
 /**
  * Panel para asignar beneficios a tipos de membresía.
- * Permite visualizar los beneficios actuales y agregar/eliminar beneficios.
+ * Permite visualizar los beneficios actuales.
  */
 public class AsignarBeneficiosPanel extends JPanel {
 
@@ -90,7 +89,7 @@ public class AsignarBeneficiosPanel extends JPanel {
     cmbTipoMembresia.addActionListener(e -> cargarBeneficios());
 
     modelAsignados = new DefaultTableModel(
-        new Object[]{"ID", "Beneficio", "Descripción"}, 0) {
+        new Object[]{"ID", "Beneficio"}, 0) {
       @Override
       public boolean isCellEditable(int row, int column) {
         return false;
@@ -194,7 +193,6 @@ public class AsignarBeneficiosPanel extends JPanel {
     if (tipoSeleccionado == null) return;
 
     try {
-      // Cargar beneficios asignados
       var asociaciones = asociacionController.getAll().stream()
           .filter(a -> a.getTipoMembresiaNombre().equals(tipoSeleccionado.getNombre()))
           .toList();
@@ -203,8 +201,8 @@ public class AsignarBeneficiosPanel extends JPanel {
       for (MembresiaBeneficioListadoDTO asoc : asociaciones) {
         modelAsignados.addRow(new Object[]{
             asoc.getId(),
+            asoc.getTipoMembresiaNombre(),
             asoc.getBeneficioNombre(),
-            "" 
         });
       }
 

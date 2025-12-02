@@ -18,12 +18,14 @@ public class TipoMembresiaCreateDTO {
       String descripcion,
       Integer duracionDias,
       BigDecimal costo,
-      Boolean accesoCompleto) {
+      Boolean accesoCompleto,
+      List<Integer> beneficiosIds) {
     this.nombre = nombre;
     this.descripcion = descripcion;
     this.duracionDias = duracionDias;
     this.costo = costo;
     this.accesoCompleto = accesoCompleto;
+    this.beneficiosIds = beneficiosIds;
   }
 
   public String getNombre() {
@@ -66,5 +68,12 @@ public class TipoMembresiaCreateDTO {
     this.accesoCompleto = accesoCompleto;
   }
 
+  public List<Integer> getBeneficiosIds() {
+    return beneficiosIds;
+  }
+
+  public void setBeneficiosIds(List<Integer> beneficiosIds) {
+    this.beneficiosIds = beneficiosIds;
+  }
   
 }

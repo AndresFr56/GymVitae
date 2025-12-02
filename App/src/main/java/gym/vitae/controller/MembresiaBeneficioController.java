@@ -1,7 +1,6 @@
 package gym.vitae.controller;
 
 import static gym.vitae.controller.ValidationUtils.*;
-
 import gym.vitae.mapper.MembresiaBeneficioMapper;
 import gym.vitae.model.Beneficio;
 import gym.vitae.model.MembresiaBeneficio;
@@ -12,6 +11,7 @@ import gym.vitae.model.dtos.membresias.MembresiaBeneficioListadoDTO;
 import gym.vitae.repositories.BeneficioRepository;
 import gym.vitae.repositories.MembresiaBeneficioRepository;
 import gym.vitae.repositories.TiposMembresiaRepository;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MembresiaBeneficioController extends BaseController {
@@ -27,9 +27,24 @@ public class MembresiaBeneficioController extends BaseController {
     this.beneficioRepository = getRepository(BeneficioRepository.class);
   }
 
-  // Listar todas
+// Listar todas
   public List<MembresiaBeneficioListadoDTO> getAll() {
-    return repository.findAllListado();
+    
+    List<MembresiaBeneficioListadoDTO> listadoIncompleto = repository.findAllListado();
+    List<MembresiaBeneficioListadoDTO> resultado = new ArrayList<>();
+    
+    for (MembresiaBeneficioListadoDTO dto : listadoIncompleto) {
+        MembresiaBeneficioDetalleDTO detalleDto = getById(dto.getId());
+
+        MembresiaBeneficioListadoDTO fixedDto = new MembresiaBeneficioListadoDTO(
+            detalleDto.getId(),
+            detalleDto.getTipoMembresiaNombre(),
+            detalleDto.getBeneficioNombre()
+        );
+        resultado.add(fixedDto);
+    }
+    
+    return resultado;
   }
 
   // Listar por ID

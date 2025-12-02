@@ -5,13 +5,11 @@ import gym.vitae.controller.TiposMembresiaController;
 import gym.vitae.controller.ClienteController;
 import gym.vitae.model.dtos.membresias.MembresiaListadoDTO;
 import gym.vitae.views.components.tables.BaseTablePanel;
-
 import net.miginfocom.swing.MigLayout;
 import raven.modal.ModalDialog;
 import raven.modal.component.SimpleModalBorder;
 import raven.modal.option.Option;
 import raven.modal.option.Location;
-
 import javax.swing.*;
 import java.time.format.DateTimeFormatter;
 import java.util.List;

@@ -25,16 +25,12 @@ public class UpdateTipoMembresia extends JPanel {
 
   private JPanel contentPanel;
   private JLabel lblError;
-
-  // Campos del formulario
   private JTextField txtNombre;
   private JTextArea txtDescripcion;
   private JTextField txtDuracionDias;
   private JTextField txtCosto;
   private JCheckBox chkAccesoCompleto;
   private JComboBox<String> cmbEstado;
-
-  // Botones
   private ButtonOutline btnGuardar;
   private ButtonOutline btnCancelar;
 
@@ -251,7 +247,6 @@ public class UpdateTipoMembresia extends JPanel {
 
     hideError();
 
-    // Aplicar filtros DESPUÉS de cargar los datos
     applyInputFilters();
   }
 

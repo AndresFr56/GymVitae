@@ -1,12 +1,12 @@
 package gym.vitae.views.membresias;
 
 import gym.vitae.controller.TiposMembresiaController;
+import gym.vitae.controller.BeneficiosController;
 import gym.vitae.model.dtos.membresias.TipoMembresiaListadoDTO;
 import gym.vitae.views.components.tables.BaseTablePanel;
-
+import gym.vitae.views.components.tables.TableAction; // <-- ASUMO que esta clase existe
 import java.util.List;
 import javax.swing.JOptionPane;
-
 import raven.modal.ModalDialog;
 import raven.modal.component.SimpleModalBorder;
 import raven.modal.option.Location;
@@ -15,11 +15,24 @@ import raven.modal.option.Option;
 public class TipoMembresiaTablePanel extends BaseTablePanel<TipoMembresiaListadoDTO> {
 
     private final TiposMembresiaController controller;
+    private final BeneficiosController beneficioController;
     
-
-    public TipoMembresiaTablePanel(TiposMembresiaController controller) {
+    public TipoMembresiaTablePanel(TiposMembresiaController controller, BeneficiosController beneficioController) {
         super("Tipos de Membresía");
         this.controller = controller;
+        this.beneficioController = beneficioController; 
+    }
+    
+    
+    @Override
+    protected List<TableAction> getTableActions() {
+        List<TableAction> actions = super.getTableActions(); 
+        
+        TableAction addBeneficioAction = new TableAction("Nuevo Beneficio", "#00BCD4", this::onAddBeneficio);
+        
+        actions.add(0, addBeneficioAction); 
+        
+        return actions;
     }
 
     @Override
@@ -48,15 +61,42 @@ public class TipoMembresiaTablePanel extends BaseTablePanel<TipoMembresiaListado
                 t.getActivo() ? "Activo" : "Inactivo"
         };
     }
+    
+    protected void onAddBeneficio() {
+        RegisterBeneficio form = new RegisterBeneficio(beneficioController);
+        
+        Option option = ModalDialog.createOption();
+        option.getLayoutOption()
+                .setSize(0.40f, 1f)                      
+                .setLocation(Location.TRAILING, Location.TOP) 
+                .setAnimateDistance(0.7f, 0);         
+
+        ModalDialog.showModal(
+                this,
+                new SimpleModalBorder(
+                        form,
+                        "Nuevo Beneficio de Membresía",
+                        SimpleModalBorder.DEFAULT_OPTION,
+                        (control, action) -> {}
+                ),
+                option
+        );
+
+        form.getBtnGuardar().addOnClick(e -> {
+            if (form.saveBeneficio()) { 
+                ModalDialog.closeAllModal();
+            }
+        });
+
+        form.getBtnCancelar().addOnClick(e -> ModalDialog.closeAllModal());
+    }
 
     @Override
     protected void onAdd() {
-
-        RegisterTipoMembresia form = new RegisterTipoMembresia(controller);
-
+        RegisterTipoMembresia form = new RegisterTipoMembresia(controller, beneficioController);
         Option option = ModalDialog.createOption();
         option.getLayoutOption()
-                .setSize(0.40f, 1f)                    
+                .setSize(0.40f, 1f)                      
                 .setLocation(Location.TRAILING, Location.TOP) 
                 .setAnimateDistance(0.7f, 0);         
 
@@ -73,7 +113,7 @@ public class TipoMembresiaTablePanel extends BaseTablePanel<TipoMembresiaListado
 
 
         form.getBtnGuardar().addOnClick(e -> {
-            if (form.validateForm() && form.saveTipoMembresia()) {
+            if (form.validateForm() && form.saveTipoMembresia()) { 
                 ModalDialog.closeAllModal();
                 refresh();
             }

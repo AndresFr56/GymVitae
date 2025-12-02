@@ -4,6 +4,7 @@ import static gym.vitae.controller.ValidationUtils.*;
 
 import gym.vitae.mapper.TipoMembresiaMapper;
 import gym.vitae.model.TiposMembresia;
+import gym.vitae.model.dtos.membresias.MembresiaBeneficioCreateDTO;
 import gym.vitae.model.dtos.membresias.TipoMembresiaCreateDTO;
 import gym.vitae.model.dtos.membresias.TipoMembresiaDetalleDTO;
 import gym.vitae.model.dtos.membresias.TipoMembresiaListadoDTO;
@@ -14,10 +15,12 @@ import java.util.List;
 public class TiposMembresiaController extends BaseController {
 
   private final TiposMembresiaRepository repository;
+  private final MembresiaBeneficioController asociacionController;
 
   public TiposMembresiaController() {
     super();
     this.repository = getRepository(TiposMembresiaRepository.class);
+    this.asociacionController = new MembresiaBeneficioController();
   }
 
   // Listado
@@ -85,5 +88,45 @@ public class TiposMembresiaController extends BaseController {
     } catch (Exception e) {
         return repository.findAllListado();
     }}
+
+  public TipoMembresiaDetalleDTO createTipoConBeneficios(TipoMembresiaCreateDTO dto) {
+    
+    if (dto == null) {
+      throw new IllegalArgumentException("Los datos del tipo de membresía son obligatorios");
+    }
+
+    validateRequiredString(dto.getNombre(), "El nombre del tipo de membresía", 100);
+
+    TipoMembresiaCreateDTO baseDto = new TipoMembresiaCreateDTO(
+        dto.getNombre(),
+        dto.getDescripcion(),
+        dto.getDuracionDias(),
+        dto.getCosto(),
+        dto.getAccesoCompleto(),
+        null
+    );
+
+    TiposMembresia tipo = TipoMembresiaMapper.toEntity(baseDto);
+    TiposMembresia savedTipo = repository.save(tipo);
+    Integer nuevoTipoId = savedTipo.getId();
+
+    if (dto.getBeneficiosIds() != null && !dto.getBeneficiosIds().isEmpty()) {
+      for (Integer beneficioId : dto.getBeneficiosIds()) {
+        try {
+          MembresiaBeneficioCreateDTO asociacionDto = new MembresiaBeneficioCreateDTO(
+              nuevoTipoId,
+              beneficioId
+          );
+          asociacionController.create(asociacionDto); 
+        } catch (IllegalArgumentException e) {
+          System.err.println("Advertencia: Beneficio ID " + beneficioId + " no válido o ya asignado. Continuando.");
+        }
+      }
+    }
+
+    return repository
+        .findDetalleById(nuevoTipoId)
+        .orElseThrow(() -> new IllegalStateException("No se pudo recuperar el tipo creado"));
+  }
 
 }
