@@ -22,17 +22,11 @@ public final class ApplicationConfig {
     try {
       dbManager.init();
 
-      if (!dbManager.isConnected()) {
-        DatabaseUnavailableException ex =
-            new DatabaseUnavailableException(
-                "No se pudo establecer conexión inicial con la base de datos");
-        ErrorHandler.handleDatabaseError(ex);
-        throw ex;
-      }
-
+      // Registrar DBConnectionManager SIEMPRE, esté conectado o no
+      // Los errores de conexión se manejarán cuando se intente usar la BD
       sc.register(DBConnectionManager.class, dbManager);
 
-      // Registrar repositorios de forma segura
+      // Registrar repositorios siempre (funcionarán cuando haya conexión)
       registerRepositories(sc, dbManager);
 
       // Registrar EntityManagerFactory solo si está conectado
@@ -41,12 +35,13 @@ public final class ApplicationConfig {
         sc.register(EntityManagerFactory.class, emf);
       }
 
-    } catch (DatabaseUnavailableException e) {
-      // Ya fue manejado por ErrorHandler
-      throw e;
     } catch (Exception e) {
+      // Manejar errores inesperados pero no cerrar la app
       ErrorHandler.handleUnexpectedError("Error inesperado al inicializar la aplicación", e);
-      dbManager.close();
+
+      if (!sc.isRegistered(DBConnectionManager.class)) {
+        sc.register(DBConnectionManager.class, dbManager);
+      }
     }
   }
 

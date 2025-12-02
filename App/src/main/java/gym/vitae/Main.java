@@ -68,12 +68,15 @@ public class Main extends JFrame {
       EventQueue.invokeLater(() -> new Main().setVisible(true));
 
     } catch (Exception e) {
-      JOptionPane.showMessageDialog(
-          null,
-          "Error al iniciar la aplicación:\n\n" + e.getMessage(),
-          "Error Fatal",
-          JOptionPane.ERROR_MESSAGE);
-      System.exit(1);
+      // Los errores de BD se manejan cuando el usuario intenta usar funcionalidades
+      if (!(e instanceof gym.vitae.core.DatabaseUnavailableException)) {
+        JOptionPane.showMessageDialog(
+            null,
+            "Error al iniciar la aplicación:\n\n" + e.getMessage(),
+            "Error Fatal",
+            JOptionPane.ERROR_MESSAGE);
+        System.exit(1);
+      }
     }
   }
 

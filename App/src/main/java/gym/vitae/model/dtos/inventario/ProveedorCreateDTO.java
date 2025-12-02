@@ -1,7 +1,13 @@
 package gym.vitae.model.dtos.inventario;
 
+/**
+ * DTO para la creación de proveedores. Incluye los datos necesarios para registrar un proveedor.
+ */
 public class ProveedorCreateDTO {
 
+  /**
+   * Código del proveedor es generado automáticamente en el controlador.
+   */
   private String codigo;
   private String nombre;
   private String contacto;
@@ -9,16 +15,28 @@ public class ProveedorCreateDTO {
   private String email;
   private String direccion;
 
-  public ProveedorCreateDTO() {}
+  /**
+   * Constructor por defecto para instanciar la clase.
+   */
+  public ProveedorCreateDTO() {
+  }
 
+  /**
+   * Constructor para crear un nuevo proveedor. No se especifica el código del proveedor porque es
+   * generado en el controlador
+   *
+   * @param nombre del proveedor
+   * @param contacto del proveedor
+   * @param telefono del proveedor
+   * @param email del proveedor
+   * @param direccion del proveedor
+   */
   public ProveedorCreateDTO(
-      String codigo,
       String nombre,
       String contacto,
       String telefono,
       String email,
       String direccion) {
-    this.codigo = codigo;
     this.nombre = nombre;
     this.contacto = contacto;
     this.telefono = telefono;

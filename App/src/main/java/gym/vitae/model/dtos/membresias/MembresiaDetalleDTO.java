@@ -16,16 +16,16 @@ public class MembresiaDetalleDTO {
   private Instant createdAt;
   private Instant updatedAt;
 
-  // Cliente info
+  // Cliente
   private Integer clienteId;
   private String clienteNombre;
   private String clienteDocumento;
 
-  // Tipo Membresía info
+  // Tipo Membresía
   private Integer tipoMembresiaId;
   private String tipoMembresiaNombre;
 
-  // Factura info
+  // Factura
   private Integer facturaId;
   private String facturaNumero;
 

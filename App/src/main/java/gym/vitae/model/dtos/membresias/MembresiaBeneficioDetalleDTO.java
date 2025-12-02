@@ -7,11 +7,11 @@ public class MembresiaBeneficioDetalleDTO {
   private Integer id;
   private Instant createdAt;
 
-  // Tipo Membresía info
+  // Tipo Membresía
   private Integer tipoMembresiaId;
   private String tipoMembresiaNombre;
 
-  // Beneficio info
+  // Beneficio
   private Integer beneficioId;
   private String beneficioNombre;
   private String beneficioDescripcion;

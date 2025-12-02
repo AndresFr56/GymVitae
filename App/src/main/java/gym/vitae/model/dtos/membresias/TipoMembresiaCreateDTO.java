@@ -1,6 +1,7 @@
 package gym.vitae.model.dtos.membresias;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class TipoMembresiaCreateDTO {
 
@@ -9,7 +10,7 @@ public class TipoMembresiaCreateDTO {
   private Integer duracionDias;
   private BigDecimal costo;
   private Boolean accesoCompleto;
-
+  private List<Integer> beneficiosIds;
   public TipoMembresiaCreateDTO() {}
 
   public TipoMembresiaCreateDTO(
@@ -17,12 +18,14 @@ public class TipoMembresiaCreateDTO {
       String descripcion,
       Integer duracionDias,
       BigDecimal costo,
-      Boolean accesoCompleto) {
+      Boolean accesoCompleto,
+      List<Integer> beneficiosIds) {
     this.nombre = nombre;
     this.descripcion = descripcion;
     this.duracionDias = duracionDias;
     this.costo = costo;
     this.accesoCompleto = accesoCompleto;
+    this.beneficiosIds = beneficiosIds;
   }
 
   public String getNombre() {
@@ -64,4 +67,13 @@ public class TipoMembresiaCreateDTO {
   public void setAccesoCompleto(Boolean accesoCompleto) {
     this.accesoCompleto = accesoCompleto;
   }
+
+  public List<Integer> getBeneficiosIds() {
+    return beneficiosIds;
+  }
+
+  public void setBeneficiosIds(List<Integer> beneficiosIds) {
+    this.beneficiosIds = beneficiosIds;
+  }
+  
 }
