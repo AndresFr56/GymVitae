@@ -43,6 +43,16 @@ public class MembresiasController extends BaseController {
         this.authController = new AuthController();
     }
     
+/**
+     * Constructor para pruebas.
+     *
+     * @param membresiaRepository Repositorio de Membresias.
+     * @param clienteRepository Repositorio de Clientes.
+     * @param tiposMembresiaRepository Repositorio de TiposMembresia.
+     * @param facturaRepository Repositorio de Facturas.
+     * @param detallesFacturaRepository Repositorio de DetallesFactura.
+     * @param authController Controlador de Autenticación (para obtener empleado actual).
+     */
     MembresiasController(
                         MembresiaRepository membresiaRepository,
                         ClienteRepository clienteRepository,

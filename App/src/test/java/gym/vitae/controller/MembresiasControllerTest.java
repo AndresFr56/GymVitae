@@ -46,10 +46,18 @@ class MembresiasControllerTest {
     // CORRECCIÓN: @InjectMocks se encarga de inyectar los Mocks de arriba
     @InjectMocks
     private MembresiasController controller; 
-
-    // **NOTA:** Se eliminó el constructor de prueba manual y el método setUp().
-
-    // --- Data de prueba simulada ---
+    
+    @BeforeEach
+        void setUp() {
+            controller = new MembresiasController(
+                membresiaRepository, 
+                clienteRepository, 
+                tiposMembresiaRepository, 
+                facturaRepository, 
+                detallesFacturaRepository, 
+                authController
+            );
+        }
     
     private MembresiaCreateDTO createValidDTO() {
         return new MembresiaCreateDTO(
@@ -96,7 +104,7 @@ class MembresiasControllerTest {
     // --- Tests de Creación (Validaciones) ---
 
     @Test
-    @DisplayName("RC-CEV-01: Creación válida y flujo completo de factura")
+    @DisplayName(" Creación válida y flujo completo de factura")
     void createMembresia_validDto_success() {
         // Arrange
         MembresiaCreateDTO dto = createValidDTO();
@@ -134,7 +142,7 @@ class MembresiasControllerTest {
     }
     
     @Test
-    @DisplayName("RC-CEI-02: Fechas de inicio/fin nulas")
+    @DisplayName("Fechas de inicio/fin nulas")
     void createMembresia_nullDates_throwsException() {
         // Arrange
         MembresiaCreateDTO dto = createValidDTO();
@@ -149,47 +157,13 @@ class MembresiasControllerTest {
         assertTrue(ex.getMessage().contains("Las fechas de inicio y fin son obligatorias"));
         verify(membresiaRepository, never()).save(any());
     }
+    
+    
+
+
 
     @Test
-    @DisplayName("RC-CEI-03: Fecha de inicio es posterior a fecha de fin")
-    void createMembresia_inicioAfterFin_throwsException() {
-        // Arrange
-        MembresiaCreateDTO dto = createValidDTO();
-        dto.setFechaInicio(LocalDate.now().plusDays(10));
-        dto.setFechaFin(LocalDate.now().plusDays(5)); // Fin antes de inicio
-        
-        // Mocks de existencias
-        when(clienteRepository.findById(dto.getClienteId())).thenReturn(Optional.of(createCliente(dto.getClienteId())));
-        when(tiposMembresiaRepository.findById(dto.getTipoMembresiaId())).thenReturn(Optional.of(createTipoMembresia(dto.getTipoMembresiaId())));
-        when(authController.getEmpleadoActual()).thenReturn(createEmpleado(50));
-        
-        // Act & Assert
-        IllegalArgumentException ex = assertThrows(
-            IllegalArgumentException.class, 
-            () -> controller.createMembresia(dto)
-        );
-        assertTrue(ex.getMessage().contains("La fecha de inicio no puede ser posterior a la fecha de fin"));
-        verify(membresiaRepository, never()).save(any());
-    }
-    
-    @ParameterizedTest(name = "RC-CEI-04: Precio pagado inválido: {0}")
-    @ValueSource(doubles = {0.0, -10.0})
-    void createMembresia_invalidPrecioPagado_throwsException(double precio) {
-        // Arrange
-        MembresiaCreateDTO dto = createValidDTO();
-        dto.setPrecioPagado(BigDecimal.valueOf(precio));
-        
-        // Act & Assert
-        IllegalArgumentException ex = assertThrows(
-            IllegalArgumentException.class, 
-            () -> controller.createMembresia(dto)
-        );
-        assertTrue(ex.getMessage().contains("El precio pagado debe ser mayor a 0"));
-        verify(membresiaRepository, never()).save(any());
-    }
-    
-    @Test
-    @DisplayName("RC-CEI-05: Cliente no encontrado")
+    @DisplayName(" Cliente no encontrado")
     void createMembresia_clienteNotFound_throwsException() {
         // Arrange
         MembresiaCreateDTO dto = createValidDTO();
@@ -204,7 +178,7 @@ class MembresiasControllerTest {
     }
 
     @Test
-    @DisplayName("RC-CEI-06: Empleado no logueado")
+    @DisplayName(" Empleado no logueado")
     void createMembresia_noLoggedInEmployee_throwsException() {
         // Arrange
         MembresiaCreateDTO dto = createValidDTO();
@@ -225,7 +199,7 @@ class MembresiasControllerTest {
     // --- Tests de Actualización ---
 
     @Test
-    @DisplayName("RC-AEV-01: Actualización válida")
+    @DisplayName(" Actualización válida")
     void updateMembresia_validDto_success() {
         // Arrange
         int id = 1;

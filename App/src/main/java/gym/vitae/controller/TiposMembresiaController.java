@@ -16,11 +16,24 @@ public class TiposMembresiaController extends BaseController {
 
     private final TiposMembresiaRepository repository;
     private final MembresiaBeneficioController asociacionController;
+    private  TipoMembresiaMapper mapper;
 
     public TiposMembresiaController() {
         super();
         this.repository = getRepository(TiposMembresiaRepository.class);
         this.asociacionController = new MembresiaBeneficioController();
+    }
+    
+    // Constructor usado para pruebas (inyección de Mocks)
+    TiposMembresiaController(
+            TiposMembresiaRepository repository, 
+            MembresiaBeneficioController asociacionController,
+            TipoMembresiaMapper mapper // <- ¡ESTE ES EL CONSTRUCTOR FALTANTE!
+    ) {
+        super(null);
+        this.repository = repository;
+        this.asociacionController = asociacionController;
+        this.mapper = mapper;
     }
 
     // Listado

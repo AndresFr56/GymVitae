@@ -27,6 +27,23 @@ public class MembresiaBeneficioController extends BaseController {
     this.beneficioRepository = getRepository(BeneficioRepository.class);
   }
 
+/**
+   * Constructor para pruebas.
+   *
+   * @param repository Repositorio de MembresiaBeneficio.
+   * @param tiposRepository Repositorio de TiposMembresia.
+   * @param beneficioRepository Repositorio de Beneficio.
+   */
+  MembresiaBeneficioController(
+      MembresiaBeneficioRepository repository,
+      TiposMembresiaRepository tiposRepository,
+      BeneficioRepository beneficioRepository) {
+    super(null);
+    this.repository = repository;
+    this.tiposRepository = tiposRepository;
+    this.beneficioRepository = beneficioRepository;
+  }
+
 // Listar todas
   public List<MembresiaBeneficioListadoDTO> getAll() {
     
