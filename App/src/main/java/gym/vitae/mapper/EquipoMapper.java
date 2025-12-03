@@ -23,7 +23,9 @@ public class EquipoMapper {
         equipo.getModelo(),
         equipo.getEstado(),
         equipo.getUbicacion(),
-        equipo.getCategoria() != null ? equipo.getCategoria().getNombre() : null);
+        equipo.getCategoria() != null ? equipo.getCategoria().getNombre() : null,
+        equipo.getDescripcion(),
+        equipo.getFechaAdquisicion());
   }
 
   public static EquipoDetalleDTO toDetalleDTO(Equipo equipo) {

@@ -6,6 +6,7 @@ import gym.vitae.mapper.CategoriaMapper;
 import gym.vitae.model.Categoria;
 import gym.vitae.model.dtos.inventario.CategoriaDetalleDTO;
 import gym.vitae.model.dtos.inventario.CategoriaListadoDTO;
+import gym.vitae.model.enums.TipoCategoria;
 import java.util.List;
 import java.util.Optional;
 import javax.persistence.TypedQuery;
@@ -141,6 +142,60 @@ public record CategoriaRepository(DBConnectionManager db) implements IRepository
         em -> {
           Categoria categoria = em.find(Categoria.class, id);
           return Optional.ofNullable(CategoriaMapper.toDetalleDTO(categoria));
+        });
+  }
+
+  /**
+   * Obtiene todas las categorías activas filtradas por tipo.
+   *
+   * @param tipo Tipo de categoría (PRODUCTO o EQUIPO)
+   * @return Lista de Categoria filtradas por tipo
+   */
+  public List<Categoria> findByTipo(TipoCategoria tipo) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          TypedQuery<Categoria> q =
+              em.createQuery(
+                  "SELECT c FROM Categoria c WHERE c.tipo = :tipo AND c.activo = true ORDER BY c.nombre",
+                  Categoria.class);
+          q.setParameter("tipo", tipo);
+          return q.getResultList();
+        });
+  }
+
+  /**
+   * Obtiene todas las categorías activas.
+   *
+   * @return Lista de Categoria activas
+   */
+  public List<Categoria> findActivos() {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          TypedQuery<Categoria> q =
+              em.createQuery(
+                  "SELECT c FROM Categoria c WHERE c.activo = true ORDER BY c.nombre",
+                  Categoria.class);
+          return q.getResultList();
+        });
+  }
+
+  /**
+   * Busca una categoría por nombre.
+   *
+   * @param nombre Nombre de la categoría
+   * @return Optional de Categoria
+   */
+  public Optional<Categoria> findByNombre(String nombre) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          TypedQuery<Categoria> q =
+              em.createQuery(
+                  "SELECT c FROM Categoria c WHERE LOWER(c.nombre) = :nombre", Categoria.class);
+          q.setParameter("nombre", nombre.toLowerCase());
+          return q.getResultStream().findFirst();
         });
   }
 }

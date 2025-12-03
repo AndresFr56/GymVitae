@@ -7,13 +7,10 @@ import gym.vitae.model.dtos.inventario.ProveedorListadoDTO;
 import gym.vitae.model.dtos.inventario.ProveedorUpdateDTO;
 import java.util.List;
 
-/**
- * Clase para mapear proveedores en sus DTOs y viceversa.
- */
+/** Clase para mapear proveedores en sus DTOs y viceversa. */
 public class ProveedorMapper {
 
-  private ProveedorMapper() {
-  }
+  private ProveedorMapper() {}
 
   /**
    * Mapea un proveedor a un DTO de listado.

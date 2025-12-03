@@ -9,8 +9,8 @@ import gym.vitae.views.components.primitives.ButtonOutline;
 import java.awt.*;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.swing.*;
 import javax.swing.text.*;
 import net.miginfocom.swing.MigLayout;
@@ -33,8 +33,8 @@ public class RegisterTipoMembresia extends JPanel {
   private JTextArea txtDescripcion;
   private JTextField txtDuracionDias;
   private JTextField txtCosto;
-  private JList<BeneficioListadoDTO> listBeneficios;
-  private DefaultListModel<BeneficioListadoDTO> listModelBeneficios;
+  private final JList<BeneficioListadoDTO> listBeneficios;
+  private final DefaultListModel<BeneficioListadoDTO> listModelBeneficios;
   private JScrollPane scrollBeneficios;
   private JCheckBox chkAccesoCompleto;
 

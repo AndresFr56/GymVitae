@@ -5,7 +5,6 @@ import gym.vitae.model.dtos.membresias.BeneficioCreateDTO;
 import gym.vitae.model.dtos.membresias.BeneficioDetalleDTO;
 import gym.vitae.model.dtos.membresias.BeneficioListadoDTO;
 import gym.vitae.model.dtos.membresias.BeneficioUpdateDTO;
-
 import java.util.List;
 
 public class BeneficioMapper {
@@ -41,7 +40,7 @@ public class BeneficioMapper {
     return beneficios.stream().map(BeneficioMapper::toListadoDTO).toList();
   }
 
-    public static Beneficio toEntity(BeneficioCreateDTO dto) {
+  public static Beneficio toEntity(BeneficioCreateDTO dto) {
     Beneficio entity = new Beneficio();
     entity.setNombre(dto.getNombre());
     entity.setDescripcion(dto.getDescripcion());

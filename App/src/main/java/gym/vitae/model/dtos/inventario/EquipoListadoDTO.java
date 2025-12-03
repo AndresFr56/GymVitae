@@ -1,6 +1,7 @@
 package gym.vitae.model.dtos.inventario;
 
 import gym.vitae.model.enums.EstadoEquipo;
+import java.time.LocalDate;
 
 public class EquipoListadoDTO {
 
@@ -12,6 +13,8 @@ public class EquipoListadoDTO {
   private EstadoEquipo estado;
   private String ubicacion;
   private String categoriaNombre;
+  private String descripcion;
+  private LocalDate fechaIngreso;
 
   public EquipoListadoDTO() {}
 
@@ -23,7 +26,9 @@ public class EquipoListadoDTO {
       String modelo,
       EstadoEquipo estado,
       String ubicacion,
-      String categoriaNombre) {
+      String categoriaNombre,
+      String descripcion,
+      LocalDate fechaIngreso) {
     this.id = id;
     this.codigo = codigo;
     this.nombre = nombre;
@@ -32,8 +37,11 @@ public class EquipoListadoDTO {
     this.estado = estado;
     this.ubicacion = ubicacion;
     this.categoriaNombre = categoriaNombre;
+    this.descripcion = descripcion;
+    this.fechaIngreso = fechaIngreso;
   }
 
+  // Getters y setters
   public Integer getId() {
     return id;
   }
@@ -96,5 +104,21 @@ public class EquipoListadoDTO {
 
   public void setCategoriaNombre(String categoriaNombre) {
     this.categoriaNombre = categoriaNombre;
+  }
+
+  public String getDescripcion() {
+    return descripcion;
+  }
+
+  public void setDescripcion(String descripcion) {
+    this.descripcion = descripcion;
+  }
+
+  public LocalDate getFechaAdquisicion() {
+    return fechaIngreso;
+  }
+
+  public void setFechaAdquisicion(LocalDate fechaAdquisicion) {
+    this.fechaIngreso = fechaIngreso;
   }
 }

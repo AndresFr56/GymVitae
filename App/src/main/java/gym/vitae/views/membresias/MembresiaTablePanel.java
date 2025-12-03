@@ -1,28 +1,27 @@
 package gym.vitae.views.membresias;
 
+import gym.vitae.controller.ClienteController;
 import gym.vitae.controller.MembresiasController;
 import gym.vitae.controller.TiposMembresiaController;
-import gym.vitae.controller.ClienteController;
 import gym.vitae.model.dtos.membresias.MembresiaListadoDTO;
 import gym.vitae.views.components.tables.BaseTablePanel;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import javax.swing.*;
 import net.miginfocom.swing.MigLayout;
 import raven.modal.ModalDialog;
 import raven.modal.component.SimpleModalBorder;
-import raven.modal.option.Option;
 import raven.modal.option.Location;
-import javax.swing.*;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
+import raven.modal.option.Option;
 
 public class MembresiaTablePanel extends BaseTablePanel<MembresiaListadoDTO> {
 
+  private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private final MembresiasController controller;
     private final TiposMembresiaController tipoController;
     private final ClienteController clienteController;
-
     private JComboBox<String> cmbTipos;
-
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+  private boolean tiposCargados = false;
 
     public MembresiaTablePanel(MembresiasController controller,
                                TiposMembresiaController tipoController,
@@ -34,8 +33,6 @@ public class MembresiaTablePanel extends BaseTablePanel<MembresiaListadoDTO> {
         this.tipoController = tipoController;
         this.clienteController = clienteController;
     }
-
-    private boolean tiposCargados = false;
     
     @Override
     protected JPanel createCustomFilters() {

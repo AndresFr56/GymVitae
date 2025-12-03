@@ -53,14 +53,12 @@ public class MembresiaBeneficioMapper {
     if (membresiaBeneficios == null) return List.of();
     return membresiaBeneficios.stream().map(MembresiaBeneficioMapper::toListadoDTO).toList();
   }
-  
+
   public static MembresiaBeneficio toEntity(
-    MembresiaBeneficioCreateDTO dto,
-    TiposMembresia tipoMembresia,
-    Beneficio beneficio) {
+      MembresiaBeneficioCreateDTO dto, TiposMembresia tipoMembresia, Beneficio beneficio) {
 
     if (dto == null || tipoMembresia == null || beneficio == null) {
-        return null;
+      return null;
     }
 
     MembresiaBeneficio entity = new MembresiaBeneficio();

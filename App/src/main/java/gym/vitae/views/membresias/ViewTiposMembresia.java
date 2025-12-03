@@ -1,7 +1,7 @@
 package gym.vitae.views.membresias;
 
-import gym.vitae.controller.TiposMembresiaController;
 import gym.vitae.controller.BeneficiosController;
+import gym.vitae.controller.TiposMembresiaController;
 import gym.vitae.views.common.Metadata;
 import gym.vitae.views.common.ViewContainer;
 import gym.vitae.views.components.CeoHeader;

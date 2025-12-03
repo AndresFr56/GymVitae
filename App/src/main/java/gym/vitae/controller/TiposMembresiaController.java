@@ -14,180 +14,183 @@ import java.util.List;
 
 public class TiposMembresiaController extends BaseController {
 
-    private final TiposMembresiaRepository repository;
-    private final MembresiaBeneficioController asociacionController;
-    private  TipoMembresiaMapper mapper;
+  private final TiposMembresiaRepository repository;
+  private final MembresiaBeneficioController asociacionController;
+  private TipoMembresiaMapper mapper;
 
-    public TiposMembresiaController() {
-        super();
-        this.repository = getRepository(TiposMembresiaRepository.class);
-        this.asociacionController = new MembresiaBeneficioController();
-    }
-    
-    // Constructor usado para pruebas (inyección de Mocks)
-    TiposMembresiaController(
-            TiposMembresiaRepository repository, 
-            MembresiaBeneficioController asociacionController,
-            TipoMembresiaMapper mapper // <- ¡ESTE ES EL CONSTRUCTOR FALTANTE!
-    ) {
-        super(null);
-        this.repository = repository;
-        this.asociacionController = asociacionController;
-        this.mapper = mapper;
-    }
+  public TiposMembresiaController() {
+    super();
+    this.repository = getRepository(TiposMembresiaRepository.class);
+    this.asociacionController = new MembresiaBeneficioController();
+  }
 
-    // Listado
-    public List<TipoMembresiaListadoDTO> getTipos() {
-        return repository.findAllListado();
-    }
+  // Constructor usado para pruebas (inyección de Mocks)
+  TiposMembresiaController(
+      TiposMembresiaRepository repository,
+      MembresiaBeneficioController asociacionController,
+      TipoMembresiaMapper mapper // <- ¡ESTE ES EL CONSTRUCTOR FALTANTE!
+      ) {
+    super(null);
+    this.repository = repository;
+    this.asociacionController = asociacionController;
+    this.mapper = mapper;
+  }
 
-    public TipoMembresiaDetalleDTO getTipoById(int id) {
-        validateId(id);
-        return repository
-            .findDetalleById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Tipo de membresía no encontrado: " + id));
-    }
-    
-    // Crear
-    public TipoMembresiaDetalleDTO createTipo(TipoMembresiaCreateDTO dto) {
-    
-        if (dto == null) {
-            throw new IllegalArgumentException("Los datos del tipo de membresía son obligatorios");
-        }
-    
-        validateRequiredString(dto.getNombre(), "El nombre del tipo de membresía", 50);
+  // Listado
+  public List<TipoMembresiaListadoDTO> getTipos() {
+    return repository.findAllListado();
+  }
 
-        if (!dto.getNombre().matches("^[a-zA-Z\\s]+$")) {
-            throw new IllegalArgumentException("El nombre del tipo de membresía solo debe contener letras y espacios.");
-        }
+  public TipoMembresiaDetalleDTO getTipoById(int id) {
+    validateId(id);
+    return repository
+        .findDetalleById(id)
+        .orElseThrow(() -> new IllegalArgumentException("Tipo de membresía no encontrado: " + id));
+  }
 
-        validateOptionalString(dto.getDescripcion(), "La descripción del tipo de membresía", 255);
+  // Crear
+  public TipoMembresiaDetalleDTO createTipo(TipoMembresiaCreateDTO dto) {
 
-        if (dto.getDuracionDias() == null || dto.getDuracionDias() <= 0) {
-            throw new IllegalArgumentException("La duración en días es obligatoria y debe ser mayor a 0");
-        }
-
-        if (dto.getCosto() == null || dto.getCosto().doubleValue() <= 0) {
-            throw new IllegalArgumentException("El costo es obligatorio y debe ser mayor a 0");
-        }
-        
-        TiposMembresia tipo = TipoMembresiaMapper.toEntity(dto);
-        TiposMembresia saved = repository.save(tipo);
-    
-        return repository
-            .findDetalleById(saved.getId())
-            .orElseThrow(() -> new IllegalStateException("No se pudo recuperar el tipo creado"));
+    if (dto == null) {
+      throw new IllegalArgumentException("Los datos del tipo de membresía son obligatorios");
     }
 
+    validateRequiredString(dto.getNombre(), "El nombre del tipo de membresía", 50);
 
-    // Actualizar
-    public TipoMembresiaDetalleDTO updateTipo(int id, TipoMembresiaUpdateDTO dto) {
-        validateId(id);
-
-        TiposMembresia tipo =
-            repository
-                .findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Tipo no encontrado: " + id));
-        
-        if (dto == null) {
-            throw new IllegalArgumentException("Los datos actualizados del tipo de membresía son obligatorios");
-        }
-        
-        validateRequiredString(dto.getNombre(), "El nombre del tipo de membresía", 50);
-        
-        if (!dto.getNombre().matches("^[a-zA-Z\\s]+$")) {
-            throw new IllegalArgumentException("El nombre del tipo de membresía solo debe contener letras y espacios.");
-        }
-
-
-        validateOptionalString(dto.getDescripcion(), "La descripción del tipo de membresía", 255);
-
-        if (dto.getDuracionDias() == null || dto.getDuracionDias() <= 0) {
-            throw new IllegalArgumentException("La duración en días es obligatoria y debe ser mayor a 0");
-        }
-
-        if (dto.getCosto() == null || dto.getCosto().doubleValue() <= 0) {
-            throw new IllegalArgumentException("El costo es obligatorio y debe ser mayor a 0");
-        }
-        
-        TipoMembresiaMapper.updateEntity(tipo, dto);
-        repository.update(tipo);
-
-        return repository
-            .findDetalleById(id)
-            .orElseThrow(() -> new IllegalStateException("Error al recuperar el tipo actualizado"));
+    if (!dto.getNombre().matches("^[a-zA-Z\\s]+$")) {
+      throw new IllegalArgumentException(
+          "El nombre del tipo de membresía solo debe contener letras y espacios.");
     }
 
-    public void deleteTipo(int id) {
-        validateId(id);
+    validateOptionalString(dto.getDescripcion(), "La descripción del tipo de membresía", 255);
 
-        if (!repository.existsById(id)) {
-            throw new IllegalArgumentException("Tipo no encontrado: " + id);
-        }
-
-        repository.delete(id);
+    if (dto.getDuracionDias() == null || dto.getDuracionDias() <= 0) {
+      throw new IllegalArgumentException("La duración en días es obligatoria y debe ser mayor a 0");
     }
 
-    public List<TipoMembresiaListadoDTO> getPaged(int page, int size) {
-        int offset = page * size;
-        try {
-            return repository.findAllListadoPaginated(offset, size);
-        } catch (Exception e) {
-            return repository.findAllListado();
-        }}
+    if (dto.getCosto() == null || dto.getCosto().doubleValue() <= 0) {
+      throw new IllegalArgumentException("El costo es obligatorio y debe ser mayor a 0");
+    }
 
-    public TipoMembresiaDetalleDTO createTipoConBeneficios(TipoMembresiaCreateDTO dto) {
-        
-        if (dto == null) {
-            throw new IllegalArgumentException("Los datos del tipo de membresía son obligatorios");
-        }
+    TiposMembresia tipo = TipoMembresiaMapper.toEntity(dto);
+    TiposMembresia saved = repository.save(tipo);
 
-        validateRequiredString(dto.getNombre(), "El nombre del tipo de membresía", 50);
-        
-        if (!dto.getNombre().matches("^[a-zA-Z\\s]+$")) {
-            throw new IllegalArgumentException("El nombre del tipo de membresía solo debe contener letras y espacios.");
-        }
+    return repository
+        .findDetalleById(saved.getId())
+        .orElseThrow(() -> new IllegalStateException("No se pudo recuperar el tipo creado"));
+  }
 
-        validateOptionalString(dto.getDescripcion(), "La descripción del tipo de membresía", 255);
+  // Actualizar
+  public TipoMembresiaDetalleDTO updateTipo(int id, TipoMembresiaUpdateDTO dto) {
+    validateId(id);
 
-        if (dto.getDuracionDias() == null || dto.getDuracionDias() <= 0) {
-            throw new IllegalArgumentException("La duración en días es obligatoria y debe ser mayor a 0");
-        }
+    TiposMembresia tipo =
+        repository
+            .findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Tipo no encontrado: " + id));
 
-        if (dto.getCosto() == null || dto.getCosto().doubleValue() <= 0) {
-            throw new IllegalArgumentException("El costo es obligatorio y debe ser mayor a 0");
-        }
+    if (dto == null) {
+      throw new IllegalArgumentException(
+          "Los datos actualizados del tipo de membresía son obligatorios");
+    }
 
-        TipoMembresiaCreateDTO baseDto = new TipoMembresiaCreateDTO(
+    validateRequiredString(dto.getNombre(), "El nombre del tipo de membresía", 50);
+
+    if (!dto.getNombre().matches("^[a-zA-Z\\s]+$")) {
+      throw new IllegalArgumentException(
+          "El nombre del tipo de membresía solo debe contener letras y espacios.");
+    }
+
+    validateOptionalString(dto.getDescripcion(), "La descripción del tipo de membresía", 255);
+
+    if (dto.getDuracionDias() == null || dto.getDuracionDias() <= 0) {
+      throw new IllegalArgumentException("La duración en días es obligatoria y debe ser mayor a 0");
+    }
+
+    if (dto.getCosto() == null || dto.getCosto().doubleValue() <= 0) {
+      throw new IllegalArgumentException("El costo es obligatorio y debe ser mayor a 0");
+    }
+
+    TipoMembresiaMapper.updateEntity(tipo, dto);
+    repository.update(tipo);
+
+    return repository
+        .findDetalleById(id)
+        .orElseThrow(() -> new IllegalStateException("Error al recuperar el tipo actualizado"));
+  }
+
+  public void deleteTipo(int id) {
+    validateId(id);
+
+    if (!repository.existsById(id)) {
+      throw new IllegalArgumentException("Tipo no encontrado: " + id);
+    }
+
+    repository.delete(id);
+  }
+
+  public List<TipoMembresiaListadoDTO> getPaged(int page, int size) {
+    int offset = page * size;
+    try {
+      return repository.findAllListadoPaginated(offset, size);
+    } catch (Exception e) {
+      return repository.findAllListado();
+    }
+  }
+
+  public TipoMembresiaDetalleDTO createTipoConBeneficios(TipoMembresiaCreateDTO dto) {
+
+    if (dto == null) {
+      throw new IllegalArgumentException("Los datos del tipo de membresía son obligatorios");
+    }
+
+    validateRequiredString(dto.getNombre(), "El nombre del tipo de membresía", 50);
+
+    if (!dto.getNombre().matches("^[a-zA-Z\\s]+$")) {
+      throw new IllegalArgumentException(
+          "El nombre del tipo de membresía solo debe contener letras y espacios.");
+    }
+
+    validateOptionalString(dto.getDescripcion(), "La descripción del tipo de membresía", 255);
+
+    if (dto.getDuracionDias() == null || dto.getDuracionDias() <= 0) {
+      throw new IllegalArgumentException("La duración en días es obligatoria y debe ser mayor a 0");
+    }
+
+    if (dto.getCosto() == null || dto.getCosto().doubleValue() <= 0) {
+      throw new IllegalArgumentException("El costo es obligatorio y debe ser mayor a 0");
+    }
+
+    TipoMembresiaCreateDTO baseDto =
+        new TipoMembresiaCreateDTO(
             dto.getNombre(),
             dto.getDescripcion(),
             dto.getDuracionDias(),
             dto.getCosto(),
             dto.getAccesoCompleto(),
-            null
-        );
+            null);
 
-        TiposMembresia tipo = TipoMembresiaMapper.toEntity(baseDto);
-        TiposMembresia savedTipo = repository.save(tipo);
-        Integer nuevoTipoId = savedTipo.getId();
+    TiposMembresia tipo = TipoMembresiaMapper.toEntity(baseDto);
+    TiposMembresia savedTipo = repository.save(tipo);
+    Integer nuevoTipoId = savedTipo.getId();
 
-        if (dto.getBeneficiosIds() != null && !dto.getBeneficiosIds().isEmpty()) {
-            for (Integer beneficioId : dto.getBeneficiosIds()) {
-                try {
-                    MembresiaBeneficioCreateDTO asociacionDto = new MembresiaBeneficioCreateDTO(
-                        nuevoTipoId,
-                        beneficioId
-                    );
-                    asociacionController.create(asociacionDto); 
-                } catch (IllegalArgumentException e) {
-                    System.err.println("Advertencia: Beneficio ID " + beneficioId + " no válido o ya asignado. Continuando.");
-                }
-            }
+    if (dto.getBeneficiosIds() != null && !dto.getBeneficiosIds().isEmpty()) {
+      for (Integer beneficioId : dto.getBeneficiosIds()) {
+        try {
+          MembresiaBeneficioCreateDTO asociacionDto =
+              new MembresiaBeneficioCreateDTO(nuevoTipoId, beneficioId);
+          asociacionController.create(asociacionDto);
+        } catch (IllegalArgumentException e) {
+          System.err.println(
+              "Advertencia: Beneficio ID "
+                  + beneficioId
+                  + " no válido o ya asignado. Continuando.");
         }
-
-        return repository
-            .findDetalleById(nuevoTipoId)
-            .orElseThrow(() -> new IllegalStateException("No se pudo recuperar el tipo creado"));
+      }
     }
 
+    return repository
+        .findDetalleById(nuevoTipoId)
+        .orElseThrow(() -> new IllegalStateException("No se pudo recuperar el tipo creado"));
+  }
 }

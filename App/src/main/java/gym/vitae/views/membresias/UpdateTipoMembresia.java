@@ -12,9 +12,7 @@ import javax.swing.*;
 import javax.swing.text.*;
 import net.miginfocom.swing.MigLayout;
 
-/**
- * Formulario para actualizar un tipo de membresía existente.
- */
+/** Formulario para actualizar un tipo de membresía existente. */
 public class UpdateTipoMembresia extends JPanel {
 
   private static final Logger LOGGER = Logger.getLogger(UpdateTipoMembresia.class.getName());
@@ -34,7 +32,8 @@ public class UpdateTipoMembresia extends JPanel {
   private ButtonOutline btnGuardar;
   private ButtonOutline btnCancelar;
 
-  public UpdateTipoMembresia(TiposMembresiaController controller, TipoMembresiaDetalleDTO tipoDetalle) {
+  public UpdateTipoMembresia(
+      TiposMembresiaController controller, TipoMembresiaDetalleDTO tipoDetalle) {
     this.controller = controller;
     this.tipoDetalle = tipoDetalle;
     init();
@@ -89,15 +88,15 @@ public class UpdateTipoMembresia extends JPanel {
 
   private void initializeComponents() {
     txtNombre = new JTextField();
-    
+
     txtDescripcion = new JTextArea(3, 20);
     txtDescripcion.setLineWrap(true);
     txtDescripcion.setWrapStyleWord(true);
-    
+
     txtDuracionDias = new JTextField();
     txtCosto = new JTextField();
     chkAccesoCompleto = new JCheckBox("El cliente tendrá acceso completo al gimnasio");
-    
+
     cmbEstado = new JComboBox<>(new String[] {"ACTIVO", "INACTIVO"});
   }
 
@@ -239,7 +238,8 @@ public class UpdateTipoMembresia extends JPanel {
     }
 
     txtNombre.setText(tipoDetalle.getNombre());
-    txtDescripcion.setText(tipoDetalle.getDescripcion() != null ? tipoDetalle.getDescripcion() : "");
+    txtDescripcion.setText(
+        tipoDetalle.getDescripcion() != null ? tipoDetalle.getDescripcion() : "");
     txtDuracionDias.setText(tipoDetalle.getDuracionDias().toString());
     txtCosto.setText(tipoDetalle.getCosto().toString());
     chkAccesoCompleto.setSelected(tipoDetalle.getAccesoCompleto());
@@ -312,14 +312,14 @@ public class UpdateTipoMembresia extends JPanel {
     }
 
     try {
-      TipoMembresiaUpdateDTO updateDTO = new TipoMembresiaUpdateDTO(
-          txtNombre.getText().trim(),
-          txtDescripcion.getText().trim().isEmpty() ? null : txtDescripcion.getText().trim(),
-          Integer.parseInt(txtDuracionDias.getText().trim()),
-          new BigDecimal(txtCosto.getText().trim()),
-          chkAccesoCompleto.isSelected(),
-          cmbEstado.getSelectedItem().equals("ACTIVO")
-      );
+      TipoMembresiaUpdateDTO updateDTO =
+          new TipoMembresiaUpdateDTO(
+              txtNombre.getText().trim(),
+              txtDescripcion.getText().trim().isEmpty() ? null : txtDescripcion.getText().trim(),
+              Integer.parseInt(txtDuracionDias.getText().trim()),
+              new BigDecimal(txtCosto.getText().trim()),
+              chkAccesoCompleto.isSelected(),
+              cmbEstado.getSelectedItem().equals("ACTIVO"));
 
       controller.updateTipo(tipoDetalle.getId(), updateDTO);
 
