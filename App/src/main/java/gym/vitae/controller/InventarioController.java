@@ -316,6 +316,7 @@ public class InventarioController extends BaseController {
     dto.setFechaIngreso(LocalDate.now());
 
     Producto producto = ProductoMapper.toEntity(dto, categoria, proveedor);
+    producto.setActivo(true);
     Producto saved = productoRepository.save(producto);
 
     return productoRepository
