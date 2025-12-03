@@ -44,3 +44,4 @@ DatabaseStore
 ### env file
 .env
 
+Resources/gymvitae_db.sql

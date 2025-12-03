@@ -10,6 +10,7 @@ import gym.vitae.views.common.StateView;
 import gym.vitae.views.common.ViewContainer;
 import gym.vitae.views.common.ViewManager;
 import gym.vitae.views.components.primitives.Icons;
+import gym.vitae.views.inventario.ViewInventario;
 import gym.vitae.views.membresias.ViewMembresias;
 import gym.vitae.views.membresias.ViewTiposMembresia;
 import gym.vitae.views.personal.ViewPersonal;
@@ -75,7 +76,7 @@ public class Menu extends SimpleDrawerBuilder {
               .subMenu("Listado de Membresias", ViewMembresias.class)
               .subMenu("Tipos de Membresias", ViewTiposMembresia.class),
           new Item("Iventario", "pack.svg")
-              .subMenu("Productos y Equipos")
+              .subMenu("Productos y Equipos", ViewInventario.class)
               .subMenu("Proveedores", ViewProveedores.class),
           new Item("Cerrar Session", "logout.svg")
         };
