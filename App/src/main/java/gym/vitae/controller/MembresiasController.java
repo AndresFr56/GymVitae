@@ -128,7 +128,7 @@ public class MembresiasController extends BaseController {
                   () ->
                       new IllegalArgumentException(
                           "Cliente no encontrado con ID: " + dto.getClienteId()));
-      TiposMembresia tipo =
+      final TiposMembresia tipo =
           tiposMembresiaRepository
               .findById(dto.getTipoMembresiaId())
               .orElseThrow(
@@ -156,7 +156,7 @@ public class MembresiasController extends BaseController {
   
       Factura savedFactura = facturaRepository.save(factura);
   
-      Integer nuevaFacturaId = savedFactura.getId(); 
+      final Integer nuevaFacturaId = savedFactura.getId(); 
   
       DetallesFactura detalle = new DetallesFactura();
       detalle.setFactura(savedFactura);
