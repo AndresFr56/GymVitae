@@ -33,10 +33,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-/** Controlador de Inventario. Gestiona productos, equipos y proveedores según RF-17 a RF-24. */
+/** Controlador del modulo de Inventario. Gestiona productos, equipos y proveedores según RF-17 a RF-24. */
 public class InventarioController extends BaseController {
 
-  // Subtipos válidos según el tipo (restricción de la base de datos)
+  // Subtipos válidos de acuerdo al tipo (restricción de la base de datos)
   private static final String[] SUBTIPOS_PRODUCTO = {
     "PRODUCTO", "ACCESORIO", "MATERIAL_DE_LIMPIEZA"
   };
@@ -48,7 +48,7 @@ public class InventarioController extends BaseController {
 
   // ============ INVENTARIO GENERAL (RF-17) ============
 
-  /** Constructor para inyección de dependencias. */
+  /** Constructor inyección de dependencias. */
   public InventarioController() {
     super();
     this.productoRepository = getRepository(ProductoRepository.class);
@@ -78,14 +78,14 @@ public class InventarioController extends BaseController {
   }
 
   /**
-   * Obtiene todos los productos y equipos activos combinados en un listado de Inventario.
+   * Obtiene todos los productos y equipos activos y en stock combinados en un listado de Inventario.
    *
    * @return Lista de InventarioListadoDTO
    */
   public List<InventarioListadoDTO> getInventarioGeneral() {
     List<InventarioListadoDTO> result = new ArrayList<>();
 
-    // Productos activos
+    // Productos en stock
     List<ProductoListadoDTO> productos = productoRepository.findActivosListado();
     result.addAll(
         productos.stream()
@@ -119,7 +119,7 @@ public class InventarioController extends BaseController {
   }
 
   /**
-   * Obtiene inventario general con paginación.
+   * Obtiene inventario con paginación.
    *
    * @param offset Posición inicial
    * @param limit Cantidad de registros
@@ -561,7 +561,7 @@ public class InventarioController extends BaseController {
             .orElseThrow(() -> new IllegalArgumentException("Equipo no encontrado con ID: " + id));
 
     if (equipo.getEstado() == EstadoEquipo.FUERA_SERVICIO) {
-      throw new IllegalArgumentException("El equipo ya está dado de baja");
+      throw new IllegalArgumentException("Equipo ya está dado de baja");
     }
 
     equipo.setEstado(EstadoEquipo.FUERA_SERVICIO);
@@ -974,13 +974,13 @@ public class InventarioController extends BaseController {
    */
   private void validatePrecioUnitario(BigDecimal precio) {
     if (precio == null) {
-      throw new IllegalArgumentException("El precio unitario es obligatorio");
+      throw new IllegalArgumentException("Precio unitario obligatorio");
     }
     if (precio.compareTo(BigDecimal.ZERO) <= 0) {
-      throw new IllegalArgumentException("El precio unitario debe ser mayor a 0");
+      throw new IllegalArgumentException("Precio unitario debe ser mayor a 0");
     }
     if (precio.scale() > 2) {
-      throw new IllegalArgumentException("El precio unitario solo puede tener hasta 2 decimales");
+      throw new IllegalArgumentException("Precio unitario solo puede tener hasta 2 decimales");
     }
   }
 
@@ -989,20 +989,20 @@ public class InventarioController extends BaseController {
    */
   private void validateStock(Integer stock) {
     if (stock == null) {
-      throw new IllegalArgumentException("El stock es obligatorio");
+      throw new IllegalArgumentException("Stock obligatorio");
     }
     if (stock < 0) {
-      throw new IllegalArgumentException("El stock no puede ser negativo");
+      throw new IllegalArgumentException("Stock no puede ser negativo");
     }
     if (stock > 999) {
-      throw new IllegalArgumentException("El stock no puede exceder 999 unidades");
+      throw new IllegalArgumentException("Stock no puede exceder 999 unidades");
     }
   }
 
-  /** Valida la unidad de medida de un producto. */
+  /** Valida la unidad de medida del producto. */
   private void validateUnidadMedida(String unidadMedida) {
     if (unidadMedida == null || unidadMedida.trim().isEmpty()) {
-      throw new IllegalArgumentException("La unidad de medida es obligatoria");
+      throw new IllegalArgumentException("La unidad de medida del producto es obligatoria");
     }
     String[] unidadesValidas = {"Unidad", "Kg", "Litro", "Caja", "Paquete"};
     boolean esValida = false;
@@ -1053,19 +1053,19 @@ public class InventarioController extends BaseController {
   private void validateModelo(String modelo) {
     if (modelo != null && !modelo.trim().isEmpty()) {
       if (modelo.length() > 100) {
-        throw new IllegalArgumentException("El modelo no puede exceder 100 caracteres");
+        throw new IllegalArgumentException("El modelo no puede exceder los 100 caracteres");
       }
       if (!modelo.matches("^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\\s\\-]+$")) {
         throw new IllegalArgumentException(
-            "El modelo solo puede contener letras, números, espacios y guiones");
+            "El modelo solo debe contener letras, números, espacios y guiones");
       }
     }
   }
 
-  /** Valida la ubicación de un equipo. */
+  /** Valida ubicación de un equipo. */
   private void validateUbicacion(String ubicacion) {
     if (ubicacion != null && !ubicacion.trim().isEmpty()) {
-      String[] ubicacionesValidas = {"Área de cardio", "Zona de peso libre", "Bodega"};
+      String[] ubicacionesValidas = {"Área de cardio", "Zona peso libre", "Bodega"};
       boolean esValida = false;
       for (String ub : ubicacionesValidas) {
         if (ub.equalsIgnoreCase(ubicacion)) {
@@ -1075,7 +1075,7 @@ public class InventarioController extends BaseController {
       }
       if (!esValida) {
         throw new IllegalArgumentException(
-            "La ubicación debe ser: Área de cardio, Zona de peso libre o Bodega");
+            "La ubicación debe ser: Área de cardio, Zona peso libre o Bodega");
       }
     }
   }
@@ -1144,10 +1144,10 @@ public class InventarioController extends BaseController {
   private void validateEmailOpcional(String email) {
     if (email != null && !email.trim().isEmpty()) {
       if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-        throw new IllegalArgumentException("El formato del email no es válido");
+        throw new IllegalArgumentException("El formato del email no es el válido");
       }
       if (email.length() > 100) {
-        throw new IllegalArgumentException("El email no puede exceder 100 caracteres");
+        throw new IllegalArgumentException("El email no puede exceder los 100 caracteres");
       }
     }
   }
@@ -1155,7 +1155,7 @@ public class InventarioController extends BaseController {
   /** Valida la dirección de un proveedor. */
   private void validateDireccionProveedor(String direccion) {
     if (direccion != null && direccion.length() > 255) {
-      throw new IllegalArgumentException("La dirección no puede exceder 255 caracteres");
+      throw new IllegalArgumentException("La dirección no puede exceder los 255 caracteres");
     }
   }
 }

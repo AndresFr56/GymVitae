@@ -17,7 +17,7 @@ import javax.swing.text.*;
 import net.miginfocom.swing.MigLayout;
 
 /**
- * Formulario para registrar un nuevo producto (RF-19). Campos obligatorios: Código, nombre,
+ * Formulario para registrar un nuevo producto en el sistema (RF-19). Campos obligatorios: Código, nombre,
  * categoría, precio unitario, stock, unidad de medida. Campos opcionales: Descripción, proveedor.
  * Código y fecha de ingreso se generan automáticamente.
  */
@@ -29,11 +29,11 @@ public class RegisterProducto extends JPanel {
 
   private final transient InventarioController controller;
 
-  // Panel de contenido scrollable
+  // JPanel es el Panel de contenido scrollable
   private JPanel contentPanel;
   private JLabel lblError;
 
-  // Campos del formulario
+  // Campos del formulario de Registrar Producto
   private JTextField txtCodigo;
   private JTextField txtNombre;
   private JTextArea txtDescripcion;
@@ -43,7 +43,7 @@ public class RegisterProducto extends JPanel {
   private JSpinner spnStock;
   private JComboBox<UnidadMedida> cmbUnidadMedida;
 
-  // Botones
+  // Botones de accion
   private ButtonOutline btnGuardar;
   private ButtonOutline btnCancelar;
 
@@ -164,15 +164,15 @@ public class RegisterProducto extends JPanel {
   }
 
   private void applyStyles() {
-    txtCodigo.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Generado automáticamente");
+    txtCodigo.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Generado de forma automática");
     txtNombre.putClientProperty(
-        FlatClientProperties.PLACEHOLDER_TEXT, "Ej: Proteína Whey, Barra energética");
+        FlatClientProperties.PLACEHOLDER_TEXT, "Ej: Proteína, Barra energética");
     txtDescripcion.putClientProperty(
         FlatClientProperties.PLACEHOLDER_TEXT, "Descripción del producto (opcional)");
-    txtPrecio.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ej: 199.99");
+    txtPrecio.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ej: 999.99");
   }
 
-  /** Aplica filtro para permitir solo letras y espacios. */
+  /** Filtro para permitir solo letras y espacios. */
   private void applyLettersAndSpacesFilter(JTextField textField) {
     ((AbstractDocument) textField.getDocument())
         .setDocumentFilter(
@@ -205,7 +205,7 @@ public class RegisterProducto extends JPanel {
             });
   }
 
-  /** Aplica filtro de longitud máxima. */
+  /** Filtro de longitud máxima. */
   private void applyMaxLengthFilter(JTextComponent textComponent) {
     ((AbstractDocument) textComponent.getDocument())
         .setDocumentFilter(
@@ -232,7 +232,7 @@ public class RegisterProducto extends JPanel {
             });
   }
 
-  /** Aplica filtro para permitir solo números decimales. */
+  /** Filtro para permitir solo números decimales. */
   private void applyDecimalFilter(JTextField textField) {
     ((AbstractDocument) textField.getDocument())
         .setDocumentFilter(
@@ -274,30 +274,30 @@ public class RegisterProducto extends JPanel {
   private void buildForm() {
     createTitle("Información del Producto");
 
-    contentPanel.add(new JLabel("Código *"));
+    contentPanel.add(new JLabel("Código*"));
     contentPanel.add(txtCodigo);
 
-    contentPanel.add(new JLabel("Nombre del Producto *"));
+    contentPanel.add(new JLabel("Nombre del Producto*"));
     contentPanel.add(txtNombre);
 
-    contentPanel.add(new JLabel("Descripción"));
+    contentPanel.add(new JLabel("Descripción del Producto"));
     JScrollPane scrollDesc = new JScrollPane(txtDescripcion);
     scrollDesc.setPreferredSize(new Dimension(0, 80));
     contentPanel.add(scrollDesc);
 
-    contentPanel.add(new JLabel("Categoría *"));
+    contentPanel.add(new JLabel("Categoría del Producto*"));
     contentPanel.add(cmbCategoria);
 
-    contentPanel.add(new JLabel("Proveedor"));
+    contentPanel.add(new JLabel("Proveedor del Producto"));
     contentPanel.add(cmbProveedor);
 
-    contentPanel.add(new JLabel("Precio Unitario *"));
+    contentPanel.add(new JLabel("Precio Unitario del Producto*"));
     contentPanel.add(txtPrecio);
 
-    contentPanel.add(new JLabel("Stock Inicial *"));
+    contentPanel.add(new JLabel("Stock Inicial del Producto*"));
     contentPanel.add(spnStock);
 
-    contentPanel.add(new JLabel("Unidad de Medida *"));
+    contentPanel.add(new JLabel("Unidad de Medida del Producto*"));
     contentPanel.add(cmbUnidadMedida);
 
     contentPanel.add(new JLabel(" "), "gapy 10");
@@ -314,7 +314,7 @@ public class RegisterProducto extends JPanel {
     hideError();
 
     try {
-      // Validar nombre
+      // Validar el nombre
       String nombre = txtNombre.getText().trim();
       if (nombre.isEmpty()) {
         showErrorMessage("El nombre del producto es obligatorio");
@@ -322,7 +322,7 @@ public class RegisterProducto extends JPanel {
         return false;
       }
 
-      // Validar categoría
+      // Validar la categoría
       if (cmbCategoria.getSelectedItem() == null) {
         showErrorMessage("Debe seleccionar una categoría");
         cmbCategoria.requestFocus();
@@ -332,14 +332,14 @@ public class RegisterProducto extends JPanel {
       // Validar precio
       String precioStr = txtPrecio.getText().trim();
       if (precioStr.isEmpty()) {
-        showErrorMessage("El precio unitario es obligatorio");
+        showErrorMessage("El precio unitario del producto es obligatorio");
         txtPrecio.requestFocus();
         return false;
       }
       try {
         BigDecimal precio = new BigDecimal(precioStr);
         if (precio.compareTo(BigDecimal.ZERO) <= 0) {
-          showErrorMessage("El precio debe ser mayor a cero");
+          showErrorMessage("El precio del producto debe ser mayor a cero");
           txtPrecio.requestFocus();
           return false;
         }
@@ -349,7 +349,7 @@ public class RegisterProducto extends JPanel {
         return false;
       }
 
-      // Validar stock
+      // Validar el stock
       int stock = (Integer) spnStock.getValue();
       if (stock < 0) {
         showErrorMessage("El stock no puede ser negativo");
@@ -370,7 +370,7 @@ public class RegisterProducto extends JPanel {
       controller.createProducto(dto);
 
       JOptionPane.showMessageDialog(
-          this, "Producto registrado exitosamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+          this, "El producto ha sido registrado exitosamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
 
       clearForm();
       return true;
