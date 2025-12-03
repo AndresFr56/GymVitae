@@ -22,9 +22,7 @@ import javax.swing.text.DocumentFilter;
 import javax.swing.text.JTextComponent;
 import net.miginfocom.swing.MigLayout;
 
-/**
- * Formulario para actualización del proveedor
- */
+/** Formulario para actualización del proveedor */
 public class UpdateProveedor extends JPanel {
 
   private static final Logger LOGGER = Logger.getLogger(UpdateProveedor.class.getName());
@@ -34,11 +32,11 @@ public class UpdateProveedor extends JPanel {
   private final transient ProveedoresController controller;
   private final transient ProveedorDetalleDTO proveedorDetalle;
 
-  //Panel de contenido scrolleable
+  // Panel de contenido scrolleable
   private JPanel contentPanel;
   private JLabel lblError;
 
-  //Campos del formulario
+  // Campos del formulario
   private JTextField txtCodigoProveedor;
   private JTextField txtNombreProveedor;
   private JTextField txtContactoProveedor;
@@ -46,10 +44,10 @@ public class UpdateProveedor extends JPanel {
   private JTextField txtEmailProveedor;
   private JTextArea txtDireccionProveedor;
 
-  //Estado del proveedor
+  // Estado del proveedor
   private JComboBox<String> cmbEstadoProveedor;
 
-  //Botones
+  // Botones
   private ButtonOutline btnGuardar;
   private ButtonOutline btnCancelar;
 
@@ -119,7 +117,7 @@ public class UpdateProveedor extends JPanel {
     txtDireccionProveedor = new JTextArea(2, 20);
     txtDireccionProveedor.setLineWrap(true);
     txtDireccionProveedor.setWrapStyleWord(true);
-    cmbEstadoProveedor = new JComboBox<>(new String[]{"ACTIVO", "INACTIVO"});
+    cmbEstadoProveedor = new JComboBox<>(new String[] {"ACTIVO", "INACTIVO"});
     txtCodigoProveedor.setEditable(false);
   }
 
@@ -132,15 +130,15 @@ public class UpdateProveedor extends JPanel {
   }
 
   private void applyStyles() {
-    txtNombreProveedor.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT,
-        "Ej: Suplementos Ecuador S.A.");
-    txtContactoProveedor.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT,
-        "Ej: María Fabiani");
+    txtNombreProveedor.putClientProperty(
+        FlatClientProperties.PLACEHOLDER_TEXT, "Ej: Suplementos Ecuador S.A.");
+    txtContactoProveedor.putClientProperty(
+        FlatClientProperties.PLACEHOLDER_TEXT, "Ej: María Fabiani");
     txtTelefonoProveedor.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ej: 0998765432");
-    txtEmailProveedor.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT,
-        "Ej: ventas@proveedor.com");
-    txtDireccionProveedor.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT,
-        "Ej: Av. Barcelona y República");
+    txtEmailProveedor.putClientProperty(
+        FlatClientProperties.PLACEHOLDER_TEXT, "Ej: ventas@proveedor.com");
+    txtDireccionProveedor.putClientProperty(
+        FlatClientProperties.PLACEHOLDER_TEXT, "Ej: Av. Barcelona y República");
   }
 
   private void applyMaxLengthFilter(JTextComponent textComponent, int maxLength) {
@@ -211,30 +209,34 @@ public class UpdateProveedor extends JPanel {
 
   private void applyCompanyNameFilter(JTextField textField, int maxLength) {
     ((AbstractDocument) textField.getDocument())
-        .setDocumentFilter(new DocumentFilter() {
-          @Override
-          public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
-              throws BadLocationException {
-            if (string != null && isValidCompanyName(string)
-                && fb.getDocument().getLength() + string.length() <= maxLength) {
-              super.insertString(fb, offset, string, attr);
-            }
-          }
+        .setDocumentFilter(
+            new DocumentFilter() {
+              @Override
+              public void insertString(
+                  FilterBypass fb, int offset, String string, AttributeSet attr)
+                  throws BadLocationException {
+                if (string != null
+                    && isValidCompanyName(string)
+                    && fb.getDocument().getLength() + string.length() <= maxLength) {
+                  super.insertString(fb, offset, string, attr);
+                }
+              }
 
-          @Override
-          public void replace(FilterBypass fb, int offset, int length, String text,
-              AttributeSet attrs)
-              throws BadLocationException {
-            if (text != null && isValidCompanyName(text)
-                && fb.getDocument().getLength() - length + text.length() <= maxLength) {
-              super.replace(fb, offset, length, text, attrs);
-            }
-          }
+              @Override
+              public void replace(
+                  FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
+                  throws BadLocationException {
+                if (text != null
+                    && isValidCompanyName(text)
+                    && fb.getDocument().getLength() - length + text.length() <= maxLength) {
+                  super.replace(fb, offset, length, text, attrs);
+                }
+              }
 
-          private boolean isValidCompanyName(String text) {
-            return text.matches("^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ .,&\\-]*$");
-          }
-        });
+              private boolean isValidCompanyName(String text) {
+                return text.matches("^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ .,&\\-]*$");
+              }
+            });
   }
 
   private void applyNumericFilter(JTextField textField, int maxLength) {
@@ -372,19 +374,17 @@ public class UpdateProveedor extends JPanel {
     }
 
     try {
-      ProveedorUpdateDTO updateDTO = new ProveedorUpdateDTO(
-          txtNombreProveedor.getText().trim(),
-          txtContactoProveedor.getText().trim(),
-          txtTelefonoProveedor.getText().trim(),
-          txtEmailProveedor.getText().trim(),
-          txtDireccionProveedor.getText().trim(),
-          "ACTIVO".equals(cmbEstadoProveedor.getSelectedItem()));
+      ProveedorUpdateDTO updateDTO =
+          new ProveedorUpdateDTO(
+              txtNombreProveedor.getText().trim(),
+              txtContactoProveedor.getText().trim(),
+              txtTelefonoProveedor.getText().trim(),
+              txtEmailProveedor.getText().trim(),
+              txtDireccionProveedor.getText().trim(),
+              "ACTIVO".equals(cmbEstadoProveedor.getSelectedItem()));
       controller.updateProveedor(proveedorDetalle.getId(), updateDTO);
       JOptionPane.showMessageDialog(
-          this,
-          "Proveedor Actualizado Correctamente",
-          "Éxito",
-          JOptionPane.INFORMATION_MESSAGE);
+          this, "Proveedor Actualizado Correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
       return true;
     } catch (IllegalArgumentException e) {
       showErrorMessage(e.getMessage());
@@ -418,6 +418,4 @@ public class UpdateProveedor extends JPanel {
   public ButtonOutline getBtnCancelar() {
     return btnCancelar;
   }
-
-
 }

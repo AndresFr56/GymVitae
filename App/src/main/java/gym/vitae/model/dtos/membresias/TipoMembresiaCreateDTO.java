@@ -11,6 +11,7 @@ public class TipoMembresiaCreateDTO {
   private BigDecimal costo;
   private Boolean accesoCompleto;
   private List<Integer> beneficiosIds;
+
   public TipoMembresiaCreateDTO() {}
 
   public TipoMembresiaCreateDTO(
@@ -75,5 +76,4 @@ public class TipoMembresiaCreateDTO {
   public void setBeneficiosIds(List<Integer> beneficiosIds) {
     this.beneficiosIds = beneficiosIds;
   }
-  
 }

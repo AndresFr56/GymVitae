@@ -13,9 +13,7 @@ import javax.swing.*;
 import net.miginfocom.swing.MigLayout;
 import raven.datetime.DatePicker;
 
-/**
- * Formulario para actualizar una membresía existente.
- */
+/** Formulario para actualizar una membresía existente. */
 public class UpdateMembresia extends JPanel {
 
   private static final Logger LOGGER = Logger.getLogger(UpdateMembresia.class.getName());
@@ -95,16 +93,16 @@ public class UpdateMembresia extends JPanel {
   private void initializeComponents() {
     txtCliente = new JTextField();
     txtCliente.setEditable(false);
-    
+
     txtTipoMembresia = new JTextField();
     txtTipoMembresia.setEditable(false);
-    
+
     txtFechaInicio = new JTextField();
     txtFechaInicio.setEditable(false);
-    
+
     txtPrecioPagado = new JTextField();
     txtPrecioPagado.setEditable(false);
-    
+
     txtFactura = new JTextField();
     txtFactura.setEditable(false);
 
@@ -169,15 +167,16 @@ public class UpdateMembresia extends JPanel {
       throw new IllegalArgumentException("La membresía no puede ser nula");
     }
 
-    txtCliente.setText(membresiaDetalle.getClienteNombre() + " - " + membresiaDetalle.getClienteDocumento());
+    txtCliente.setText(
+        membresiaDetalle.getClienteNombre() + " - " + membresiaDetalle.getClienteDocumento());
     txtTipoMembresia.setText(membresiaDetalle.getTipoMembresiaNombre());
     txtFechaInicio.setText(membresiaDetalle.getFechaInicio().format(DATE_FORMATTER));
     dateFechaFin.setSelectedDate(membresiaDetalle.getFechaFin());
     txtPrecioPagado.setText(String.format("$%.2f", membresiaDetalle.getPrecioPagado()));
     txtFactura.setText(membresiaDetalle.getFacturaNumero());
-    
+
     cmbEstado.setSelectedItem(membresiaDetalle.getEstado());
-    
+
     txtObservaciones.setText(
         membresiaDetalle.getObservaciones() != null ? membresiaDetalle.getObservaciones() : "");
 
@@ -218,19 +217,18 @@ public class UpdateMembresia extends JPanel {
     }
 
     try {
-      MembresiaUpdateDTO updateDTO = new MembresiaUpdateDTO(
-          (EstadoMembresia) cmbEstado.getSelectedItem(),
-          dateFechaFin.getSelectedDate(),
-          txtObservaciones.getText().trim().isEmpty() ? null : txtObservaciones.getText().trim()
-      );
+      MembresiaUpdateDTO updateDTO =
+          new MembresiaUpdateDTO(
+              (EstadoMembresia) cmbEstado.getSelectedItem(),
+              dateFechaFin.getSelectedDate(),
+              txtObservaciones.getText().trim().isEmpty()
+                  ? null
+                  : txtObservaciones.getText().trim());
 
       controller.updateMembresia(membresiaDetalle.getId(), updateDTO);
 
       JOptionPane.showMessageDialog(
-          this,
-          "Membresía actualizada exitosamente",
-          "Éxito",
-          JOptionPane.INFORMATION_MESSAGE);
+          this, "Membresía actualizada exitosamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
 
       return true;
 

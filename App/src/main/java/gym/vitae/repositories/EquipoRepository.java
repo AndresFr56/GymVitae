@@ -141,4 +141,114 @@ public record EquipoRepository(DBConnectionManager db) implements IRepository<Eq
           return Optional.ofNullable(EquipoMapper.toDetalleDTO(equipo));
         });
   }
+
+  /**
+   * Obtiene todos los equipos activos (no fuera de servicio) como DTOs de listado.
+   *
+   * @return Lista de EquipoListadoDTO activos
+   */
+  public List<EquipoListadoDTO> findActivosListado() {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          TypedQuery<Equipo> q =
+              em.createQuery(
+                  "SELECT e FROM Equipo e LEFT JOIN FETCH e.categoria "
+                      + "WHERE e.estado != :estadoFuera ORDER BY e.id",
+                  Equipo.class);
+          q.setParameter("estadoFuera", EstadoEquipo.FUERA_SERVICIO);
+          return EquipoMapper.toListadoDTOList(q.getResultList());
+        });
+  }
+
+  /**
+   * Busca equipos con filtros opcionales y paginación.
+   *
+   * @param searchText Texto de búsqueda en nombre/código (puede ser null)
+   * @param categoriaId ID de categoría para filtrar (puede ser null)
+   * @param estado Estado del equipo para filtrar (puede ser null)
+   * @param offset Posición inicial
+   * @param limit Cantidad de registros
+   * @return Lista de EquipoListadoDTO que coinciden con los filtros
+   */
+  public List<EquipoListadoDTO> findAllListadoWithFilters(
+      String searchText, Integer categoriaId, EstadoEquipo estado, int offset, int limit) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          StringBuilder jpql =
+              new StringBuilder("SELECT e FROM Equipo e LEFT JOIN FETCH e.categoria WHERE 1=1");
+
+          if (searchText != null && !searchText.trim().isEmpty()) {
+            jpql.append(
+                " AND (LOWER(e.nombre) LIKE :searchText OR LOWER(e.codigo) LIKE :searchText)");
+          }
+          if (categoriaId != null) {
+            jpql.append(" AND e.categoria.id = :categoriaId");
+          }
+          if (estado != null) {
+            jpql.append(" AND e.estado = :estado");
+          }
+
+          jpql.append(" ORDER BY e.id");
+
+          TypedQuery<Equipo> query = em.createQuery(jpql.toString(), Equipo.class);
+
+          if (searchText != null && !searchText.trim().isEmpty()) {
+            query.setParameter("searchText", "%" + searchText.toLowerCase() + "%");
+          }
+          if (categoriaId != null) {
+            query.setParameter("categoriaId", categoriaId);
+          }
+          if (estado != null) {
+            query.setParameter("estado", estado);
+          }
+
+          query.setFirstResult(offset);
+          query.setMaxResults(limit);
+
+          return EquipoMapper.toListadoDTOList(query.getResultList());
+        });
+  }
+
+  /**
+   * Cuenta equipos con filtros opcionales.
+   *
+   * @param searchText Texto de búsqueda en nombre/código (puede ser null)
+   * @param categoriaId ID de categoría para filtrar (puede ser null)
+   * @param estado Estado del equipo para filtrar (puede ser null)
+   * @return Cantidad de equipos que coinciden con los filtros
+   */
+  public long countWithFilters(String searchText, Integer categoriaId, EstadoEquipo estado) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          StringBuilder jpql = new StringBuilder("SELECT COUNT(e) FROM Equipo e WHERE 1=1");
+
+          if (searchText != null && !searchText.trim().isEmpty()) {
+            jpql.append(
+                " AND (LOWER(e.nombre) LIKE :searchText OR LOWER(e.codigo) LIKE :searchText)");
+          }
+          if (categoriaId != null) {
+            jpql.append(" AND e.categoria.id = :categoriaId");
+          }
+          if (estado != null) {
+            jpql.append(" AND e.estado = :estado");
+          }
+
+          TypedQuery<Long> query = em.createQuery(jpql.toString(), Long.class);
+
+          if (searchText != null && !searchText.trim().isEmpty()) {
+            query.setParameter("searchText", "%" + searchText.toLowerCase() + "%");
+          }
+          if (categoriaId != null) {
+            query.setParameter("categoriaId", categoriaId);
+          }
+          if (estado != null) {
+            query.setParameter("estado", estado);
+          }
+
+          return query.getSingleResult();
+        });
+  }
 }

@@ -2,7 +2,6 @@ package gym.vitae.controller;
 
 import static gym.vitae.controller.ValidationUtils.validateFechaSalida;
 import static gym.vitae.controller.ValidationUtils.validateId;
-import static gym.vitae.controller.ValidationUtils.validateRequiredString;
 
 import gym.vitae.mapper.MembresiaMapper;
 import gym.vitae.model.Cliente;
@@ -27,9 +26,10 @@ import java.util.List;
 import java.util.Random;
 
 /**
-* Controlador para gestionar membresías.
-* @author GymVitae
-*/
+ * Controlador para gestionar membresías.
+ *
+ * @author GymVitae
+ */
 public class MembresiasController extends BaseController {
 
   private final MembresiaRepository membresiaRepository;
@@ -39,10 +39,7 @@ public class MembresiasController extends BaseController {
   private final DetallesFacturaRepository detallesFacturaRepository;
   private final AuthController authController;
 
-  /**
-   * Constructor por defecto.
-   * 
-   */
+  /** Constructor por defecto. */
   public MembresiasController() {
     super();
     this.membresiaRepository = getRepository(MembresiaRepository.class);
@@ -52,14 +49,16 @@ public class MembresiasController extends BaseController {
     this.detallesFacturaRepository = getRepository(DetallesFacturaRepository.class);
     this.authController = new AuthController();
   }
-/**
-* Constructor para pruebas.
-* @param membresiaRepository Repositorio de Membresia.
-* @param clienteRepository Repositorio de Cliente.
-* @param tiposMembresiaRepository Repositorio de TiposMembresia.
-* @param facturaRepository Repositorio de Factura.
-* @param detallesFacturaRepository Repositorio de DetallesFactura.  
-*/
+
+  /**
+   * Constructor para pruebas.
+   *
+   * @param membresiaRepository Repositorio de Membresia.
+   * @param clienteRepository Repositorio de Cliente.
+   * @param tiposMembresiaRepository Repositorio de TiposMembresia.
+   * @param facturaRepository Repositorio de Factura.
+   * @param detallesFacturaRepository Repositorio de DetallesFactura.
+   */
   MembresiasController(
       MembresiaRepository membresiaRepository,
       ClienteRepository clienteRepository,
@@ -77,14 +76,17 @@ public class MembresiasController extends BaseController {
   }
 
   /**
- * Listado de Membresias. 
- * @return Lista de Membresias.
- */
+   * Listado de Membresias.
+   *
+   * @return Lista de Membresias.
+   */
   public List<MembresiaListadoDTO> getMembresias() {
     return membresiaRepository.findAllListado();
   }
+
   /**
    * Obtiene una membresía por su ID.
+   *
    * @param id ID de la membresía.
    * @return Detalle de la membresía.
    * @throws IllegalArgumentException si la membresía no se encuentra.
@@ -98,87 +100,89 @@ public class MembresiasController extends BaseController {
 
   /**
    * Crea una nueva membresía.
+   *
    * @param dto Datos de la membresía a crear.
    * @return Detalle de la membresía creada.
    * @throws IllegalArgumentException si los datos son inválidos.
    * @throws IllegalStateException si ocurre un error al recuperar la membresía creada.
-  */
+   */
   public MembresiaDetalleDTO createMembresia(MembresiaCreateDTO dto) {
-      if (dto == null) {
-        throw new IllegalArgumentException("Los datos de la membresía no pueden ser nulos");
-      }
-  
-      validateId(dto.getClienteId());
-      validateId(dto.getTipoMembresiaId());
-  
-      if (dto.getFechaInicio() == null || dto.getFechaFin() == null) {
-        throw new IllegalArgumentException("Las fechas de inicio y fin son obligatorias");
-      }
-  
-      validateFechaSalida(dto.getFechaInicio(), dto.getFechaFin());
-  
-      if (dto.getPrecioPagado() == null || dto.getPrecioPagado().doubleValue() <= 0) {
-        throw new IllegalArgumentException("El precio pagado debe ser mayor a 0");
-      }
-  
-      Cliente cliente =
-          clienteRepository
-              .findById(dto.getClienteId())
-              .orElseThrow(
-                  () ->
-                      new IllegalArgumentException(
-                          "Cliente no encontrado con ID: " + dto.getClienteId()));
-      final TiposMembresia tipo =
-          tiposMembresiaRepository
-              .findById(dto.getTipoMembresiaId())
-              .orElseThrow(
-                  () ->
-                      new IllegalArgumentException(
-                          "Tipo de membresía no encontrado con ID: " + dto.getTipoMembresiaId()));
-  
-      Empleado empleadoResponsable = authController.getEmpleadoActual();
-  
-      if (empleadoResponsable == null) {
-        throw new IllegalStateException("No hay un empleado logueado para registrar la venta");
-      }
-  
-      Factura factura = new Factura();
-      String numeroFactura =
-          "FAC-" + LocalDate.now().toString().replace("-", "") + new Random().nextInt(10000);
-  
-      factura.setNumeroFactura(numeroFactura);
-      factura.setCliente(cliente);
-      factura.setEmpleadoResponsable(empleadoResponsable);
-      factura.setFechaEmision(LocalDate.now());
-      factura.setTipoVenta(TipoVenta.MEMBRESIA);
-      factura.setTotal(dto.getPrecioPagado());
-      factura.setEstado(EstadoFactura.PAGADA);
-  
-      Factura savedFactura = facturaRepository.save(factura);
-  
-      final Integer nuevaFacturaId = savedFactura.getId(); 
-  
-      DetallesFactura detalle = new DetallesFactura();
-      detalle.setFactura(savedFactura);
-      detalle.setTipoMembresia(tipo);
-      detalle.setCantidad(1);
-      detalle.setPrecioUnitario(dto.getPrecioPagado());
-      detalle.setSubtotal(dto.getPrecioPagado());
-  
-      detallesFacturaRepository.save(detalle);
-  
-      dto.setFacturaId(nuevaFacturaId);
-  
-      Membresia membresia = MembresiaMapper.toEntity(dto, cliente, tipo, savedFactura);
-      Membresia saved = membresiaRepository.save(membresia);
-  
-      return membresiaRepository
-          .findDetalleById(saved.getId())
-          .orElseThrow(() -> new IllegalStateException("Error al recuperar la membresía creada"));
+    if (dto == null) {
+      throw new IllegalArgumentException("Los datos de la membresía no pueden ser nulos");
     }
+
+    validateId(dto.getClienteId());
+    validateId(dto.getTipoMembresiaId());
+
+    if (dto.getFechaInicio() == null || dto.getFechaFin() == null) {
+      throw new IllegalArgumentException("Las fechas de inicio y fin son obligatorias");
+    }
+
+    validateFechaSalida(dto.getFechaInicio(), dto.getFechaFin());
+
+    if (dto.getPrecioPagado() == null || dto.getPrecioPagado().doubleValue() <= 0) {
+      throw new IllegalArgumentException("El precio pagado debe ser mayor a 0");
+    }
+
+    Cliente cliente =
+        clienteRepository
+            .findById(dto.getClienteId())
+            .orElseThrow(
+                () ->
+                    new IllegalArgumentException(
+                        "Cliente no encontrado con ID: " + dto.getClienteId()));
+    final TiposMembresia tipo =
+        tiposMembresiaRepository
+            .findById(dto.getTipoMembresiaId())
+            .orElseThrow(
+                () ->
+                    new IllegalArgumentException(
+                        "Tipo de membresía no encontrado con ID: " + dto.getTipoMembresiaId()));
+
+    Empleado empleadoResponsable = authController.getEmpleadoActual();
+
+    if (empleadoResponsable == null) {
+      throw new IllegalStateException("No hay un empleado logueado para registrar la venta");
+    }
+
+    Factura factura = new Factura();
+    String numeroFactura =
+        "FAC-" + LocalDate.now().toString().replace("-", "") + new Random().nextInt(10000);
+
+    factura.setNumeroFactura(numeroFactura);
+    factura.setCliente(cliente);
+    factura.setEmpleadoResponsable(empleadoResponsable);
+    factura.setFechaEmision(LocalDate.now());
+    factura.setTipoVenta(TipoVenta.MEMBRESIA);
+    factura.setTotal(dto.getPrecioPagado());
+    factura.setEstado(EstadoFactura.PAGADA);
+
+    Factura savedFactura = facturaRepository.save(factura);
+
+    final Integer nuevaFacturaId = savedFactura.getId();
+
+    DetallesFactura detalle = new DetallesFactura();
+    detalle.setFactura(savedFactura);
+    detalle.setTipoMembresia(tipo);
+    detalle.setCantidad(1);
+    detalle.setPrecioUnitario(dto.getPrecioPagado());
+    detalle.setSubtotal(dto.getPrecioPagado());
+
+    detallesFacturaRepository.save(detalle);
+
+    dto.setFacturaId(nuevaFacturaId);
+
+    Membresia membresia = MembresiaMapper.toEntity(dto, cliente, tipo, savedFactura);
+    Membresia saved = membresiaRepository.save(membresia);
+
+    return membresiaRepository
+        .findDetalleById(saved.getId())
+        .orElseThrow(() -> new IllegalStateException("Error al recuperar la membresía creada"));
+  }
 
   /**
    * Actualiza una membresía existente.
+   *
    * @param id ID de la membresía a actualizar.
    * @param dto Datos actualizados de la membresía.
    * @return Detalle de la membresía actualizada.
@@ -209,6 +213,7 @@ public class MembresiasController extends BaseController {
 
   /**
    * Cancela una membresía existente.
+   *
    * @param id ID de la membresía a cancelar.
    * @throws IllegalArgumentException si la membresía no se encuentra.
    */
@@ -224,6 +229,7 @@ public class MembresiasController extends BaseController {
 
   /**
    * Obtiene una página de membresías.
+   *
    * @param page Número de página (0-indexado).
    * @param size Tamaño de la página.
    * @return Lista de membresías en la página solicitada.

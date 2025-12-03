@@ -1,12 +1,12 @@
 package gym.vitae.views.membresias;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import gym.vitae.controller.ClienteController;
 import gym.vitae.controller.MembresiasController;
 import gym.vitae.controller.TiposMembresiaController;
-import gym.vitae.controller.ClienteController;
+import gym.vitae.model.dtos.cliente.ClienteListadoDTO;
 import gym.vitae.model.dtos.membresias.MembresiaCreateDTO;
 import gym.vitae.model.dtos.membresias.TipoMembresiaListadoDTO;
-import gym.vitae.model.dtos.cliente.ClienteListadoDTO;
 import gym.vitae.views.components.primitives.ButtonOutline;
 import java.awt.*;
 import java.math.BigDecimal;

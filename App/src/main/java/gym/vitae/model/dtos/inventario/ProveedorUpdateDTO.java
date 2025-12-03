@@ -1,8 +1,6 @@
 package gym.vitae.model.dtos.inventario;
 
-/**
- * DTO para la actualización de proveedores.
- */
+/** DTO para la actualización de proveedores. */
 public class ProveedorUpdateDTO {
 
   private String codigo;
@@ -13,11 +11,8 @@ public class ProveedorUpdateDTO {
   private String direccion;
   private Boolean activo;
 
-  /**
-   * Constructor por defecto para instanciar la clase.
-   */
-  public ProveedorUpdateDTO() {
-  }
+  /** Constructor por defecto para instanciar la clase. */
+  public ProveedorUpdateDTO() {}
 
   /**
    * Constructor para actualizar datos del proveedor. El código del proveedor no es modificable, el

@@ -14,9 +14,7 @@ import raven.modal.component.SimpleModalBorder;
 import raven.modal.option.Location;
 import raven.modal.option.Option;
 
-/**
- * Panel de tabla para la gestión de proveedores
- */
+/** Panel de tabla para la gestión de proveedores */
 public class ProveedorTablePanel extends BaseTablePanel<ProveedorListadoDTO> {
 
   private final transient ProveedoresController controller;
@@ -29,22 +27,22 @@ public class ProveedorTablePanel extends BaseTablePanel<ProveedorListadoDTO> {
 
   @Override
   protected String[] getColumnNames() {
-    return new String[]{
-        "SELECT", "#", "Código", "Nombre", "Contacto", "Teléfono", "Email", "Estado"
+    return new String[] {
+      "SELECT", "#", "Código", "Nombre", "Contacto", "Teléfono", "Email", "Estado"
     };
   }
 
   @Override
   protected Object[] entityToRow(ProveedorListadoDTO proveedor, int rowNumber) {
-    return new Object[]{
-        false,
-        rowNumber,
-        proveedor.getCodigo(),
-        proveedor.getNombre(),
-        proveedor.getContacto(),
-        proveedor.getTelefono(),
-        proveedor.getEmail(),
-        proveedor.getActivo() ? "ACTIVO" : "INACTIVO"
+    return new Object[] {
+      false,
+      rowNumber,
+      proveedor.getCodigo(),
+      proveedor.getNombre(),
+      proveedor.getContacto(),
+      proveedor.getTelefono(),
+      proveedor.getEmail(),
+      proveedor.getActivo() ? "ACTIVO" : "INACTIVO"
     };
   }
 
@@ -54,8 +52,8 @@ public class ProveedorTablePanel extends BaseTablePanel<ProveedorListadoDTO> {
   }
 
   @Override
-  protected List<ProveedorListadoDTO> fetchPagedDataWithFilters(String searchText, int offset,
-      int limit) {
+  protected List<ProveedorListadoDTO> fetchPagedDataWithFilters(
+      String searchText, int offset, int limit) {
     return controller.getProveedores().stream()
         .filter(p -> filterEntity(p, searchText))
         .skip(offset)
@@ -75,7 +73,7 @@ public class ProveedorTablePanel extends BaseTablePanel<ProveedorListadoDTO> {
 
   protected JPanel createCustomFilters() {
     JPanel filtersPanel = new JPanel(new MigLayout("insets 0", "[grow,fill]", "[]"));
-    cmbEstadoProveedor = new JComboBox<>(new String[]{"Todos", "ACTIVO", "INACTIVO"});
+    cmbEstadoProveedor = new JComboBox<>(new String[] {"Todos", "ACTIVO", "INACTIVO"});
     cmbEstadoProveedor.addActionListener(e -> loadData());
 
     filtersPanel.add(new JLabel("Estado:"));
@@ -86,14 +84,14 @@ public class ProveedorTablePanel extends BaseTablePanel<ProveedorListadoDTO> {
 
   @Override
   protected void configureColumnWidths(JTable table) {
-    table.getColumnModel().getColumn(0).setMaxWidth(50); //Select
-    table.getColumnModel().getColumn(1).setMaxWidth(50); //#
-    table.getColumnModel().getColumn(2).setPreferredWidth(100); //Codigo
-    table.getColumnModel().getColumn(3).setPreferredWidth(100); //Nombre
-    table.getColumnModel().getColumn(4).setPreferredWidth(100); //Contacto
-    table.getColumnModel().getColumn(5).setPreferredWidth(100); //Telefono
-    table.getColumnModel().getColumn(6).setPreferredWidth(100); //Email
-    table.getColumnModel().getColumn(7).setPreferredWidth(100); //Estado
+    table.getColumnModel().getColumn(0).setMaxWidth(50); // Select
+    table.getColumnModel().getColumn(1).setMaxWidth(50); // #
+    table.getColumnModel().getColumn(2).setPreferredWidth(100); // Codigo
+    table.getColumnModel().getColumn(3).setPreferredWidth(100); // Nombre
+    table.getColumnModel().getColumn(4).setPreferredWidth(100); // Contacto
+    table.getColumnModel().getColumn(5).setPreferredWidth(100); // Telefono
+    table.getColumnModel().getColumn(6).setPreferredWidth(100); // Email
+    table.getColumnModel().getColumn(7).setPreferredWidth(100); // Estado
   }
 
   @Override
@@ -103,9 +101,9 @@ public class ProveedorTablePanel extends BaseTablePanel<ProveedorListadoDTO> {
 
   private boolean matchesSearchText(ProveedorListadoDTO proveedor, String searchText) {
     String lowerTxt = searchText.toLowerCase();
-    return proveedor.getNombre().toLowerCase().contains(lowerTxt) ||
-        proveedor.getCodigo().toLowerCase().contains(lowerTxt) ||
-        proveedor.getEmail().toLowerCase().contains(lowerTxt);
+    return proveedor.getNombre().toLowerCase().contains(lowerTxt)
+        || proveedor.getCodigo().toLowerCase().contains(lowerTxt)
+        || proveedor.getEmail().toLowerCase().contains(lowerTxt);
   }
 
   private boolean matchesEstado(ProveedorListadoDTO proveedor) {
@@ -133,27 +131,30 @@ public class ProveedorTablePanel extends BaseTablePanel<ProveedorListadoDTO> {
         .setLocation(Location.TRAILING, Location.TOP)
         .setAnimateDistance(0.7f, 0);
 
-    ModalDialog.showModal(this,
+    ModalDialog.showModal(
+        this,
         new SimpleModalBorder(
             registerForm,
             "Registrar Nuevo Proveedor",
             SimpleModalBorder.DEFAULT_OPTION,
-            (control, action) -> {
-
-            }),
+            (control, action) -> {}),
         option);
 
     registerForm
         .getBtnGuardar()
-        .addOnClick(e -> {
-          if (registerForm.validateForm() && registerForm.saveProveedor()) {
-            ModalDialog.closeAllModal();
-            refresh();
-          }
-        });
-    registerForm.getBtnCancelar().addOnClick(e -> {
-      ModalDialog.closeAllModal();
-    });
+        .addOnClick(
+            e -> {
+              if (registerForm.validateForm() && registerForm.saveProveedor()) {
+                ModalDialog.closeAllModal();
+                refresh();
+              }
+            });
+    registerForm
+        .getBtnCancelar()
+        .addOnClick(
+            e -> {
+              ModalDialog.closeAllModal();
+            });
   }
 
   @Override
@@ -174,8 +175,7 @@ public class ProveedorTablePanel extends BaseTablePanel<ProveedorListadoDTO> {
             updateForm,
             "Actualizar Proveedor",
             SimpleModalBorder.DEFAULT_OPTION,
-            (control, action) -> {
-            }),
+            (control, action) -> {}),
         option);
 
     // Configurar listeners de botones

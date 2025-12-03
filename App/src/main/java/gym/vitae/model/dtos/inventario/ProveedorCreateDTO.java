@@ -5,21 +5,17 @@ package gym.vitae.model.dtos.inventario;
  */
 public class ProveedorCreateDTO {
 
-  /**
-   * Código del proveedor es generado automáticamente en el controlador.
-   */
+  /** Código del proveedor es generado automáticamente en el controlador. */
   private String codigo;
+
   private String nombre;
   private String contacto;
   private String telefono;
   private String email;
   private String direccion;
 
-  /**
-   * Constructor por defecto para instanciar la clase.
-   */
-  public ProveedorCreateDTO() {
-  }
+  /** Constructor por defecto para instanciar la clase. */
+  public ProveedorCreateDTO() {}
 
   /**
    * Constructor para crear un nuevo proveedor. No se especifica el código del proveedor porque es
@@ -32,11 +28,7 @@ public class ProveedorCreateDTO {
    * @param direccion del proveedor
    */
   public ProveedorCreateDTO(
-      String nombre,
-      String contacto,
-      String telefono,
-      String email,
-      String direccion) {
+      String nombre, String contacto, String telefono, String email, String direccion) {
     this.nombre = nombre;
     this.contacto = contacto;
     this.telefono = telefono;

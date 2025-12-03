@@ -3,7 +3,6 @@ package gym.vitae.views.components;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import gym.vitae.model.Empleado;
-import gym.vitae.model.dtos.membresias.TipoMembresiaListadoDTO;
 import gym.vitae.views.clases.ViewClases;
 import gym.vitae.views.clientes.ViewClientes;
 import gym.vitae.views.common.StateView;
