@@ -1,6 +1,8 @@
 package gym.vitae.controller;
 
-import static gym.vitae.controller.ValidationUtils.*;
+import static gym.vitae.controller.ValidationUtils.validateFechaSalida;
+import static gym.vitae.controller.ValidationUtils.validateId;
+import static gym.vitae.controller.ValidationUtils.validateRequiredString;
 
 import gym.vitae.mapper.MembresiaMapper;
 import gym.vitae.model.Cliente;
@@ -24,6 +26,10 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Random;
 
+/**
+* Controlador para gestionar membresías.
+* @author GymVitae
+*/
 public class MembresiasController extends BaseController {
 
   private final MembresiaRepository membresiaRepository;
@@ -42,7 +48,14 @@ public class MembresiasController extends BaseController {
     this.detallesFacturaRepository = getRepository(DetallesFacturaRepository.class);
     this.authController = new AuthController();
   }
-
+/**
+* Constructor para pruebas.
+* @param membresiaRepository Repositorio de Membresia.
+* @param clienteRepository Repositorio de Cliente.
+* @param tiposMembresiaRepository Repositorio de TiposMembresia.
+* @param facturaRepository Repositorio de Factura.
+* @param detallesFacturaRepository Repositorio de DetallesFactura.  
+*/
   MembresiasController(
       MembresiaRepository membresiaRepository,
       ClienteRepository clienteRepository,
@@ -59,10 +72,19 @@ public class MembresiasController extends BaseController {
     this.authController = authController;
   }
 
+  /**
+ * Listado de Membresias. 
+ * @return Lista de Membresias.
+ */
   public List<MembresiaListadoDTO> getMembresias() {
     return membresiaRepository.findAllListado();
   }
-
+  /**
+   * Obtiene una membresía por su ID.
+   * @param id ID de la membresía.
+   * @return Detalle de la membresía.
+   * @throws IllegalArgumentException si la membresía no se encuentra.
+   */
   public MembresiaDetalleDTO getMembresiaById(int id) {
     validateId(id);
     return membresiaRepository
@@ -70,6 +92,13 @@ public class MembresiasController extends BaseController {
         .orElseThrow(() -> new IllegalArgumentException("Membresía no encontrada con ID: " + id));
   }
 
+  /**
+   * Crea una nueva membresía.
+   * @param dto Datos de la membresía a crear.
+   * @return Detalle de la membresía creada.
+   * @throws IllegalArgumentException si los datos son inválidos.
+   * @throws IllegalStateException si ocurre un error al recuperar la membresía creada.
+   */
   public MembresiaDetalleDTO createMembresia(MembresiaCreateDTO dto) {
     if (dto == null) {
       throw new IllegalArgumentException("Los datos de la membresía no pueden ser nulos");
@@ -144,6 +173,14 @@ public class MembresiasController extends BaseController {
         .orElseThrow(() -> new IllegalStateException("Error al recuperar la membresía creada"));
   }
 
+  /**
+   * Actualiza una membresía existente.
+   * @param id ID de la membresía a actualizar.
+   * @param dto Datos actualizados de la membresía.
+   * @return Detalle de la membresía actualizada.
+   * @throws IllegalArgumentException si los datos son inválidos o la membresía no se encuentra.
+   * @throws IllegalStateException si ocurre un error al recuperar la membresía actualizada.
+   */
   public MembresiaDetalleDTO updateMembresia(int id, MembresiaUpdateDTO dto) {
     validateId(id);
 
@@ -166,6 +203,11 @@ public class MembresiasController extends BaseController {
             () -> new IllegalStateException("Error al recuperar la membresía actualizada"));
   }
 
+  /**
+   * Cancela una membresía existente.
+   * @param id ID de la membresía a cancelar.
+   * @throws IllegalArgumentException si la membresía no se encuentra.
+   */
   public void cancelarMembresia(int id) {
     validateId(id);
 
@@ -176,6 +218,13 @@ public class MembresiasController extends BaseController {
     membresiaRepository.delete(id);
   }
 
+  /**
+   * Obtiene una página de membresías.
+   * @param page Número de página (0-indexado).
+   * @param size Tamaño de la página.
+   * @return Lista de membresías en la página solicitada.
+   * @throws IllegalArgumentException si los parámetros de paginación son inválidos.
+   */
   public List<MembresiaListadoDTO> getPaged(int page, int size) {
     var all = getMembresias();
     int from = Math.min(page * size, all.size());
