@@ -39,6 +39,10 @@ public class MembresiasController extends BaseController {
   private final DetallesFacturaRepository detallesFacturaRepository;
   private final AuthController authController;
 
+  /**
+   * Constructor por defecto.
+   * 
+   */
   public MembresiasController() {
     super();
     this.membresiaRepository = getRepository(MembresiaRepository.class);
@@ -98,80 +102,80 @@ public class MembresiasController extends BaseController {
    * @return Detalle de la membresía creada.
    * @throws IllegalArgumentException si los datos son inválidos.
    * @throws IllegalStateException si ocurre un error al recuperar la membresía creada.
-   */
+  */
   public MembresiaDetalleDTO createMembresia(MembresiaCreateDTO dto) {
-    if (dto == null) {
-      throw new IllegalArgumentException("Los datos de la membresía no pueden ser nulos");
+      if (dto == null) {
+        throw new IllegalArgumentException("Los datos de la membresía no pueden ser nulos");
+      }
+  
+      validateId(dto.getClienteId());
+      validateId(dto.getTipoMembresiaId());
+  
+      if (dto.getFechaInicio() == null || dto.getFechaFin() == null) {
+        throw new IllegalArgumentException("Las fechas de inicio y fin son obligatorias");
+      }
+  
+      validateFechaSalida(dto.getFechaInicio(), dto.getFechaFin());
+  
+      if (dto.getPrecioPagado() == null || dto.getPrecioPagado().doubleValue() <= 0) {
+        throw new IllegalArgumentException("El precio pagado debe ser mayor a 0");
+      }
+  
+      Cliente cliente =
+          clienteRepository
+              .findById(dto.getClienteId())
+              .orElseThrow(
+                  () ->
+                      new IllegalArgumentException(
+                          "Cliente no encontrado con ID: " + dto.getClienteId()));
+      TiposMembresia tipo =
+          tiposMembresiaRepository
+              .findById(dto.getTipoMembresiaId())
+              .orElseThrow(
+                  () ->
+                      new IllegalArgumentException(
+                          "Tipo de membresía no encontrado con ID: " + dto.getTipoMembresiaId()));
+  
+      Empleado empleadoResponsable = authController.getEmpleadoActual();
+  
+      if (empleadoResponsable == null) {
+        throw new IllegalStateException("No hay un empleado logueado para registrar la venta");
+      }
+  
+      Factura factura = new Factura();
+      String numeroFactura =
+          "FAC-" + LocalDate.now().toString().replace("-", "") + new Random().nextInt(10000);
+  
+      factura.setNumeroFactura(numeroFactura);
+      factura.setCliente(cliente);
+      factura.setEmpleadoResponsable(empleadoResponsable);
+      factura.setFechaEmision(LocalDate.now());
+      factura.setTipoVenta(TipoVenta.MEMBRESIA);
+      factura.setTotal(dto.getPrecioPagado());
+      factura.setEstado(EstadoFactura.PAGADA);
+  
+      Factura savedFactura = facturaRepository.save(factura);
+  
+      Integer nuevaFacturaId = savedFactura.getId(); 
+  
+      DetallesFactura detalle = new DetallesFactura();
+      detalle.setFactura(savedFactura);
+      detalle.setTipoMembresia(tipo);
+      detalle.setCantidad(1);
+      detalle.setPrecioUnitario(dto.getPrecioPagado());
+      detalle.setSubtotal(dto.getPrecioPagado());
+  
+      detallesFacturaRepository.save(detalle);
+  
+      dto.setFacturaId(nuevaFacturaId);
+  
+      Membresia membresia = MembresiaMapper.toEntity(dto, cliente, tipo, savedFactura);
+      Membresia saved = membresiaRepository.save(membresia);
+  
+      return membresiaRepository
+          .findDetalleById(saved.getId())
+          .orElseThrow(() -> new IllegalStateException("Error al recuperar la membresía creada"));
     }
-
-    validateId(dto.getClienteId());
-    validateId(dto.getTipoMembresiaId());
-
-    if (dto.getFechaInicio() == null || dto.getFechaFin() == null) {
-      throw new IllegalArgumentException("Las fechas de inicio y fin son obligatorias");
-    }
-
-    validateFechaSalida(dto.getFechaInicio(), dto.getFechaFin());
-
-    if (dto.getPrecioPagado() == null || dto.getPrecioPagado().doubleValue() <= 0) {
-      throw new IllegalArgumentException("El precio pagado debe ser mayor a 0");
-    }
-
-    Cliente cliente =
-        clienteRepository
-            .findById(dto.getClienteId())
-            .orElseThrow(
-                () ->
-                    new IllegalArgumentException(
-                        "Cliente no encontrado con ID: " + dto.getClienteId()));
-
-    TiposMembresia tipo =
-        tiposMembresiaRepository
-            .findById(dto.getTipoMembresiaId())
-            .orElseThrow(
-                () ->
-                    new IllegalArgumentException(
-                        "Tipo de membresía no encontrado con ID: " + dto.getTipoMembresiaId()));
-
-    Empleado empleadoResponsable = authController.getEmpleadoActual();
-
-    if (empleadoResponsable == null) {
-      throw new IllegalStateException("No hay un empleado logueado para registrar la venta");
-    }
-
-    Factura factura = new Factura();
-    String numeroFactura =
-        "FAC-" + LocalDate.now().toString().replace("-", "") + new Random().nextInt(10000);
-
-    factura.setNumeroFactura(numeroFactura);
-    factura.setCliente(cliente);
-    factura.setEmpleadoResponsable(empleadoResponsable);
-    factura.setFechaEmision(LocalDate.now());
-    factura.setTipoVenta(TipoVenta.MEMBRESIA);
-    factura.setTotal(dto.getPrecioPagado());
-    factura.setEstado(EstadoFactura.PAGADA);
-
-    Factura savedFactura = facturaRepository.save(factura);
-    Integer nuevaFacturaId = savedFactura.getId();
-
-    DetallesFactura detalle = new DetallesFactura();
-    detalle.setFactura(savedFactura);
-    detalle.setTipoMembresia(tipo);
-    detalle.setCantidad(1);
-    detalle.setPrecioUnitario(dto.getPrecioPagado());
-    detalle.setSubtotal(dto.getPrecioPagado());
-
-    detallesFacturaRepository.save(detalle);
-
-    dto.setFacturaId(nuevaFacturaId);
-
-    Membresia membresia = MembresiaMapper.toEntity(dto, cliente, tipo, savedFactura);
-    Membresia saved = membresiaRepository.save(membresia);
-
-    return membresiaRepository
-        .findDetalleById(saved.getId())
-        .orElseThrow(() -> new IllegalStateException("Error al recuperar la membresía creada"));
-  }
 
   /**
    * Actualiza una membresía existente.
