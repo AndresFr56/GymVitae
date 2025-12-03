@@ -20,9 +20,7 @@ import javax.swing.text.DocumentFilter;
 import javax.swing.text.JTextComponent;
 import net.miginfocom.swing.MigLayout;
 
-/**
- * Formulario para registro del proveedor
- */
+/** Formulario para registro del proveedor */
 public class RegisterProveedor extends JPanel {
 
   private static final Logger LOGGER = Logger.getLogger(RegisterProveedor.class.getName());
@@ -31,11 +29,11 @@ public class RegisterProveedor extends JPanel {
   private static final int MAX_NUMERIC_LENGTH = 10;
   private final transient ProveedoresController controller;
 
-  //Panel de contenido scrolleable
+  // Panel de contenido scrolleable
   private JPanel contentPanel;
   private JLabel lblError;
 
-  //Campos del formulario
+  // Campos del formulario
   private JTextField txtCodigoProveedor;
   private JTextField txtNombreProveedor;
   private JTextField txtContactoProveedor;
@@ -43,7 +41,7 @@ public class RegisterProveedor extends JPanel {
   private JTextField txtEmailProveedor;
   private JTextArea txtDireccionProveedor;
 
-  //Botones
+  // Botones
   private ButtonOutline btnGuardar;
   private ButtonOutline btnCancelar;
 
@@ -115,7 +113,7 @@ public class RegisterProveedor extends JPanel {
     txtCodigoProveedor.setEditable(false);
     txtCodigoProveedor.setText(controller.getNextCodigoProveedor());
 
-    //Aplicar filtros
+    // Aplicar filtros
     applyCompanyNameFilter(txtNombreProveedor, MAX_TEXT_LENGTH);
     applyLettersAndSpacesFilter(txtContactoProveedor, MAX_TEXT_LENGTH);
     applyNumericFilter(txtTelefonoProveedor, MAX_NUMERIC_LENGTH);
@@ -155,30 +153,34 @@ public class RegisterProveedor extends JPanel {
 
   private void applyCompanyNameFilter(JTextField textField, int maxLength) {
     ((AbstractDocument) textField.getDocument())
-        .setDocumentFilter(new DocumentFilter() {
-          @Override
-          public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
-              throws BadLocationException {
-            if (string != null && isValidCompanyName(string)
-                && fb.getDocument().getLength() + string.length() <= maxLength) {
-              super.insertString(fb, offset, string, attr);
-            }
-          }
+        .setDocumentFilter(
+            new DocumentFilter() {
+              @Override
+              public void insertString(
+                  FilterBypass fb, int offset, String string, AttributeSet attr)
+                  throws BadLocationException {
+                if (string != null
+                    && isValidCompanyName(string)
+                    && fb.getDocument().getLength() + string.length() <= maxLength) {
+                  super.insertString(fb, offset, string, attr);
+                }
+              }
 
-          @Override
-          public void replace(FilterBypass fb, int offset, int length, String text,
-              AttributeSet attrs)
-              throws BadLocationException {
-            if (text != null && isValidCompanyName(text)
-                && fb.getDocument().getLength() - length + text.length() <= maxLength) {
-              super.replace(fb, offset, length, text, attrs);
-            }
-          }
+              @Override
+              public void replace(
+                  FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
+                  throws BadLocationException {
+                if (text != null
+                    && isValidCompanyName(text)
+                    && fb.getDocument().getLength() - length + text.length() <= maxLength) {
+                  super.replace(fb, offset, length, text, attrs);
+                }
+              }
 
-          private boolean isValidCompanyName(String text) {
-            return text.matches("^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ .,&\\-]*$");
-          }
-        });
+              private boolean isValidCompanyName(String text) {
+                return text.matches("^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ .,&\\-]*$");
+              }
+            });
   }
 
   private void applyLettersAndSpacesFilter(JTextField textField, int maxLength) {
@@ -276,15 +278,15 @@ public class RegisterProveedor extends JPanel {
   }
 
   private void applyStyles() {
-    txtNombreProveedor.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT,
-        "Ej: Suplementos Ecuador S.A.");
-    txtContactoProveedor.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT,
-        "Ej: María Fabiani");
+    txtNombreProveedor.putClientProperty(
+        FlatClientProperties.PLACEHOLDER_TEXT, "Ej: Suplementos Ecuador S.A.");
+    txtContactoProveedor.putClientProperty(
+        FlatClientProperties.PLACEHOLDER_TEXT, "Ej: María Fabiani");
     txtTelefonoProveedor.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ej: 0998765432");
-    txtEmailProveedor.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT,
-        "Ej: ventas@proveedor.com");
-    txtDireccionProveedor.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT,
-        "Ej: Av. Barcelona y República");
+    txtEmailProveedor.putClientProperty(
+        FlatClientProperties.PLACEHOLDER_TEXT, "Ej: ventas@proveedor.com");
+    txtDireccionProveedor.putClientProperty(
+        FlatClientProperties.PLACEHOLDER_TEXT, "Ej: Av. Barcelona y República");
   }
 
   private void createTitle(String title) {

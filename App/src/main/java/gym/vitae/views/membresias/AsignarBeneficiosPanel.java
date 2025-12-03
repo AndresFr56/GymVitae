@@ -14,8 +14,7 @@ import javax.swing.table.DefaultTableModel;
 import net.miginfocom.swing.MigLayout;
 
 /**
- * Panel para asignar beneficios a tipos de membresía.
- * Permite visualizar los beneficios actuales.
+ * Panel para asignar beneficios a tipos de membresía. Permite visualizar los beneficios actuales.
  */
 public class AsignarBeneficiosPanel extends JPanel {
 
@@ -40,8 +39,7 @@ public class AsignarBeneficiosPanel extends JPanel {
   private ButtonOutline btnEliminar;
 
   public AsignarBeneficiosPanel(
-      TiposMembresiaController tipoController,
-      BeneficiosController beneficioController) {
+      TiposMembresiaController tipoController, BeneficiosController beneficioController) {
     this.tipoController = tipoController;
     this.beneficioController = beneficioController;
     this.asociacionController = new MembresiaBeneficioController();
@@ -75,43 +73,45 @@ public class AsignarBeneficiosPanel extends JPanel {
 
   private void initializeComponents() {
     cmbTipoMembresia = new JComboBox<>();
-    cmbTipoMembresia.setRenderer(new DefaultListCellRenderer() {
-      @Override
-      public Component getListCellRendererComponent(JList<?> list, Object value,
-          int index, boolean isSelected, boolean cellHasFocus) {
-        super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-        if (value instanceof TipoMembresiaListadoDTO tipo) {
-          setText(tipo.getNombre() + " - $" + tipo.getCosto());
-        }
-        return this;
-      }
-    });
+    cmbTipoMembresia.setRenderer(
+        new DefaultListCellRenderer() {
+          @Override
+          public Component getListCellRendererComponent(
+              JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            if (value instanceof TipoMembresiaListadoDTO tipo) {
+              setText(tipo.getNombre() + " - $" + tipo.getCosto());
+            }
+            return this;
+          }
+        });
     cmbTipoMembresia.addActionListener(e -> cargarBeneficios());
 
-    modelAsignados = new DefaultTableModel(
-        new Object[]{"ID", "Beneficio"}, 0) {
-      @Override
-      public boolean isCellEditable(int row, int column) {
-        return false;
-      }
-    };
+    modelAsignados =
+        new DefaultTableModel(new Object[] {"ID", "Beneficio"}, 0) {
+          @Override
+          public boolean isCellEditable(int row, int column) {
+            return false;
+          }
+        };
     tableBeneficiosAsignados = new JTable(modelAsignados);
     tableBeneficiosAsignados.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
     modelDisponibles = new DefaultListModel<>();
     listBeneficiosDisponibles = new JList<>(modelDisponibles);
     listBeneficiosDisponibles.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    listBeneficiosDisponibles.setCellRenderer(new DefaultListCellRenderer() {
-      @Override
-      public Component getListCellRendererComponent(JList<?> list, Object value,
-          int index, boolean isSelected, boolean cellHasFocus) {
-        super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-        if (value instanceof BeneficioListadoDTO beneficio) {
-          setText(beneficio.getNombre() + " - " + beneficio.getDescripcion());
-        }
-        return this;
-      }
-    });
+    listBeneficiosDisponibles.setCellRenderer(
+        new DefaultListCellRenderer() {
+          @Override
+          public Component getListCellRendererComponent(
+              JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            if (value instanceof BeneficioListadoDTO beneficio) {
+              setText(beneficio.getNombre() + " - " + beneficio.getDescripcion());
+            }
+            return this;
+          }
+        });
 
     // Botones
     btnAgregar = new ButtonOutline("Agregar →");
@@ -131,10 +131,8 @@ public class AsignarBeneficiosPanel extends JPanel {
 
     createTitle("Gestión de Beneficios");
 
-    JPanel splitPanel = new JPanel(new MigLayout(
-        "fill,insets 0", 
-        "[fill,grow][100][fill,grow]", 
-        "[fill,grow]"));
+    JPanel splitPanel =
+        new JPanel(new MigLayout("fill,insets 0", "[fill,grow][100][fill,grow]", "[fill,grow]"));
 
     JPanel leftPanel = new JPanel(new BorderLayout());
     leftPanel.add(new JLabel("Beneficios Disponibles"), BorderLayout.NORTH);
@@ -170,10 +168,9 @@ public class AsignarBeneficiosPanel extends JPanel {
   private void loadTiposMembresia() {
     try {
       cmbTipoMembresia.removeAllItems();
-      var tipos = tipoController.getTipos().stream()
-          .filter(TipoMembresiaListadoDTO::getActivo)
-          .toList();
-      
+      var tipos =
+          tipoController.getTipos().stream().filter(TipoMembresiaListadoDTO::getActivo).toList();
+
       for (TipoMembresiaListadoDTO tipo : tipos) {
         cmbTipoMembresia.addItem(tipo);
       }
@@ -187,28 +184,27 @@ public class AsignarBeneficiosPanel extends JPanel {
   }
 
   private void cargarBeneficios() {
-    TipoMembresiaListadoDTO tipoSeleccionado = 
+    TipoMembresiaListadoDTO tipoSeleccionado =
         (TipoMembresiaListadoDTO) cmbTipoMembresia.getSelectedItem();
-    
+
     if (tipoSeleccionado == null) return;
 
     try {
-      var asociaciones = asociacionController.getAll().stream()
-          .filter(a -> a.getTipoMembresiaNombre().equals(tipoSeleccionado.getNombre()))
-          .toList();
+      var asociaciones =
+          asociacionController.getAll().stream()
+              .filter(a -> a.getTipoMembresiaNombre().equals(tipoSeleccionado.getNombre()))
+              .toList();
 
       modelAsignados.setRowCount(0);
       for (MembresiaBeneficioListadoDTO asoc : asociaciones) {
-        modelAsignados.addRow(new Object[]{
-            asoc.getId(),
-            asoc.getTipoMembresiaNombre(),
-            asoc.getBeneficioNombre(),
-        });
+        modelAsignados.addRow(
+            new Object[] {
+              asoc.getId(), asoc.getTipoMembresiaNombre(), asoc.getBeneficioNombre(),
+            });
       }
 
-      List<String> beneficiosAsignados = asociaciones.stream()
-          .map(MembresiaBeneficioListadoDTO::getBeneficioNombre)
-          .toList();
+      List<String> beneficiosAsignados =
+          asociaciones.stream().map(MembresiaBeneficioListadoDTO::getBeneficioNombre).toList();
 
       modelDisponibles.clear();
       beneficioController.getBeneficios().stream()
@@ -225,7 +221,7 @@ public class AsignarBeneficiosPanel extends JPanel {
 
   private void agregarBeneficio() {
     BeneficioListadoDTO beneficioSeleccionado = listBeneficiosDisponibles.getSelectedValue();
-    TipoMembresiaListadoDTO tipoSeleccionado = 
+    TipoMembresiaListadoDTO tipoSeleccionado =
         (TipoMembresiaListadoDTO) cmbTipoMembresia.getSelectedItem();
 
     if (beneficioSeleccionado == null) {
@@ -239,20 +235,15 @@ public class AsignarBeneficiosPanel extends JPanel {
     }
 
     try {
-      MembresiaBeneficioCreateDTO dto = new MembresiaBeneficioCreateDTO(
-          tipoSeleccionado.getId(),
-          beneficioSeleccionado.getId()
-      );
+      MembresiaBeneficioCreateDTO dto =
+          new MembresiaBeneficioCreateDTO(tipoSeleccionado.getId(), beneficioSeleccionado.getId());
 
       asociacionController.create(dto);
       cargarBeneficios();
       hideError();
 
       JOptionPane.showMessageDialog(
-          this,
-          "Beneficio asignado correctamente",
-          "Éxito",
-          JOptionPane.INFORMATION_MESSAGE);
+          this, "Beneficio asignado correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
 
     } catch (Exception e) {
       showErrorMessage("Error al asignar beneficio: " + e.getMessage());
@@ -262,7 +253,7 @@ public class AsignarBeneficiosPanel extends JPanel {
 
   private void eliminarBeneficio() {
     int selectedRow = tableBeneficiosAsignados.getSelectedRow();
-    
+
     if (selectedRow == -1) {
       showErrorMessage("Debe seleccionar un beneficio asignado para eliminar");
       return;
@@ -270,11 +261,12 @@ public class AsignarBeneficiosPanel extends JPanel {
 
     int asociacionId = (int) modelAsignados.getValueAt(selectedRow, 0);
 
-    int confirm = JOptionPane.showConfirmDialog(
-        this,
-        "¿Está seguro de eliminar este beneficio?",
-        "Confirmar Eliminación",
-        JOptionPane.YES_NO_OPTION);
+    int confirm =
+        JOptionPane.showConfirmDialog(
+            this,
+            "¿Está seguro de eliminar este beneficio?",
+            "Confirmar Eliminación",
+            JOptionPane.YES_NO_OPTION);
 
     if (confirm == JOptionPane.YES_OPTION) {
       try {
@@ -283,10 +275,7 @@ public class AsignarBeneficiosPanel extends JPanel {
         hideError();
 
         JOptionPane.showMessageDialog(
-            this,
-            "Beneficio eliminado correctamente",
-            "Éxito",
-            JOptionPane.INFORMATION_MESSAGE);
+            this, "Beneficio eliminado correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
 
       } catch (Exception e) {
         showErrorMessage("Error al eliminar beneficio: " + e.getMessage());

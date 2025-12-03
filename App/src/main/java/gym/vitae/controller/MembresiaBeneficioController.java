@@ -1,6 +1,7 @@
 package gym.vitae.controller;
 
 import static gym.vitae.controller.ValidationUtils.*;
+
 import gym.vitae.mapper.MembresiaBeneficioMapper;
 import gym.vitae.model.Beneficio;
 import gym.vitae.model.MembresiaBeneficio;
@@ -27,7 +28,7 @@ public class MembresiaBeneficioController extends BaseController {
     this.beneficioRepository = getRepository(BeneficioRepository.class);
   }
 
-/**
+  /**
    * Constructor para pruebas.
    *
    * @param repository Repositorio de MembresiaBeneficio.
@@ -44,23 +45,23 @@ public class MembresiaBeneficioController extends BaseController {
     this.beneficioRepository = beneficioRepository;
   }
 
-// Listar todas
+  // Listar todas
   public List<MembresiaBeneficioListadoDTO> getAll() {
-    
+
     List<MembresiaBeneficioListadoDTO> listadoIncompleto = repository.findAllListado();
     List<MembresiaBeneficioListadoDTO> resultado = new ArrayList<>();
-    
-    for (MembresiaBeneficioListadoDTO dto : listadoIncompleto) {
-        MembresiaBeneficioDetalleDTO detalleDto = getById(dto.getId());
 
-        MembresiaBeneficioListadoDTO fixedDto = new MembresiaBeneficioListadoDTO(
-            detalleDto.getId(),
-            detalleDto.getTipoMembresiaNombre(),
-            detalleDto.getBeneficioNombre()
-        );
-        resultado.add(fixedDto);
+    for (MembresiaBeneficioListadoDTO dto : listadoIncompleto) {
+      MembresiaBeneficioDetalleDTO detalleDto = getById(dto.getId());
+
+      MembresiaBeneficioListadoDTO fixedDto =
+          new MembresiaBeneficioListadoDTO(
+              detalleDto.getId(),
+              detalleDto.getTipoMembresiaNombre(),
+              detalleDto.getBeneficioNombre());
+      resultado.add(fixedDto);
     }
-    
+
     return resultado;
   }
 
@@ -88,8 +89,7 @@ public class MembresiaBeneficioController extends BaseController {
             .findById(dto.getBeneficioId())
             .orElseThrow(() -> new IllegalArgumentException("Beneficio no encontrado"));
 
-    MembresiaBeneficio entity =
-        MembresiaBeneficioMapper.toEntity(dto, tipo, beneficio);
+    MembresiaBeneficio entity = MembresiaBeneficioMapper.toEntity(dto, tipo, beneficio);
 
     MembresiaBeneficio saved = repository.save(entity);
 

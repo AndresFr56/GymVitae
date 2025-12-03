@@ -1,7 +1,7 @@
 package gym.vitae.views.membresias;
 
-import gym.vitae.controller.TiposMembresiaController;
 import gym.vitae.controller.BeneficiosController;
+import gym.vitae.controller.TiposMembresiaController;
 import gym.vitae.model.dtos.membresias.TipoMembresiaListadoDTO;
 import gym.vitae.views.components.tables.BaseTablePanel;
 import gym.vitae.views.components.tables.TableAction; // <-- ASUMO que esta clase existe

@@ -1,6 +1,7 @@
 package gym.vitae.model.dtos.inventario;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public class ProductoListadoDTO {
 
@@ -14,6 +15,7 @@ public class ProductoListadoDTO {
   private Boolean activo;
   private String categoriaNombre;
   private String proveedorNombre;
+  private LocalDate fechaIngreso;
 
   public ProductoListadoDTO() {}
 
@@ -27,7 +29,8 @@ public class ProductoListadoDTO {
       String unidadMedida,
       Boolean activo,
       String categoriaNombre,
-      String proveedorNombre) {
+      String proveedorNombre,
+      LocalDate fechaIngreso) {
     this.id = id;
     this.codigo = codigo;
     this.nombre = nombre;
@@ -38,8 +41,10 @@ public class ProductoListadoDTO {
     this.activo = activo;
     this.categoriaNombre = categoriaNombre;
     this.proveedorNombre = proveedorNombre;
+    this.fechaIngreso = fechaIngreso;
   }
 
+  // Getters y setters
   public Integer getId() {
     return id;
   }
@@ -118,5 +123,13 @@ public class ProductoListadoDTO {
 
   public void setProveedorNombre(String proveedorNombre) {
     this.proveedorNombre = proveedorNombre;
+  }
+
+  public LocalDate getFechaIngreso() {
+    return fechaIngreso;
+  }
+
+  public void setFechaIngreso(LocalDate fechaIngreso) {
+    this.fechaIngreso = fechaIngreso;
   }
 }
