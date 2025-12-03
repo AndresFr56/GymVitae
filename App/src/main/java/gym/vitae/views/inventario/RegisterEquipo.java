@@ -16,7 +16,7 @@ import javax.swing.text.*;
 import net.miginfocom.swing.MigLayout;
 
 /**
- * Formulario para registrar un nuevo equipo (RF-22). Campos obligatorios: Código, nombre,
+ * Formulario que sirve para registrar un nuevo equipo (RF-22). Campos obligatorios: Código, nombre,
  * categoría, marca, modelo, costo, ubicación. Campos opcionales: Descripción, observaciones.
  * Código, fecha de adquisición y estado se generan automáticamente.
  */
@@ -28,11 +28,11 @@ public class RegisterEquipo extends JPanel {
 
   private final transient InventarioController controller;
 
-  // Panel de contenido scrollable
+  // JPanel es el Panel de contenido scrollable
   private JPanel contentPanel;
   private JLabel lblError;
 
-  // Campos del formulario
+  // Campos del formulario de Registrar Equipo
   private JTextField txtCodigo;
   private JTextField txtNombre;
   private JTextArea txtDescripcion;
@@ -43,7 +43,7 @@ public class RegisterEquipo extends JPanel {
   private JComboBox<UbicacionEquipo> cmbUbicacion;
   private JTextArea txtObservaciones;
 
-  // Botones
+  // Botones de accion
   private ButtonOutline btnGuardar;
   private ButtonOutline btnCancelar;
 
@@ -55,7 +55,7 @@ public class RegisterEquipo extends JPanel {
   private void init() {
     setLayout(new BorderLayout());
 
-    // Panel superior con mensaje de error
+    // Panel superior con su mensaje de error
     lblError = new JLabel();
     lblError.setVisible(false);
     lblError.putClientProperty(
@@ -67,10 +67,10 @@ public class RegisterEquipo extends JPanel {
     scrollPane.setBorder(null);
     scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
-    // Panel de botones fijo en la parte inferior
+    // Panel de boton fijo en la parte inferior
     JPanel buttonPanel = createButtonPanel();
 
-    // Ensamblar layout
+    // Implementar layout
     JPanel topPanel = new JPanel(new MigLayout("fillx,wrap,insets 10 20 0 20", "[fill]"));
     topPanel.add(lblError);
 
@@ -103,7 +103,7 @@ public class RegisterEquipo extends JPanel {
   }
 
   private void initializeComponents() {
-    // Código generado automáticamente (no editable)
+    // Código generado automáticamente
     txtCodigo = new JTextField();
     txtCodigo.setEditable(false);
     txtCodigo.setText(controller.generateCodigoEquipo());
@@ -113,7 +113,7 @@ public class RegisterEquipo extends JPanel {
     txtDescripcion.setLineWrap(true);
     txtDescripcion.setWrapStyleWord(true);
 
-    // ComboBox de categorías (solo tipo EQUIPO)
+    // ComboBox de categorías (EQUIPO)
     cmbCategoria = new JComboBox<>();
     loadCategorias();
 
@@ -129,7 +129,7 @@ public class RegisterEquipo extends JPanel {
     txtObservaciones.setLineWrap(true);
     txtObservaciones.setWrapStyleWord(true);
 
-    // Aplicar filtros
+    // Filtros
     applyTextFilter(txtNombre);
     applyTextFilter(txtMarca);
     applyTextFilter(txtModelo);
@@ -146,24 +146,24 @@ public class RegisterEquipo extends JPanel {
         cmbCategoria.addItem(new CategoriaItem(cat.getId(), cat.getNombre()));
       }
     } catch (Exception e) {
-      LOGGER.warning("No se pudieron cargar las categorías: " + e.getMessage());
+      LOGGER.warning("No se pudieron cargar todas las categorías: " + e.getMessage());
     }
   }
 
   private void applyStyles() {
-    txtCodigo.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Generado automáticamente");
+    txtCodigo.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Generado de forma automática");
     txtNombre.putClientProperty(
-        FlatClientProperties.PLACEHOLDER_TEXT, "Ej: Caminadora, Bicicleta estática");
+        FlatClientProperties.PLACEHOLDER_TEXT, "Ej: Caminadora, Bicicleta");
     txtDescripcion.putClientProperty(
         FlatClientProperties.PLACEHOLDER_TEXT, "Descripción del equipo (opcional)");
-    txtMarca.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ej: Life Fitness, Precor");
-    txtModelo.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ej: T5, 885");
-    txtCosto.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ej: 25000.00");
+    txtMarca.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ej: Life Fitness o Precor");
+    txtModelo.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ej: T5, 855");
+    txtCosto.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ej: 2500.00");
     txtObservaciones.putClientProperty(
         FlatClientProperties.PLACEHOLDER_TEXT, "Observaciones adicionales (opcional)");
   }
 
-  /** Aplica filtro para permitir letras, números y espacios. */
+  /** Filtro para permitir letras, números y espacios. */
   private void applyTextFilter(JTextField textField) {
     ((AbstractDocument) textField.getDocument())
         .setDocumentFilter(
@@ -196,7 +196,7 @@ public class RegisterEquipo extends JPanel {
             });
   }
 
-  /** Aplica filtro de longitud máxima. */
+  /** Filtro de longitud máxima. */
   private void applyMaxLengthFilter(JTextComponent textComponent) {
     ((AbstractDocument) textComponent.getDocument())
         .setDocumentFilter(
@@ -223,7 +223,7 @@ public class RegisterEquipo extends JPanel {
             });
   }
 
-  /** Aplica filtro para permitir solo números decimales. */
+  /** Filtro para permitir solo números decimales. */
   private void applyDecimalFilter(JTextField textField) {
     ((AbstractDocument) textField.getDocument())
         .setDocumentFilter(
@@ -271,24 +271,24 @@ public class RegisterEquipo extends JPanel {
     contentPanel.add(new JLabel("Nombre del Equipo *"));
     contentPanel.add(txtNombre);
 
-    contentPanel.add(new JLabel("Descripción"));
+    contentPanel.add(new JLabel("Descripción del Equipo"));
     JScrollPane scrollDesc = new JScrollPane(txtDescripcion);
     scrollDesc.setPreferredSize(new Dimension(0, 80));
     contentPanel.add(scrollDesc);
 
-    contentPanel.add(new JLabel("Categoría *"));
+    contentPanel.add(new JLabel("Categoría del Equipo*"));
     contentPanel.add(cmbCategoria);
 
-    contentPanel.add(new JLabel("Marca *"));
+    contentPanel.add(new JLabel("Marca del Equipo*"));
     contentPanel.add(txtMarca);
 
-    contentPanel.add(new JLabel("Modelo *"));
+    contentPanel.add(new JLabel("Modelo del Equipo*"));
     contentPanel.add(txtModelo);
 
-    contentPanel.add(new JLabel("Costo *"));
+    contentPanel.add(new JLabel("Costo del Equipo*"));
     contentPanel.add(txtCosto);
 
-    contentPanel.add(new JLabel("Ubicación *"));
+    contentPanel.add(new JLabel("Ubicación del Equipo*"));
     contentPanel.add(cmbUbicacion);
 
     contentPanel.add(new JLabel("Observaciones"));
@@ -328,7 +328,7 @@ public class RegisterEquipo extends JPanel {
       // Validar marca
       String marca = txtMarca.getText().trim();
       if (marca.isEmpty()) {
-        showErrorMessage("La marca es obligatoria");
+        showErrorMessage("La marca del equipo es obligatoria");
         txtMarca.requestFocus();
         return false;
       }
@@ -336,7 +336,7 @@ public class RegisterEquipo extends JPanel {
       // Validar modelo
       String modelo = txtModelo.getText().trim();
       if (modelo.isEmpty()) {
-        showErrorMessage("El modelo es obligatorio");
+        showErrorMessage("El modelo del equipo es obligatorio");
         txtModelo.requestFocus();
         return false;
       }
@@ -344,7 +344,7 @@ public class RegisterEquipo extends JPanel {
       // Validar costo
       String costoStr = txtCosto.getText().trim();
       if (costoStr.isEmpty()) {
-        showErrorMessage("El costo es obligatorio");
+        showErrorMessage("El costo del equipo es obligatorio");
         txtCosto.requestFocus();
         return false;
       }
@@ -377,7 +377,7 @@ public class RegisterEquipo extends JPanel {
 
   public boolean saveEquipo() {
     try {
-      LOGGER.info("Iniciando guardado de equipo...");
+      LOGGER.info("Iniciando el guardado del equipo...");
       EquipoCreateDTO dto = buildDTOFromForm();
       LOGGER.info(
           "DTO construido: nombre="
@@ -394,7 +394,7 @@ public class RegisterEquipo extends JPanel {
               + dto.getUbicacion());
 
       controller.createEquipo(dto);
-      LOGGER.info("Equipo creado exitosamente");
+      LOGGER.info("El equipo ha sido creado exitosamente");
 
       JOptionPane.showMessageDialog(
           this, "Equipo registrado exitosamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
@@ -465,7 +465,7 @@ public class RegisterEquipo extends JPanel {
     return btnCancelar;
   }
 
-  /** Wrapper para items del combo de categorías. */
+  /** Wrapper para los items del combo de categorías. */
   private record CategoriaItem(Integer id, String nombre) {
 
     @Override
