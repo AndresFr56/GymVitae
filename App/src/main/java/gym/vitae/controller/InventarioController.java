@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-/** Controlador del modulo de Inventario. Gestiona productos, equipos y proveedores según RF-17 a RF-24. */
+/** Controlador Inventario. Gestiona productos, equipos y proveedores según RF-17 a RF-24. */
 public class InventarioController extends BaseController {
 
   // Subtipos válidos de acuerdo al tipo (restricción de la base de datos)
@@ -78,7 +78,7 @@ public class InventarioController extends BaseController {
   }
 
   /**
-   * Obtiene todos los productos y equipos activos y en stock combinados en un listado de Inventario.
+   * Obtiene productos y equipos activos y en stock combinados en un listado de Inventario.
    *
    * @return Lista de InventarioListadoDTO
    */
