@@ -18,8 +18,8 @@ import raven.modal.option.Location;
 import raven.modal.option.Option;
 
 /**
- * Panel de tabla combinada para inventario (productos y equipos). Muestra todos los items del
- * inventario con filtros por tipo, proveedor y nombre.
+ * Panel de tabla combinada para el inventario (productos y equipos).
+ * Permite visualizar todos los items con filtros por tipo, proveedor y nombre.
  */
 public class InventarioTablePanel extends BaseTablePanel<InventarioListadoDTO> {
 
@@ -30,7 +30,7 @@ public class InventarioTablePanel extends BaseTablePanel<InventarioListadoDTO> {
   private JComboBox<ProveedorItem> cmbProveedor;
 
   /**
-   * Constructor para el panel de inventario combinado.
+   * Constructor del panel de inventario combinado.
    *
    * @param controller Controlador de inventario
    */
@@ -96,7 +96,7 @@ public class InventarioTablePanel extends BaseTablePanel<InventarioListadoDTO> {
   protected JPanel createCustomFilters() {
     JPanel filtersPanel = new JPanel(new MigLayout("insets 0", "[][grow,fill][][grow,fill]", "[]"));
 
-    // Filtro por tipo
+    // Filtro por tipo de item
     cmbTipo = new JComboBox<>();
     cmbTipo.addItem(new TipoItem("Todos", "Todos"));
     cmbTipo.addItem(new TipoItem("Producto", "Producto"));
@@ -125,7 +125,7 @@ public class InventarioTablePanel extends BaseTablePanel<InventarioListadoDTO> {
         cmbProveedor.addItem(new ProveedorItem(prov.getId(), prov.getNombre()));
       }
     } catch (Exception e) {
-      LOGGER.warning("No se pudieron cargar los proveedores: " + e.getMessage());
+      LOGGER.warning("No pudo cargar los proveedores: " + e.getMessage());
     }
   }
 
@@ -161,13 +161,13 @@ public class InventarioTablePanel extends BaseTablePanel<InventarioListadoDTO> {
 
   @Override
   protected void onAdd() {
-    // Mostrar diálogo para seleccionar tipo
+    // Mostrar dialog para seleccionar tipo
     String[] opciones = {"Producto", "Equipo"};
     int seleccion =
         JOptionPane.showOptionDialog(
             this,
             "¿Qué tipo de item desea registrar?",
-            "Nuevo Item de Inventario",
+            "Nuevo Item para el Inventario",
             JOptionPane.DEFAULT_OPTION,
             JOptionPane.QUESTION_MESSAGE,
             null,
@@ -181,6 +181,7 @@ public class InventarioTablePanel extends BaseTablePanel<InventarioListadoDTO> {
     }
   }
 
+  // Abrir formulario de registro de producto
   private void openRegisterProducto() {
     RegisterProducto registerForm = new RegisterProducto(controller);
 
@@ -213,6 +214,7 @@ public class InventarioTablePanel extends BaseTablePanel<InventarioListadoDTO> {
     registerForm.getBtnCancelar().addOnClick(e -> ModalDialog.closeAllModal());
   }
 
+  // Abrir formulario de registro de equipo
   private void openRegisterEquipo() {
     RegisterEquipo registerForm = new RegisterEquipo(controller);
 
@@ -245,6 +247,7 @@ public class InventarioTablePanel extends BaseTablePanel<InventarioListadoDTO> {
     registerForm.getBtnCancelar().addOnClick(e -> ModalDialog.closeAllModal());
   }
 
+  // Abrir formulario de registro de categoría
   private void openRegisterCategoria() {
     RegisterCategoria registerForm = new RegisterCategoria(controller);
 
@@ -286,6 +289,7 @@ public class InventarioTablePanel extends BaseTablePanel<InventarioListadoDTO> {
     }
   }
 
+  //Abrir actualización de producto
   private void openUpdateProducto(InventarioListadoDTO item) {
     ProductoDetalleDTO detalle = controller.getProductoById(item.getId());
     UpdateProducto updateForm = new UpdateProducto(controller, detalle);
@@ -319,6 +323,7 @@ public class InventarioTablePanel extends BaseTablePanel<InventarioListadoDTO> {
     updateForm.getBtnCancelar().addOnClick(e -> ModalDialog.closeAllModal());
   }
 
+  //Abrir actualización de equipo
   private void openUpdateEquipo(InventarioListadoDTO item) {
     EquipoDetalleDTO detalle = controller.getEquipoById(item.getId());
     UpdateEquipo updateForm = new UpdateEquipo(controller, detalle);
@@ -357,7 +362,7 @@ public class InventarioTablePanel extends BaseTablePanel<InventarioListadoDTO> {
     int confirmResult =
         JOptionPane.showConfirmDialog(
             this,
-            "¿Está seguro de dar de baja los " + entities.size() + " registros seleccionados?",
+            "¿Está seguro en dar de baja los " + entities.size() + " registros seleccionados?",
             "Confirmar baja",
             JOptionPane.YES_NO_OPTION,
             JOptionPane.WARNING_MESSAGE);
@@ -380,7 +385,7 @@ public class InventarioTablePanel extends BaseTablePanel<InventarioListadoDTO> {
     loadData();
   }
 
-  /** Obtiene el tipo seleccionado o null si es "Todos". */
+  /** Devuelve el tipo seleccionado, o null si se seleccionó "Todos". */
   private String getSelectedTipo() {
     if (cmbTipo == null) return null;
     TipoItem selected = (TipoItem) cmbTipo.getSelectedItem();
@@ -390,7 +395,7 @@ public class InventarioTablePanel extends BaseTablePanel<InventarioListadoDTO> {
     return null;
   }
 
-  /** Obtiene el ID del proveedor seleccionado o null si es "Todos". */
+  /** Devuelve el ID del proveedor seleccionado o null si es "Todos". */
   private Integer getSelectedProveedorId() {
     if (cmbProveedor == null) return null;
     ProveedorItem selected = (ProveedorItem) cmbProveedor.getSelectedItem();

@@ -265,10 +265,10 @@ public class RegisterEquipo extends JPanel {
   private void buildForm() {
     createTitle("Información del Equipo");
 
-    contentPanel.add(new JLabel("Código *"));
+    contentPanel.add(new JLabel("Código*"));
     contentPanel.add(txtCodigo);
 
-    contentPanel.add(new JLabel("Nombre del Equipo *"));
+    contentPanel.add(new JLabel("Nombre del Equipo*"));
     contentPanel.add(txtNombre);
 
     contentPanel.add(new JLabel("Descripción del Equipo"));
