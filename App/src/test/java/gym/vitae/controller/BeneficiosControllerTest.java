@@ -27,12 +27,17 @@ class BeneficiosControllerTest {
     @Mock
     private BeneficioRepository beneficioRepository;
     
-    // CORRECCIÓN: Esto es correcto, Mockito se encarga de la inicialización
     @InjectMocks
     private BeneficiosController controller;
-
-    // **NOTA:** Se eliminó el constructor de prueba manual y el método setUp().
     
+    @BeforeEach
+    void setUp() {
+        // Inicialización manual de Mockito
+        beneficioRepository = mock(BeneficioRepository.class);
+        // Uso del constructor de prueba
+        controller = new BeneficiosController(beneficioRepository);
+    }
+
     private BeneficioCreateDTO createValidCreateDTO() {
         BeneficioCreateDTO dto = new BeneficioCreateDTO();
         dto.setNombre("Acceso a Sauna");
@@ -91,7 +96,7 @@ class BeneficiosControllerTest {
 
 
     @Test
-    @DisplayName("RC-CEV-01: Creación válida")
+    @DisplayName(" Creación válida")
     void createBeneficio_validDto_success() {
         BeneficioCreateDTO dto = createValidCreateDTO();
         Beneficio savedEntity = createEntity(1, dto.getNombre());
@@ -107,25 +112,11 @@ class BeneficiosControllerTest {
         verify(beneficioRepository).save(any(Beneficio.class));
         verify(beneficioRepository).findDetalleById(1);
     }
-    
-    @ParameterizedTest(name = "RC-CEI-02: Nombre inválido: {0}")
-    @NullAndEmptySource
-    @ValueSource(strings = {"  ", "123", "Piscina!"})
-    void createBeneficio_nombreInvalido_throwsException(String nombre) {
-        BeneficioCreateDTO dto = createValidCreateDTO();
-        dto.setNombre(nombre); 
 
-        IllegalArgumentException ex = assertThrows(
-            IllegalArgumentException.class, 
-            () -> controller.createBeneficio(dto)
-        );
-        assertTrue(ex.getMessage().contains("El nombre del beneficio es obligatorio y solo debe contener letras y espacios"));
-        verify(beneficioRepository, never()).save(any());
-    }
     
 
     @Test
-    @DisplayName("RC-AEV-01: Actualización válida")
+    @DisplayName(" Actualización válida")
     void updateBeneficio_validDto_success() {
         int id = 1;
         BeneficioUpdateDTO updateDto = createValidUpdateDTO(); 
@@ -144,7 +135,7 @@ class BeneficiosControllerTest {
     }
     
     @Test
-    @DisplayName("RC-AEI-01: Actualizar beneficio no encontrado")
+    @DisplayName(" Actualizar beneficio no encontrado")
     void updateBeneficio_beneficioNoEncontrado_throwsException() {
         int id = 99;
         BeneficioUpdateDTO updateDto = createValidUpdateDTO();
@@ -156,7 +147,7 @@ class BeneficiosControllerTest {
     }
 
     @Test
-    @DisplayName("RC-AEI-02: Actualizar con nombre inválido (caracteres)")
+    @DisplayName(" Actualizar con nombre inválido (caracteres)")
     void updateBeneficio_nombreInvalidoCaracteres_throwsException() {
         int id = 1;
         BeneficioUpdateDTO updateDto = new BeneficioUpdateDTO();

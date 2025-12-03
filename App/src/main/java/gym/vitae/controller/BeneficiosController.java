@@ -20,6 +20,16 @@ public class BeneficiosController extends BaseController {
         this.beneficioRepository = getRepository(BeneficioRepository.class);
     }
 
+/**
+     * Constructor para pruebas.
+     *
+     * @param beneficioRepository Repositorio de Beneficios.
+     */
+    BeneficiosController(BeneficioRepository beneficioRepository) {
+        super(null);
+        this.beneficioRepository = beneficioRepository;
+    }
+
     // Listado
     public List<BeneficioListadoDTO> getBeneficios() {
         return beneficioRepository.findAllListado();

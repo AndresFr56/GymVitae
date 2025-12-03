@@ -1,6 +1,14 @@
 package gym.vitae.controller;
 
-import static gym.vitae.controller.ValidationUtils.*;
+import static gym.vitae.controller.ValidationUtils.validateApellidos;
+import static gym.vitae.controller.ValidationUtils.validateCargoId;
+import static gym.vitae.controller.ValidationUtils.validateCedula;
+import static gym.vitae.controller.ValidationUtils.validateDireccion;
+import static gym.vitae.controller.ValidationUtils.validateEmail;
+import static gym.vitae.controller.ValidationUtils.validateFechaIngreso;
+import static gym.vitae.controller.ValidationUtils.validateId;
+import static gym.vitae.controller.ValidationUtils.validateNombres;
+import static gym.vitae.controller.ValidationUtils.validateTelefono;
 
 import gym.vitae.mapper.EmpleadoMapper;
 import gym.vitae.model.Cargo;
@@ -20,18 +28,26 @@ public class PersonalController extends BaseController {
   private final EmpleadoRepository empleadoRepository;
   private final CargoRepository cargoRepository;
 
+  /** Constructor porla inyeccion de repositorios. */
   public PersonalController() {
     super();
     this.empleadoRepository = getRepository(EmpleadoRepository.class);
     this.cargoRepository = getRepository(CargoRepository.class);
   }
 
+  /**
+   * Constructor para pruebas.
+   *
+   * @param empleadoRepository Repositorio de empleados.
+   * @param cargoRepository Repositorio de cargos.
+   */
   PersonalController(EmpleadoRepository empleadoRepository, CargoRepository cargoRepository) {
     super(null);
     this.empleadoRepository = empleadoRepository;
     this.cargoRepository = cargoRepository;
   }
 
+  /** Obtiene todos los empleados como DTOs de listado. */
   public List<EmpleadoListadoDTO> getEmpleados() {
     return empleadoRepository.findAllListado();
   }
@@ -65,10 +81,12 @@ public class PersonalController extends BaseController {
     return empleadoRepository.countWithFilters(searchText, cargoId, genero);
   }
 
+  /** Obtiene todos los empleados activos como DTOs de listado. */
   public List<EmpleadoListadoDTO> getEmpleadosActivos() {
     return empleadoRepository.findActivosListado();
   }
 
+  /** Obtiene detalle de un empleado por ID. */
   public EmpleadoDetalleDTO getEmpleadoById(int id) {
     validateId(id);
     return empleadoRepository
@@ -76,10 +94,12 @@ public class PersonalController extends BaseController {
         .orElseThrow(() -> new IllegalArgumentException("Empleado no encontrado con ID: " + id));
   }
 
+  /** Obtiene todos los cargos disponibles. */
   public List<Cargo> getCargos() {
     return cargoRepository.findAll();
   }
 
+  /** Crea un nuevo empleado usando el repository. */
   public EmpleadoDetalleDTO createEmpleado(EmpleadoCreateDTO dto) {
     validateEmpleadoCreate(dto);
 
@@ -98,6 +118,7 @@ public class PersonalController extends BaseController {
         .orElseThrow(() -> new IllegalStateException("Error al recuperar empleado creado"));
   }
 
+  /** Actualiza un empleado existente. */
   public EmpleadoDetalleDTO updateEmpleado(int id, EmpleadoUpdateDTO dto) {
     validateEmpleadoUpdate(id, dto);
 
@@ -121,6 +142,7 @@ public class PersonalController extends BaseController {
         .orElseThrow(() -> new IllegalStateException("Error al recuperar empleado actualizado"));
   }
 
+  /** Elimina un empleado por ID elimicacion logica. */
   public void deleteEmpleado(int id) {
     validateId(id);
     if (!empleadoRepository.existsById(id)) {
@@ -129,6 +151,13 @@ public class PersonalController extends BaseController {
     empleadoRepository.delete(id);
   }
 
+  /**
+   * Cambia el estado de un empleado.
+   *
+   * @param id ID del empleado
+   * @param nuevoEstado Nuevo estado a asignar
+   * @return EmpleadoDetalleDTO actualizado
+   */
   public EmpleadoDetalleDTO cambiarEstadoEmpleado(int id, EstadoEmpleado nuevoEstado) {
     if (nuevoEstado == null) {
       throw new IllegalArgumentException("El estado no puede ser nulo");
@@ -210,6 +239,7 @@ public class PersonalController extends BaseController {
     return String.format("EMP-%d%03d", year, count + 1);
   }
 
+  /** Valida los datos para crear un empleado. */
   public void validateEmpleadoCreate(EmpleadoCreateDTO dto) {
     if (dto == null) {
       throw new IllegalArgumentException("Los datos del empleado no pueden ser nulos");
@@ -232,6 +262,7 @@ public class PersonalController extends BaseController {
     }
   }
 
+  /** Valida los datos para actualizar un empleado. */
   public void validateEmpleadoUpdate(int id, EmpleadoUpdateDTO dto) {
 
     if (dto == null) {

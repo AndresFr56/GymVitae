@@ -15,6 +15,7 @@ public class ClasesController extends BaseController {
 
   private final ClaseRepository repository;
 
+  /** Controlador para la inyección de dependencias. */
   public ClasesController() {
     super();
     this.repository = getRepository(ClaseRepository.class);
