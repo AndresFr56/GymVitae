@@ -24,11 +24,10 @@ public class TiposMembresiaController extends BaseController {
     this.asociacionController = new MembresiaBeneficioController();
   }
 
-  // Constructor usado para pruebas (inyección de Mocks)
   TiposMembresiaController(
       TiposMembresiaRepository repository,
       MembresiaBeneficioController asociacionController,
-      TipoMembresiaMapper mapper // <- ¡ESTE ES EL CONSTRUCTOR FALTANTE!
+      TipoMembresiaMapper mapper
       ) {
     super(null);
     this.repository = repository;

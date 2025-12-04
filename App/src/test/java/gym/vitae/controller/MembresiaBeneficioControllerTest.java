@@ -88,7 +88,7 @@ class MembresiaBeneficioControllerTest {
 
 
     @Nested
-    @DisplayName("🧪 Tests de Creación (create)")
+    @DisplayName("Tests de Creación (create)")
     class CreateTests {
 
         @Test
@@ -153,7 +153,7 @@ class MembresiaBeneficioControllerTest {
 
 
     @Nested
-    @DisplayName("🔎 Tests de Consulta (getById)")
+    @DisplayName("Tests de Consulta (getById)")
     class GetByIdTests {
 
         @Test
@@ -184,7 +184,7 @@ class MembresiaBeneficioControllerTest {
 
 
     @Nested
-    @DisplayName("📋 Tests de Listado (getAll)")
+    @DisplayName("Tests de Listado")
     class GetAllTests {
 
         @Test
