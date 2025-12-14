@@ -188,6 +188,8 @@ public record EquipoRepository(DBConnectionManager db) implements IRepository<Eq
           }
           if (estado != null) {
             jpql.append(" AND e.estado = :estado");
+          } else {
+            jpql.append(" AND e.estado != :estadoFuera");
           }
 
           jpql.append(" ORDER BY e.id");
@@ -202,6 +204,8 @@ public record EquipoRepository(DBConnectionManager db) implements IRepository<Eq
           }
           if (estado != null) {
             query.setParameter("estado", estado);
+          } else {
+            query.setParameter("estadoFuera", EstadoEquipo.FUERA_SERVICIO);
           }
 
           query.setFirstResult(offset);
@@ -234,6 +238,8 @@ public record EquipoRepository(DBConnectionManager db) implements IRepository<Eq
           }
           if (estado != null) {
             jpql.append(" AND e.estado = :estado");
+          } else {
+            jpql.append(" AND e.estado != :estadoFuera");
           }
 
           TypedQuery<Long> query = em.createQuery(jpql.toString(), Long.class);
@@ -246,6 +252,8 @@ public record EquipoRepository(DBConnectionManager db) implements IRepository<Eq
           }
           if (estado != null) {
             query.setParameter("estado", estado);
+          } else {
+            query.setParameter("estadoFuera", EstadoEquipo.FUERA_SERVICIO);
           }
 
           return query.getSingleResult();
