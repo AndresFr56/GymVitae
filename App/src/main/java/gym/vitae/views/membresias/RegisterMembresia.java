@@ -232,6 +232,14 @@ public class RegisterMembresia extends JPanel {
                 return false;
             }
 
+            LocalDate fechaInicio = dateFechaInicio.getSelectedDate();
+            LocalDate hoy = LocalDate.now();
+
+            if (fechaInicio.isBefore(hoy)) {
+                showErrorMessage("La fecha de inicio no puede ser anterior a la fecha de hoy (" + hoy.toString() + ")");
+                return false;
+            }
+
             if (dateFechaFin.getSelectedDate() == null) {
                 showErrorMessage("La fecha de fin es obligatoria");
                 return false;
