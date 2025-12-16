@@ -50,17 +50,11 @@ class PersonalControllerTest {
     }
 
     @Order(2)
-    @ParameterizedTest(name = "RE-CEI-[{index}]")
+    @ParameterizedTest(name = "RE-CEI-[{index}] {0}")
     @ValueSource(
         strings = {
-          "Juanito123!",
-          "Lorem Ipsum es simplemente el texto de relleno de las imprentas y archivos de texto. "
-              + "Lorem Ipsum ha sido el texto de relleno estándar de las industrias desde el año 1500, cuando un impresor "
-              + "(N. del T. persona que se dedica a la imprenta) desconocido usó una galería de textos y los mezcló de tal "
-              + "manera que logró hacer un libro de textos especimen. No sólo sobrevivió 500 años, sino que tambien "
-              + "ingresó como texto de relleno en documentos electrónicos, quedando esencialmente igual al original. "
-              + "Fue popularizado en los 60s con la creación de las hojas \"Letraset\", las cuales contenian pasajes de "
-              + "Lorem Ipsum, y más recientemente con software de autoedición",
+          "1231123!",
+          "Kohakuzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
           ""
         })
     @DisplayName(
@@ -77,7 +71,7 @@ class PersonalControllerTest {
               "juan.perez@gmail.com",
               1,
               TipoContrato.TIEMPO_COMPLETO,
-              LocalDate.now().plusDays(1),
+              LocalDate.now().plusDays(0),
               null);
 
       // Act & Assert
@@ -89,7 +83,7 @@ class PersonalControllerTest {
     }
 
     @Order(3)
-    @ParameterizedTest(name = "RE-CEI-[5+{index}]")
+    @ParameterizedTest(name = "RE-CEI-[5+{index}] {0}")
     @ValueSource(
         strings = {
           "López123!",
@@ -128,7 +122,7 @@ class PersonalControllerTest {
     }
 
     @Order(4)
-    @ParameterizedTest(name = "RE-CEI-[9+{index}]")
+    @ParameterizedTest(name = "RE-CEI-[9+{index}] {0}")
     @ValueSource(strings = {"asdsadadasd!!!", "091234567", "0912345678912"})
     @DisplayName(
         "RE-CEI-{10-12}: Clases Inválidas [1, 5, - , 13, 14, 19, 22, 26, 27, 28] Campo Cédula")
@@ -156,10 +150,10 @@ class PersonalControllerTest {
     }
 
     @Order(5)
-    @ParameterizedTest(name = "RE-CEI-[9+{index}]")
+    @ParameterizedTest(name = "RE-CEI-[9+{index}] {0}")
     @ValueSource(strings = {"WQEQE!!!...", "0987654", "09921312312312", "0513001122"})
     @DisplayName(
-        "RE-CEI-{10-13}: Clases Inválidas [1, 5, 9, 13, -, 19, 22, 26, 27, 28] Campo Teléfono")
+        "RE-CEI-{15-18}: Clases Inválidas [1, 5, 9, 13, -, 19, 22, 26, 27, 28] Campo Teléfono")
     void RE_CEI_TELEFONO(String telefono) {
       EmpleadoCreateDTO dto =
           new EmpleadoCreateDTO(
@@ -183,7 +177,7 @@ class PersonalControllerTest {
     }
 
     @Order(6)
-    @ParameterizedTest(name = "RE-CEI-[13+{index}]")
+    @ParameterizedTest(name = "RE-CEI-[13+{index}] {0}")
     @ValueSource(
         strings = {
           "",
@@ -220,7 +214,7 @@ class PersonalControllerTest {
     }
 
     @Order(7)
-    @ParameterizedTest(name = "RE-CEI-[15+{index}]")
+    @ParameterizedTest(name = "RE-CEI-[15+{index}] {0}")
     @ValueSource(strings = {"juan.elcaballo", "juan.com", "JUANl caballo@gmail.com"})
     @DisplayName(
         "RE-CEI-{16-18}: Clases Inválidas [1, 5, 9, 13, 14, 19, -, 26, 27, 28] Campo Email")
@@ -236,7 +230,7 @@ class PersonalControllerTest {
               email,
               1,
               TipoContrato.TIEMPO_COMPLETO,
-              LocalDate.now().plusDays(1),
+              LocalDate.now().plusDays(0),
               null);
       // Act & Assert
       assertThrows(
@@ -247,7 +241,7 @@ class PersonalControllerTest {
     }
 
     @Order(8)
-    @ParameterizedTest(name = "RE-CEI-[19]")
+    @ParameterizedTest(name = "RE-CEI-[19] {0}")
     @ValueSource(strings = {"2030-01-01"})
     @DisplayName(
         "RE-CEI-{19}: Clases Inválidas [1, 5, 9, 13, 14, 19, 22, 26, 27, - ] Campo Fecha Ingreso")
@@ -514,6 +508,105 @@ class PersonalControllerTest {
               1,
               TipoContrato.TIEMPO_COMPLETO,
               fechaIngreso,
+              EstadoEmpleado.ACTIVO);
+      // Act & Assert
+      assertThrows(
+          IllegalArgumentException.class,
+          () -> {
+            personalController.validateEmpleadoUpdate(1, dto);
+          });
+    }
+
+    @Test
+    @Order(17)
+    @DisplayName("Metodo de Crear Empleado - Validos")
+    void METODO_CREAR_EMPLEADO_VALIDO() {
+      EmpleadoCreateDTO dto =
+          new EmpleadoCreateDTO(
+              "Juan Carlos",
+              "Pérez López",
+              "0912345678",
+              Genero.MASCULINO,
+              "0987654321",
+              "Av Principal 123",
+              "juan.perez@gymvitae.com",
+              1,
+              TipoContrato.TIEMPO_COMPLETO,
+              LocalDate.now().minusDays(1),
+              null);
+
+      // Act & Assert
+      assertDoesNotThrow(() -> personalController.validateEmpleadoCreate(dto));
+    }
+
+    @Order(4)
+    @ParameterizedTest(name = "RE-CEI-[9+{index}] {0}")
+    @ValueSource(strings = {"asdsadadasd!!!", "091234567", "0912345678912"})
+    @DisplayName("Metodo de Crear Empleado - Campo de cedula InValidos")
+    void METODO_CREAR_EMPLEADO_INVALIDO(String cedula) {
+      EmpleadoCreateDTO dto =
+          new EmpleadoCreateDTO(
+              "Juan Carlos",
+              "Pérez López",
+              cedula, // Cédula inválida
+              Genero.MASCULINO,
+              "0987654321",
+              "Av Principal 123",
+              "sasdasda@gmail.com",
+              1,
+              TipoContrato.TIEMPO_COMPLETO,
+              LocalDate.now().plusDays(1),
+              null);
+
+      // Act & Assert
+      assertThrows(
+          IllegalArgumentException.class,
+          () -> {
+            personalController.validateEmpleadoCreate(dto);
+          });
+    }
+
+    // Actualizar personal/empleado
+
+    @Order(19)
+    @Test
+    @DisplayName("Metodo de Actualizar Empleado - Validos")
+    void METODO_ACTUALIZAR_EMPLEADO_VALIDO() {
+      EmpleadoUpdateDTO dto =
+          new EmpleadoUpdateDTO(
+              "Juan Carlos",
+              "Pérez López",
+              "0912345678",
+              Genero.MASCULINO,
+              "0912345678",
+              "0987654321",
+              "juannito@gmail.com",
+              1,
+              TipoContrato.TIEMPO_COMPLETO,
+              LocalDate.now(),
+              EstadoEmpleado.ACTIVO);
+
+      // Act & Assert
+      assertDoesNotThrow(() -> personalController.validateEmpleadoUpdate(1, dto));
+    }
+
+    @Order(20)
+    @ParameterizedTest(name = "AE-CEI-[23+{index}]")
+    @ValueSource(strings = {"juan.elcaballo", "juan.com", "JUANl caballo@gmail.com"})
+    @DisplayName("Metodo de Actualizar Empleado - Campo de email InValidos")
+    void METODO_ACTUALIZAR_EMPLEADO_INVALIDO(String email) {
+      EmpleadoUpdateDTO dto =
+          new EmpleadoUpdateDTO(
+              "Juan Carlos",
+              "Pérez López",
+              "0912345678",
+              Genero.MASCULINO,
+              "0987654321",
+              "Av Principal 123",
+              email,
+              1,
+              TipoContrato.TIEMPO_COMPLETO,
+              LocalDate.now().plusDays(1),
               EstadoEmpleado.ACTIVO);
       // Act & Assert
       assertThrows(

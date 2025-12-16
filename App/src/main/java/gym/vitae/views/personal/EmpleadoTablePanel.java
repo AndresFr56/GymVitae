@@ -262,7 +262,11 @@ public class EmpleadoTablePanel extends BaseTablePanel<EmpleadoListadoDTO> {
 
   @Override
   protected void onDeleteEntities(List<EmpleadoListadoDTO> empleados) {
-    showInfoMessage("Eliminación de " + empleados.size() + " empleado(s) en desarrollo");
+    // Soft delete - cambia estado a INACTIVO
+    for (EmpleadoListadoDTO empleado : empleados) {
+      controller.deleteEmpleado(empleado.id());
+    }
+    loadData();
   }
 
   private void loadCargos() {

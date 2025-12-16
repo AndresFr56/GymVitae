@@ -959,13 +959,14 @@ public class InventarioController extends BaseController {
    * opcional.
    */
   private void validateDescripcionInventario(String descripcion) {
-    if (descripcion != null && !descripcion.trim().isEmpty()) {
-      if (descripcion.length() > 100) {
-        throw new IllegalArgumentException("La descripción no puede exceder 100 caracteres");
-      }
-      if (!descripcion.matches("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$")) {
-        throw new IllegalArgumentException("La descripción solo puede contener letras y espacios");
-      }
+    if (descripcion == null) {
+      throw new IllegalArgumentException("La descripción es obligatoria");
+    }
+    if (descripcion.length() > 100) {
+      throw new IllegalArgumentException("La descripción no puede exceder 500 caracteres");
+    }
+    if (descripcion.length() < 10) {
+      throw new IllegalArgumentException("La descripción debe tener al menos 10 caracteres");
     }
   }
 
