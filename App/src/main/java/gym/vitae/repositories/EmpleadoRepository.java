@@ -203,7 +203,9 @@ public record EmpleadoRepository(DBConnectionManager db) implements IRepository<
         em -> {
           TypedQuery<Empleado> q =
               em.createQuery(
-                  "SELECT e FROM Empleado e LEFT JOIN FETCH e.cargo ORDER BY e.id", Empleado.class);
+                  "SELECT e FROM Empleado e LEFT JOIN FETCH e.cargo WHERE e.estado <> :estadoInactivo ORDER BY e.id",
+                  Empleado.class);
+          q.setParameter("estadoInactivo", EstadoEmpleado.INACTIVO);
           List<Empleado> empleados = q.getResultList();
           return EmpleadoMapper.toListadoDTOList(empleados);
         });
@@ -222,7 +224,9 @@ public record EmpleadoRepository(DBConnectionManager db) implements IRepository<
         em -> {
           TypedQuery<Empleado> q =
               em.createQuery(
-                  "SELECT e FROM Empleado e LEFT JOIN FETCH e.cargo ORDER BY e.id", Empleado.class);
+                  "SELECT e FROM Empleado e LEFT JOIN FETCH e.cargo WHERE e.estado <> :estadoInactivo ORDER BY e.id",
+                  Empleado.class);
+          q.setParameter("estadoInactivo", EstadoEmpleado.INACTIVO);
           q.setFirstResult(offset);
           q.setMaxResults(limit);
           List<Empleado> empleados = q.getResultList();
@@ -247,13 +251,14 @@ public record EmpleadoRepository(DBConnectionManager db) implements IRepository<
         em -> {
           String jpql =
               buildFilterQuery(
-                  "SELECT e FROM Empleado e LEFT JOIN FETCH e.cargo WHERE 1=1",
+                  "SELECT e FROM Empleado e LEFT JOIN FETCH e.cargo WHERE e.estado <> :estadoInactivo",
                   searchText,
                   cargoId,
                   genero);
           jpql += " ORDER BY e.id";
 
           TypedQuery<Empleado> query = em.createQuery(jpql, Empleado.class);
+          query.setParameter("estadoInactivo", EstadoEmpleado.INACTIVO);
           applyFilterParameters(query, searchText, cargoId, genero);
 
           query.setFirstResult(offset);

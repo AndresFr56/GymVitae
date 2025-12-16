@@ -65,8 +65,7 @@ public class ViewLogin extends ViewContainer {
         };
 
     // estilo
-    txtUsername.putClientProperty(
-        FlatClientProperties.PLACEHOLDER_TEXT, "Ingrese su nombre de usuario");
+    txtUsername.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ingrese su correo");
     txtPassword.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ingrese su contraseña");
 
     txtUsername.putClientProperty(FlatClientProperties.STYLE, "margin:4,10,4,10;arc:12;");
@@ -74,7 +73,7 @@ public class ViewLogin extends ViewContainer {
         FlatClientProperties.STYLE, "margin:4,10,4,10;arc:12;showRevealButton:true;");
     cmdLogin.putClientProperty(FlatClientProperties.STYLE, "margin:4,10,4,10;arc:12;");
 
-    loginContent.add(new JLabel("Username"), "gapy 25");
+    loginContent.add(new JLabel("Correo"), "gapy 25");
     loginContent.add(txtUsername);
 
     loginContent.add(new JLabel("Password"), "gapy 10");

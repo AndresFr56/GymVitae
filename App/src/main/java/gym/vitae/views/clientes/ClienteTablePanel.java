@@ -195,7 +195,11 @@ public class ClienteTablePanel extends BaseTablePanel<ClienteListadoDTO> {
 
   @Override
   protected void onDeleteEntities(List<ClienteListadoDTO> clientes) {
-    // Implementar soft delete cambiando estado a SUSPENDIDO
+    // Soft delete - cambia estado a SUSPENDIDO
+    for (ClienteListadoDTO cliente : clientes) {
+      controller.deleteCliente(cliente.id());
+    }
+    loadData();
   }
 
   /** Obtiene el estado seleccionado o null si es "Todos". */
