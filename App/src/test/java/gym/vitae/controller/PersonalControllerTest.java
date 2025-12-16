@@ -53,7 +53,7 @@ class PersonalControllerTest {
     @ParameterizedTest(name = "RE-CEI-[{index}] {0}")
     @ValueSource(
         strings = {
-          "Juanito123!",
+          "1231123!",
           "Kohakuzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
           ""
         })
@@ -71,15 +71,16 @@ class PersonalControllerTest {
               "juan.perez@gmail.com",
               1,
               TipoContrato.TIEMPO_COMPLETO,
-              LocalDate.now().plusDays(1),
+              LocalDate.now().plusDays(0),
               null);
 
       // Act & Assert
       assertThrows(
-          IllegalArgumentException.class,
-          () -> {
-            personalController.validateEmpleadoCreate(dto);
-          });
+              IllegalArgumentException.class,
+              () -> {
+                personalController.validateEmpleadoCreate(dto);
+              })
+          .printStackTrace();
     }
 
     @Order(3)
@@ -115,10 +116,11 @@ class PersonalControllerTest {
 
       // Act & Assert
       assertThrows(
-          IllegalArgumentException.class,
-          () -> {
-            personalController.validateEmpleadoCreate(dto);
-          });
+              IllegalArgumentException.class,
+              () -> {
+                personalController.validateEmpleadoCreate(dto);
+              })
+          .printStackTrace();
     }
 
     @Order(4)
@@ -143,17 +145,18 @@ class PersonalControllerTest {
 
       // Act & Assert
       assertThrows(
-          IllegalArgumentException.class,
-          () -> {
-            personalController.validateEmpleadoCreate(dto);
-          });
+              IllegalArgumentException.class,
+              () -> {
+                personalController.validateEmpleadoCreate(dto);
+              })
+          .printStackTrace();
     }
 
     @Order(5)
     @ParameterizedTest(name = "RE-CEI-[9+{index}] {0}")
     @ValueSource(strings = {"WQEQE!!!...", "0987654", "09921312312312", "0513001122"})
     @DisplayName(
-        "RE-CEI-{10-13}: Clases Inválidas [1, 5, 9, 13, -, 19, 22, 26, 27, 28] Campo Teléfono")
+        "RE-CEI-{15-18}: Clases Inválidas [1, 5, 9, 13, -, 19, 22, 26, 27, 28] Campo Teléfono")
     void RE_CEI_TELEFONO(String telefono) {
       EmpleadoCreateDTO dto =
           new EmpleadoCreateDTO(
@@ -170,10 +173,11 @@ class PersonalControllerTest {
               null);
       // Act & Assert
       assertThrows(
-          IllegalArgumentException.class,
-          () -> {
-            personalController.validateEmpleadoCreate(dto);
-          });
+              IllegalArgumentException.class,
+              () -> {
+                personalController.validateEmpleadoCreate(dto);
+              })
+          .printStackTrace();
     }
 
     @Order(6)
@@ -207,10 +211,11 @@ class PersonalControllerTest {
               null);
       // Act & Assert
       assertThrows(
-          IllegalArgumentException.class,
-          () -> {
-            personalController.validateEmpleadoCreate(dto);
-          });
+              IllegalArgumentException.class,
+              () -> {
+                personalController.validateEmpleadoCreate(dto);
+              })
+          .printStackTrace();
     }
 
     @Order(7)
@@ -230,14 +235,15 @@ class PersonalControllerTest {
               email,
               1,
               TipoContrato.TIEMPO_COMPLETO,
-              LocalDate.now().plusDays(1),
+              LocalDate.now().plusDays(0),
               null);
       // Act & Assert
       assertThrows(
-          IllegalArgumentException.class,
-          () -> {
-            personalController.validateEmpleadoCreate(dto);
-          });
+              IllegalArgumentException.class,
+              () -> {
+                personalController.validateEmpleadoCreate(dto);
+              })
+          .printStackTrace();
     }
 
     @Order(8)
