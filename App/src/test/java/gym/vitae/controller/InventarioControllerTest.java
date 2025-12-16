@@ -448,6 +448,8 @@ class InventarioControllerTest {
           });
     }
 
+    // ==================== MÉTODOS DE REGISTRO Y ACTUALIZACIÓN ====================
+
     @Test
     @Order(21)
     @DisplayName("Método de Registrar Producto - Válidos")

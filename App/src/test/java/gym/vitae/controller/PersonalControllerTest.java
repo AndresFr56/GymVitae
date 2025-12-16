@@ -76,11 +76,10 @@ class PersonalControllerTest {
 
       // Act & Assert
       assertThrows(
-              IllegalArgumentException.class,
-              () -> {
-                personalController.validateEmpleadoCreate(dto);
-              })
-          .printStackTrace();
+          IllegalArgumentException.class,
+          () -> {
+            personalController.validateEmpleadoCreate(dto);
+          });
     }
 
     @Order(3)
@@ -116,11 +115,10 @@ class PersonalControllerTest {
 
       // Act & Assert
       assertThrows(
-              IllegalArgumentException.class,
-              () -> {
-                personalController.validateEmpleadoCreate(dto);
-              })
-          .printStackTrace();
+          IllegalArgumentException.class,
+          () -> {
+            personalController.validateEmpleadoCreate(dto);
+          });
     }
 
     @Order(4)
@@ -145,11 +143,10 @@ class PersonalControllerTest {
 
       // Act & Assert
       assertThrows(
-              IllegalArgumentException.class,
-              () -> {
-                personalController.validateEmpleadoCreate(dto);
-              })
-          .printStackTrace();
+          IllegalArgumentException.class,
+          () -> {
+            personalController.validateEmpleadoCreate(dto);
+          });
     }
 
     @Order(5)
@@ -173,11 +170,10 @@ class PersonalControllerTest {
               null);
       // Act & Assert
       assertThrows(
-              IllegalArgumentException.class,
-              () -> {
-                personalController.validateEmpleadoCreate(dto);
-              })
-          .printStackTrace();
+          IllegalArgumentException.class,
+          () -> {
+            personalController.validateEmpleadoCreate(dto);
+          });
     }
 
     @Order(6)
@@ -211,11 +207,10 @@ class PersonalControllerTest {
               null);
       // Act & Assert
       assertThrows(
-              IllegalArgumentException.class,
-              () -> {
-                personalController.validateEmpleadoCreate(dto);
-              })
-          .printStackTrace();
+          IllegalArgumentException.class,
+          () -> {
+            personalController.validateEmpleadoCreate(dto);
+          });
     }
 
     @Order(7)
@@ -239,11 +234,10 @@ class PersonalControllerTest {
               null);
       // Act & Assert
       assertThrows(
-              IllegalArgumentException.class,
-              () -> {
-                personalController.validateEmpleadoCreate(dto);
-              })
-          .printStackTrace();
+          IllegalArgumentException.class,
+          () -> {
+            personalController.validateEmpleadoCreate(dto);
+          });
     }
 
     @Order(8)
