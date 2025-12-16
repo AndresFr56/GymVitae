@@ -25,6 +25,10 @@ public final class ValidationUtils {
       throw new IllegalArgumentException(
           fieldName + " no pueden exceder " + maxLength + " caracteres");
     }
+
+    if (!value.matches("^[a-zA-ZÀ-ÿ\\u00f1\\u00d1\\s]+$")) {
+      throw new IllegalArgumentException(fieldName + " solo pueden contener letras y espacios");
+    }
   }
 
   public static void validateOptionalString(String value, String fieldName, int maxLength) {
@@ -49,6 +53,11 @@ public final class ValidationUtils {
     }
     if (!telefono.matches("\\d{10}")) {
       throw new IllegalArgumentException("El teléfono debe tener exactamente 10 dígitos numéricos");
+    }
+
+    // inicio  con 09
+    if (!telefono.startsWith("09")) {
+      throw new IllegalArgumentException("El teléfono debe iniciar con '09'");
     }
   }
 
@@ -84,6 +93,9 @@ public final class ValidationUtils {
 
   public static void validateDireccion(String direccion) {
     validateOptionalString(direccion, "La dirección", 100);
+    if (direccion == null || direccion.trim().length() < 5) {
+      throw new IllegalArgumentException("La dirección debe tener al menos 5 caracteres");
+    }
   }
 
   public static void validateFechaIngreso(LocalDate fechaIngreso) {
