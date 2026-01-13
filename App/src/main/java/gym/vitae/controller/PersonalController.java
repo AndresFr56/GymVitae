@@ -102,6 +102,8 @@ public class PersonalController extends BaseController {
   /** Crea un nuevo empleado usando el repository. */
   public EmpleadoDetalleDTO createEmpleado(EmpleadoCreateDTO dto) {
     validateEmpleadoCreate(dto);
+    validateCedulaNoDuplicada(dto.cedula(), null);
+    validateNombresApellidosNoDuplicados(dto.nombres(), dto.apellidos(), null);
 
     Cargo cargo =
         cargoRepository
@@ -121,6 +123,8 @@ public class PersonalController extends BaseController {
   /** Actualiza un empleado existente. */
   public EmpleadoDetalleDTO updateEmpleado(int id, EmpleadoUpdateDTO dto) {
     validateEmpleadoUpdate(id, dto);
+    validateCedulaNoDuplicada(dto.cedula(), id);
+    validateNombresApellidosNoDuplicados(dto.nombres(), dto.apellidos(), id);
 
     Empleado empleado =
         empleadoRepository
@@ -288,6 +292,34 @@ public class PersonalController extends BaseController {
     }
     if (dto.estado() == null) {
       throw new IllegalArgumentException("El estado es obligatorio");
+    }
+  }
+
+  /**
+   * Valida que la cédula no esté duplicada.
+   *
+   * @param cedula Cédula a validar
+   * @param idActual ID del empleado actual (null si es creación)
+   */
+  private void validateCedulaNoDuplicada(String cedula, Integer idActual) {
+    if (empleadoRepository.existsByCedula(cedula, idActual)) {
+      throw new IllegalArgumentException(
+          "Cédula existente en otro Empleado, verifique o ingrese otro valor");
+    }
+  }
+
+  /**
+   * Valida que los nombres y apellidos no estén duplicados.
+   *
+   * @param nombres Nombres a validar
+   * @param apellidos Apellidos a validar
+   * @param idActual ID del empleado actual (null si es creación)
+   */
+  private void validateNombresApellidosNoDuplicados(
+      String nombres, String apellidos, Integer idActual) {
+    if (empleadoRepository.existsByNombresApellidos(nombres, apellidos, idActual)) {
+      throw new IllegalArgumentException(
+          "Nombres y apellidos existentes en otro Empleado, verifique o ingrese otros valores");
     }
   }
 }

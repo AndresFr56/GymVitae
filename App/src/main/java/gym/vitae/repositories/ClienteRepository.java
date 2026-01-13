@@ -283,6 +283,57 @@ public record ClienteRepository(DBConnectionManager db) implements IRepository<C
         });
   }
 
+  /**
+   * Verifica si existe un cliente con la cédula especificada.
+   *
+   * @param cedula Cédula a verificar
+   * @param excludeId ID a excluir de la búsqueda (para updates), puede ser null
+   * @return true si existe otro cliente con esa cédula
+   */
+  public boolean existsByCedula(String cedula, Integer excludeId) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          String jpql = "SELECT COUNT(c) FROM Cliente c WHERE c.cedula = :cedula";
+          if (excludeId != null) {
+            jpql += " AND c.id <> :excludeId";
+          }
+          TypedQuery<Long> q = em.createQuery(jpql, Long.class);
+          q.setParameter("cedula", cedula.trim());
+          if (excludeId != null) {
+            q.setParameter("excludeId", excludeId);
+          }
+          return q.getSingleResult() > 0;
+        });
+  }
+
+  /**
+   * Verifica si existe un cliente con los mismos nombres y apellidos.
+   *
+   * @param nombres Nombres a verificar
+   * @param apellidos Apellidos a verificar
+   * @param excludeId ID a excluir de la búsqueda (para updates), puede ser null
+   * @return true si existe otro cliente con esos nombres y apellidos
+   */
+  public boolean existsByNombresApellidos(String nombres, String apellidos, Integer excludeId) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          String jpql =
+              "SELECT COUNT(c) FROM Cliente c WHERE LOWER(c.nombres) = LOWER(:nombres) AND LOWER(c.apellidos) = LOWER(:apellidos)";
+          if (excludeId != null) {
+            jpql += " AND c.id <> :excludeId";
+          }
+          TypedQuery<Long> q = em.createQuery(jpql, Long.class);
+          q.setParameter("nombres", nombres.trim());
+          q.setParameter("apellidos", apellidos.trim());
+          if (excludeId != null) {
+            q.setParameter("excludeId", excludeId);
+          }
+          return q.getSingleResult() > 0;
+        });
+  }
+
   @Override
   public boolean equals(Object obj) {
     if (obj == this) return true;

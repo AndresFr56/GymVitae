@@ -9,6 +9,7 @@ import gym.vitae.model.dtos.empleado.EmpleadoCreateDTO;
 import gym.vitae.model.dtos.empleado.EmpleadoDetalleDTO;
 import gym.vitae.model.dtos.empleado.EmpleadoListadoDTO;
 import gym.vitae.model.dtos.empleado.EmpleadoUpdateDTO;
+import gym.vitae.model.enums.EstadoEmpleado;
 import java.util.List;
 
 /**
@@ -168,7 +169,8 @@ public class EmpleadoMapper {
     empleado.setCargo(cargo);
     empleado.setTipoContrato(dto.tipoContrato());
     empleado.setFechaIngreso(dto.fechaIngreso());
-    empleado.setEstado(dto.estado());
+    // Estado por defecto ACTIVO si no se especifica
+    empleado.setEstado(dto.estado() != null ? dto.estado() : EstadoEmpleado.ACTIVO);
 
     return empleado;
   }

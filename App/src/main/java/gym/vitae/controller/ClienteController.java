@@ -67,6 +67,7 @@ public class ClienteController extends BaseController {
   public ClienteDetalleDTO createCliente(ClienteCreateDTO dto) {
     validateClienteCreate(dto);
     validateCedulaNoDuplicada(dto.cedula(), null);
+    validateNombresApellidosNoDuplicados(dto.nombres(), dto.apellidos(), null);
 
     // Generar código
     String codigoCliente = generateCodigoCliente();
@@ -100,6 +101,7 @@ public class ClienteController extends BaseController {
             .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado con ID: " + id));
 
     validateCedulaNoDuplicada(dto.cedula(), id);
+    validateNombresApellidosNoDuplicados(dto.nombres(), dto.apellidos(), id);
 
     // Actualizar con mapper
     ClienteMapper.updateEntity(cliente, dto);
@@ -190,13 +192,24 @@ public class ClienteController extends BaseController {
   }
 
   private void validateCedulaNoDuplicada(String cedula, Integer idActual) {
-    List<Cliente> clientesExistentes =
-        clienteRepository.findAll().stream()
-            .filter(c -> c.getCedula().equals(cedula.trim()) && (!c.getId().equals(idActual)))
-            .toList();
+    if (clienteRepository.existsByCedula(cedula, idActual)) {
+      throw new IllegalArgumentException(
+          "Cédula existente en otro Cliente, verifique o ingrese otro valor");
+    }
+  }
 
-    if (!clientesExistentes.isEmpty()) {
-      throw new IllegalArgumentException("Ya existe un cliente con la cédula: " + cedula);
+  /**
+   * Valida que los nombres y apellidos no estén duplicados.
+   *
+   * @param nombres Nombres a validar
+   * @param apellidos Apellidos a validar
+   * @param idActual ID del cliente actual (null si es creación)
+   */
+  private void validateNombresApellidosNoDuplicados(
+      String nombres, String apellidos, Integer idActual) {
+    if (clienteRepository.existsByNombresApellidos(nombres, apellidos, idActual)) {
+      throw new IllegalArgumentException(
+          "Nombres y apellidos existentes en otro Cliente, verifique o ingrese otros valores");
     }
   }
 }

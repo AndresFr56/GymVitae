@@ -331,4 +331,55 @@ public record EmpleadoRepository(DBConnectionManager db) implements IRepository<
           return EmpleadoMapper.toListadoDTOList(empleados);
         });
   }
+
+  /**
+   * Verifica si existe un empleado con la cédula especificada.
+   *
+   * @param cedula Cédula a verificar
+   * @param excludeId ID a excluir de la búsqueda (para updates), puede ser null
+   * @return true si existe otro empleado con esa cédula
+   */
+  public boolean existsByCedula(String cedula, Integer excludeId) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          String jpql = "SELECT COUNT(e) FROM Empleado e WHERE e.cedula = :cedula";
+          if (excludeId != null) {
+            jpql += " AND e.id <> :excludeId";
+          }
+          TypedQuery<Long> q = em.createQuery(jpql, Long.class);
+          q.setParameter("cedula", cedula.trim());
+          if (excludeId != null) {
+            q.setParameter("excludeId", excludeId);
+          }
+          return q.getSingleResult() > 0;
+        });
+  }
+
+  /**
+   * Verifica si existe un empleado con los mismos nombres y apellidos.
+   *
+   * @param nombres Nombres a verificar
+   * @param apellidos Apellidos a verificar
+   * @param excludeId ID a excluir de la búsqueda (para updates), puede ser null
+   * @return true si existe otro empleado con esos nombres y apellidos
+   */
+  public boolean existsByNombresApellidos(String nombres, String apellidos, Integer excludeId) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          String jpql =
+              "SELECT COUNT(e) FROM Empleado e WHERE LOWER(e.nombres) = LOWER(:nombres) AND LOWER(e.apellidos) = LOWER(:apellidos)";
+          if (excludeId != null) {
+            jpql += " AND e.id <> :excludeId";
+          }
+          TypedQuery<Long> q = em.createQuery(jpql, Long.class);
+          q.setParameter("nombres", nombres.trim());
+          q.setParameter("apellidos", apellidos.trim());
+          if (excludeId != null) {
+            q.setParameter("excludeId", excludeId);
+          }
+          return q.getSingleResult() > 0;
+        });
+  }
 }
