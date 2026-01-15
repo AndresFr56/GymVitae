@@ -151,9 +151,9 @@ public class RegisterEquipo extends JPanel {
   }
 
   private void applyStyles() {
-    txtCodigo.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Generado de forma automática");
-    txtNombre.putClientProperty(
-        FlatClientProperties.PLACEHOLDER_TEXT, "Ej: Caminadora, Bicicleta");
+    txtCodigo.putClientProperty(
+        FlatClientProperties.PLACEHOLDER_TEXT, "Generado de forma automática");
+    txtNombre.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ej: Caminadora, Bicicleta");
     txtDescripcion.putClientProperty(
         FlatClientProperties.PLACEHOLDER_TEXT, "Descripción del equipo (opcional)");
     txtMarca.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ej: Life Fitness o Precor");

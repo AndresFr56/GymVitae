@@ -25,16 +25,14 @@ public class RegisterTipoMembresia extends JPanel {
 
   private final TiposMembresiaController controller;
   private final BeneficiosController beneficioController;
-
+  private final JList<BeneficioListadoDTO> listBeneficios;
+  private final DefaultListModel<BeneficioListadoDTO> listModelBeneficios;
   private JPanel contentPanel;
   private JLabel lblError;
-
   private JTextField txtNombre;
   private JTextArea txtDescripcion;
   private JTextField txtDuracionDias;
   private JTextField txtCosto;
-  private final JList<BeneficioListadoDTO> listBeneficios;
-  private final DefaultListModel<BeneficioListadoDTO> listModelBeneficios;
   private JScrollPane scrollBeneficios;
   private JCheckBox chkAccesoCompleto;
 

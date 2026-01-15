@@ -17,9 +17,9 @@ import javax.swing.text.*;
 import net.miginfocom.swing.MigLayout;
 
 /**
- * Formulario para registrar un nuevo producto en el sistema (RF-19). Campos obligatorios: Código, nombre,
- * categoría, precio unitario, stock, unidad de medida. Campos opcionales: Descripción, proveedor.
- * Código y fecha de ingreso se generan automáticamente.
+ * Formulario para registrar un nuevo producto en el sistema (RF-19). Campos obligatorios: Código,
+ * nombre, categoría, precio unitario, stock, unidad de medida. Campos opcionales: Descripción,
+ * proveedor. Código y fecha de ingreso se generan automáticamente.
  */
 public class RegisterProducto extends JPanel {
 
@@ -164,7 +164,8 @@ public class RegisterProducto extends JPanel {
   }
 
   private void applyStyles() {
-    txtCodigo.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Generado de forma automática");
+    txtCodigo.putClientProperty(
+        FlatClientProperties.PLACEHOLDER_TEXT, "Generado de forma automática");
     txtNombre.putClientProperty(
         FlatClientProperties.PLACEHOLDER_TEXT, "Ej: Proteína, Barra energética");
     txtDescripcion.putClientProperty(
@@ -370,7 +371,10 @@ public class RegisterProducto extends JPanel {
       controller.createProducto(dto);
 
       JOptionPane.showMessageDialog(
-          this, "El producto ha sido registrado exitosamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+          this,
+          "El producto ha sido registrado exitosamente",
+          "Éxito",
+          JOptionPane.INFORMATION_MESSAGE);
 
       clearForm();
       return true;
@@ -442,15 +446,15 @@ public class RegisterProducto extends JPanel {
     @Override
     public String toString() {
       return nombre;
-        }
+    }
   }
 
   /** Wrapper para items del combo de proveedores. */
   private record ProveedorItem(Integer id, String nombre) {
 
-        @Override
-        public String toString() {
+    @Override
+    public String toString() {
       return nombre;
-        }
+    }
   }
 }
