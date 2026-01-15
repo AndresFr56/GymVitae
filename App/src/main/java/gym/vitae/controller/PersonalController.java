@@ -104,6 +104,7 @@ public class PersonalController extends BaseController {
     validateEmpleadoCreate(dto);
     validateCedulaNoDuplicada(dto.cedula(), null);
     validateNombresApellidosNoDuplicados(dto.nombres(), dto.apellidos(), null);
+    validateEmailNoDuplicado(dto.email(), null);
 
     Cargo cargo =
         cargoRepository
@@ -125,6 +126,7 @@ public class PersonalController extends BaseController {
     validateEmpleadoUpdate(id, dto);
     validateCedulaNoDuplicada(dto.cedula(), id);
     validateNombresApellidosNoDuplicados(dto.nombres(), dto.apellidos(), id);
+    validateEmailNoDuplicado(dto.email(), id);
 
     Empleado empleado =
         empleadoRepository
@@ -238,9 +240,9 @@ public class PersonalController extends BaseController {
   }
 
   private String generateCodigoEmpleado() {
-    long count = empleadoRepository.count();
     int year = java.time.Year.now().getValue();
-    return String.format("EMP-%d%03d", year, count + 1);
+    int nextSecuencial = empleadoRepository.getNextCodigoSecuencial(year);
+    return String.format("EMP-%d%03d", year, nextSecuencial);
   }
 
   /** Valida los datos para crear un empleado. */
@@ -320,6 +322,19 @@ public class PersonalController extends BaseController {
     if (empleadoRepository.existsByNombresApellidos(nombres, apellidos, idActual)) {
       throw new IllegalArgumentException(
           "Nombres y apellidos existentes en otro Empleado, verifique o ingrese otros valores");
+    }
+  }
+
+  /**
+   * Valida que el email no esté duplicado.
+   *
+   * @param email Email a validar
+   * @param idActual ID del empleado actual (null si es creación)
+   */
+  private void validateEmailNoDuplicado(String email, Integer idActual) {
+    if (empleadoRepository.existsByEmail(email, idActual)) {
+      throw new IllegalArgumentException(
+          "Email existente en otro Empleado, verifique o ingrese otro valor");
     }
   }
 }

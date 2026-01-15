@@ -68,6 +68,7 @@ public class ClienteController extends BaseController {
     validateClienteCreate(dto);
     validateCedulaNoDuplicada(dto.cedula(), null);
     validateNombresApellidosNoDuplicados(dto.nombres(), dto.apellidos(), null);
+    validateEmailNoDuplicado(dto.email(), null);
 
     // Generar código
     String codigoCliente = generateCodigoCliente();
@@ -102,6 +103,7 @@ public class ClienteController extends BaseController {
 
     validateCedulaNoDuplicada(dto.cedula(), id);
     validateNombresApellidosNoDuplicados(dto.nombres(), dto.apellidos(), id);
+    validateEmailNoDuplicado(dto.email(), id);
 
     // Actualizar con mapper
     ClienteMapper.updateEntity(cliente, dto);
@@ -210,6 +212,19 @@ public class ClienteController extends BaseController {
     if (clienteRepository.existsByNombresApellidos(nombres, apellidos, idActual)) {
       throw new IllegalArgumentException(
           "Nombres y apellidos existentes en otro Cliente, verifique o ingrese otros valores");
+    }
+  }
+
+  /**
+   * Valida que el email no esté duplicado.
+   *
+   * @param email Email a validar
+   * @param idActual ID del cliente actual (null si es creación)
+   */
+  private void validateEmailNoDuplicado(String email, Integer idActual) {
+    if (clienteRepository.existsByEmail(email, idActual)) {
+      throw new IllegalArgumentException(
+          "Email existente en otro Cliente, verifique o ingrese otro valor");
     }
   }
 }

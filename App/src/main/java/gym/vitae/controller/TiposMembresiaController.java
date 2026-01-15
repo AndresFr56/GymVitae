@@ -27,8 +27,7 @@ public class TiposMembresiaController extends BaseController {
   TiposMembresiaController(
       TiposMembresiaRepository repository,
       MembresiaBeneficioController asociacionController,
-      TipoMembresiaMapper mapper
-      ) {
+      TipoMembresiaMapper mapper) {
     super(null);
     this.repository = repository;
     this.asociacionController = asociacionController;
