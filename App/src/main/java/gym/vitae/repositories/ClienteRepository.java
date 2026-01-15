@@ -334,6 +334,33 @@ public record ClienteRepository(DBConnectionManager db) implements IRepository<C
         });
   }
 
+  /**
+   * Verifica si existe un cliente con el email especificado.
+   *
+   * @param email Email a verificar
+   * @param excludeId ID a excluir de la búsqueda (para updates), puede ser null
+   * @return true si existe otro cliente con ese email
+   */
+  public boolean existsByEmail(String email, Integer excludeId) {
+    if (email == null || email.trim().isEmpty()) {
+      return false;
+    }
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          String jpql = "SELECT COUNT(c) FROM Cliente c WHERE LOWER(c.email) = LOWER(:email)";
+          if (excludeId != null) {
+            jpql += " AND c.id <> :excludeId";
+          }
+          TypedQuery<Long> q = em.createQuery(jpql, Long.class);
+          q.setParameter("email", email.trim());
+          if (excludeId != null) {
+            q.setParameter("excludeId", excludeId);
+          }
+          return q.getSingleResult() > 0;
+        });
+  }
+
   @Override
   public boolean equals(Object obj) {
     if (obj == this) return true;

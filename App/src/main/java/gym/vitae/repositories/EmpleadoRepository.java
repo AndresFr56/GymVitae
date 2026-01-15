@@ -90,7 +90,10 @@ public record EmpleadoRepository(DBConnectionManager db) implements IRepository<
     return TransactionHandler.inTransaction(
         db,
         em -> {
-          TypedQuery<Long> q = em.createQuery("select count(e) from Empleado e", Long.class);
+          TypedQuery<Long> q =
+              em.createQuery(
+                  "select count(e) from Empleado e where e.estado <> :estadoInactivo", Long.class);
+          q.setParameter("estadoInactivo", EstadoEmpleado.INACTIVO);
           return q.getSingleResult();
         });
   }
@@ -147,9 +150,13 @@ public record EmpleadoRepository(DBConnectionManager db) implements IRepository<
         em -> {
           String jpql =
               buildFilterQuery(
-                  "SELECT COUNT(e) FROM Empleado e WHERE 1=1", searchText, cargoId, genero);
+                  "SELECT COUNT(e) FROM Empleado e WHERE e.estado <> :estadoInactivo",
+                  searchText,
+                  cargoId,
+                  genero);
 
           TypedQuery<Long> query = em.createQuery(jpql, Long.class);
+          query.setParameter("estadoInactivo", EstadoEmpleado.INACTIVO);
           applyFilterParameters(query, searchText, cargoId, genero);
 
           return query.getSingleResult();
@@ -380,6 +387,73 @@ public record EmpleadoRepository(DBConnectionManager db) implements IRepository<
             q.setParameter("excludeId", excludeId);
           }
           return q.getSingleResult() > 0;
+        });
+  }
+
+  /**
+   * Verifica si existe un empleado con el email especificado.
+   *
+   * @param email Email a verificar
+   * @param excludeId ID a excluir de la búsqueda (para updates), puede ser null
+   * @return true si existe otro empleado con ese email
+   */
+  public boolean existsByEmail(String email, Integer excludeId) {
+    if (email == null || email.trim().isEmpty()) {
+      return false;
+    }
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          String jpql = "SELECT COUNT(e) FROM Empleado e WHERE LOWER(e.email) = LOWER(:email)";
+          if (excludeId != null) {
+            jpql += " AND e.id <> :excludeId";
+          }
+          TypedQuery<Long> q = em.createQuery(jpql, Long.class);
+          q.setParameter("email", email.trim());
+          if (excludeId != null) {
+            q.setParameter("excludeId", excludeId);
+          }
+          return q.getSingleResult() > 0;
+        });
+  }
+
+  /**
+   * Obtiene el siguiente número secuencial para generar código de empleado del año actual. Busca el
+   * código más alto que coincida con el patrón EMP-{año}{secuencia} y retorna el siguiente número
+   * disponible.
+   *
+   * @param year Año actual
+   * @return Siguiente número secuencial (1 si no hay empleados del año actual)
+   */
+  public int getNextCodigoSecuencial(int year) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          String prefix = "EMP-" + year;
+          TypedQuery<String> q =
+              em.createQuery(
+                  "SELECT e.codigoEmpleado FROM Empleado e WHERE e.codigoEmpleado LIKE :prefix ORDER BY e.codigoEmpleado DESC",
+                  String.class);
+          q.setParameter("prefix", prefix + "%");
+          q.setMaxResults(1);
+
+          List<String> results = q.getResultList();
+          if (results.isEmpty()) {
+            return 1;
+          }
+
+          // Extraer el número secuencial del último código (EMP-2026001 -> 001)
+          String lastCodigo = results.get(0);
+          try {
+            String secuenciaStr = lastCodigo.substring(prefix.length());
+            int ultimaSecuencia = Integer.parseInt(secuenciaStr);
+            return ultimaSecuencia + 1;
+          } catch (Exception e) {
+            // Si hay error al parsear, retornar el count total + 1 como fallback
+            TypedQuery<Long> countQuery =
+                em.createQuery("SELECT COUNT(e) FROM Empleado e", Long.class);
+            return countQuery.getSingleResult().intValue() + 1;
+          }
         });
   }
 }
