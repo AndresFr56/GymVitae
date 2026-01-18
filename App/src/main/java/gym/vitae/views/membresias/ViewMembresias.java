@@ -8,45 +8,40 @@ import gym.vitae.views.common.ViewContainer;
 import gym.vitae.views.components.CeoHeader;
 import net.miginfocom.swing.MigLayout;
 
-@Metadata(
-        name = "Vista de Membresías",
-        description = "Listado de Membresías del gimnasio")
+@Metadata(name = "Vista de Membresías", description = "Listado de Membresías del gimnasio")
 public class ViewMembresias extends ViewContainer {
 
-    private MembresiaTablePanel membresiaTablePanel;
+  private MembresiaTablePanel membresiaTablePanel;
 
-    @Override
-    protected void init() {
+  @Override
+  protected void init() {
 
-        setLayout(new MigLayout("fillx,wrap", "[fill]", "[][fill,grow]"));
+    setLayout(new MigLayout("fillx,wrap", "[fill]", "[][fill,grow]"));
 
-        MembresiasController membresiaController = new MembresiasController();
-        TiposMembresiaController tipoController = new TiposMembresiaController();
-        ClienteController clienteController = new ClienteController();
+    MembresiasController membresiaController = new MembresiasController();
+    TiposMembresiaController tipoController = new TiposMembresiaController();
+    ClienteController clienteController = new ClienteController();
 
-        add(CeoHeader.createHeaderPanel(getClass().getAnnotation(Metadata.class)), "growx");
+    add(CeoHeader.createHeaderPanel(getClass().getAnnotation(Metadata.class)), "growx");
 
-        membresiaTablePanel = new MembresiaTablePanel(
-                membresiaController,
-                tipoController,
-                clienteController
-        );
+    membresiaTablePanel =
+        new MembresiaTablePanel(membresiaController, tipoController, clienteController);
 
-        add(membresiaTablePanel, "grow");
-    }
+    add(membresiaTablePanel, "grow");
+  }
 
-    @Override
-    protected void load() {
-        if (membresiaTablePanel != null) membresiaTablePanel.loadData();
-    }
+  @Override
+  protected void load() {
+    if (membresiaTablePanel != null) membresiaTablePanel.loadData();
+  }
 
-    @Override
-    protected void open() {
-        load();
-    }
+  @Override
+  protected void open() {
+    load();
+  }
 
-    @Override
-    protected void refresh() {
-        if (membresiaTablePanel != null) membresiaTablePanel.refresh();
-    }
+  @Override
+  protected void refresh() {
+    if (membresiaTablePanel != null) membresiaTablePanel.refresh();
+  }
 }

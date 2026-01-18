@@ -18,8 +18,8 @@ import raven.modal.option.Location;
 import raven.modal.option.Option;
 
 /**
- * Panel de tabla combinada para el inventario (productos y equipos).
- * Permite visualizar todos los items con filtros por tipo, proveedor y nombre.
+ * Panel de tabla combinada para el inventario (productos y equipos). Permite visualizar todos los
+ * items con filtros por tipo, proveedor y nombre.
  */
 public class InventarioTablePanel extends BaseTablePanel<InventarioListadoDTO> {
 
@@ -289,7 +289,7 @@ public class InventarioTablePanel extends BaseTablePanel<InventarioListadoDTO> {
     }
   }
 
-  //Abrir actualización de producto
+  // Abrir actualización de producto
   private void openUpdateProducto(InventarioListadoDTO item) {
     ProductoDetalleDTO detalle = controller.getProductoById(item.getId());
     UpdateProducto updateForm = new UpdateProducto(controller, detalle);
@@ -323,7 +323,7 @@ public class InventarioTablePanel extends BaseTablePanel<InventarioListadoDTO> {
     updateForm.getBtnCancelar().addOnClick(e -> ModalDialog.closeAllModal());
   }
 
-  //Abrir actualización de equipo
+  // Abrir actualización de equipo
   private void openUpdateEquipo(InventarioListadoDTO item) {
     EquipoDetalleDTO detalle = controller.getEquipoById(item.getId());
     UpdateEquipo updateForm = new UpdateEquipo(controller, detalle);
