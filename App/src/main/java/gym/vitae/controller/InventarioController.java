@@ -1067,7 +1067,7 @@ public class InventarioController extends BaseController {
   /** Valida ubicación de un equipo. */
   private void validateUbicacion(String ubicacion) {
     if (ubicacion != null && !ubicacion.trim().isEmpty()) {
-      String[] ubicacionesValidas = {"Área de cardio", "Zona peso libre", "Bodega"};
+      String[] ubicacionesValidas = {"Área de cardio", "Zona de peso libre", "Bodega"};
       boolean esValida = false;
       for (String ub : ubicacionesValidas) {
         if (ub.equalsIgnoreCase(ubicacion)) {
