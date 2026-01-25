@@ -8,7 +8,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import gym.vitae.mapper.MembresiaBeneficioMapper;
 import gym.vitae.model.Beneficio;
 import gym.vitae.model.MembresiaBeneficio;
 import gym.vitae.model.TiposMembresia;
@@ -29,11 +28,6 @@ import org.junit.jupiter.api.Test;
 
 class MembresiaBeneficioControllerTest {
 
-    private MembresiaBeneficioRepository repository;
-    private TiposMembresiaRepository tiposRepository;
-    private BeneficioRepository beneficioRepository;
-    private MembresiaBeneficioController controller;
-
     private final int ASOCIACION_ID = 1;
     private final int MEMBRESIA_ID = 10;
     private final String MEMBRESIA_NOMBRE = "Premium";
@@ -42,7 +36,10 @@ class MembresiaBeneficioControllerTest {
     private final String BENEFICIO_DESCRIPCION = "Piscina olímpica y sauna";
     private final int ID_INVALIDO = -5;
     private final Instant CREATED_AT = Instant.now();
-
+    private MembresiaBeneficioRepository repository;
+    private TiposMembresiaRepository tiposRepository;
+    private BeneficioRepository beneficioRepository;
+    private MembresiaBeneficioController controller;
     private MembresiaBeneficioDetalleDTO detalleDTO;
     private MembresiaBeneficioListadoDTO listadoDTO;
     private MembresiaBeneficioCreateDTO createDTO;
