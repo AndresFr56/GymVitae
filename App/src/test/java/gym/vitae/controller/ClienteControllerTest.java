@@ -13,7 +13,6 @@ import gym.vitae.model.enums.EstadoCliente;
 import gym.vitae.model.enums.Genero;
 import gym.vitae.repositories.ClienteRepository;
 import java.lang.reflect.Method;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -451,15 +450,14 @@ class ClienteControllerTest {
                         "Sánchez Ruiz",
                         "0967890123",
                         Genero.MASCULINO,
-                        LocalDate.of(1990, 3, 15),
                         "0932109876",
                         "pedro.sanchez@example.com",
                         "Av. Principal #123",
+                        LocalDate.of(1990, 3, 15),
                         "María Sánchez",
                         "0987654321",
-                        EstadoCliente.ACTIVO,
-                        Instant.now(),
-                        Instant.now())));
+                        EstadoCliente.ACTIVO
+                            )));
 
         ClienteDetalleDTO out = controller.createCliente(dto);
 
@@ -592,15 +590,14 @@ class ClienteControllerTest {
                         "Mendoza Silva",
                         "0912345679",
                         Genero.MASCULINO,
-                        LocalDate.of(1985, 1, 15),
                         "0987654321",
-                        "carlos.mendoza.nuevo@example.com",
                         "Calle Nueva #456",
+                        "carlos.mendoza.nuevo@example.com",
+                        LocalDate.of(1985, 1, 15),
                         "Ana Mendoza",
                         "0998765432",
-                        EstadoCliente.ACTIVO,
-                        Instant.now(),
-                        Instant.now())));
+                        EstadoCliente.ACTIVO
+                        )));
 
         ClienteDetalleDTO out = controller.updateCliente(clienteId, dto);
 
