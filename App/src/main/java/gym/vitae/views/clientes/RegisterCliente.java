@@ -137,7 +137,8 @@ public class RegisterCliente extends JPanel {
   }
 
   private void applyStyles() {
-    txtCodigoCliente.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Código generado automáticamente");
+    txtCodigoCliente.putClientProperty(
+        FlatClientProperties.PLACEHOLDER_TEXT, "Código generado automáticamente");
     txtNombres.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Nombres del cliente");
     txtApellidos.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Apellidos del cliente");
     txtCedula.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "10 dígitos");

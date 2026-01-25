@@ -15,9 +15,7 @@ import javax.swing.*;
 import javax.swing.text.*;
 import net.miginfocom.swing.MigLayout;
 
-/**
- * Formulario para registrar un nuevo tipo de membresía.
- */
+/** Formulario para registrar un nuevo tipo de membresía. */
 public class RegisterTipoMembresia extends JPanel {
 
   private static final Logger LOGGER = Logger.getLogger(RegisterTipoMembresia.class.getName());
@@ -39,13 +37,14 @@ public class RegisterTipoMembresia extends JPanel {
   private ButtonOutline btnGuardar;
   private ButtonOutline btnCancelar;
 
-  public RegisterTipoMembresia(TiposMembresiaController controller, BeneficiosController beneficioController) {
+  public RegisterTipoMembresia(
+      TiposMembresiaController controller, BeneficiosController beneficioController) {
     this.controller = controller;
     this.beneficioController = beneficioController;
     this.listModelBeneficios = new DefaultListModel<>();
     this.listBeneficios = new JList<>(listModelBeneficios);
 
-    init(); 
+    init();
     loadBeneficios();
   }
 
@@ -107,7 +106,7 @@ public class RegisterTipoMembresia extends JPanel {
     scrollBeneficios = new JScrollPane(listBeneficios);
     chkAccesoCompleto = new JCheckBox("El cliente tendrá acceso completo al gimnasio");
     chkAccesoCompleto.setSelected(true);
-    
+
     applyMaxLengthFilter(txtNombre, 50);
     applyMaxLengthFilter(txtDescripcion, 255);
     applyNumericFilter(txtDuracionDias, 5);
@@ -223,7 +222,7 @@ public class RegisterTipoMembresia extends JPanel {
 
     contentPanel.add(new JLabel(" "));
     contentPanel.add(chkAccesoCompleto);
-    
+
     createTitle("Beneficios Disponibles (Selección Múltiple)");
     scrollBeneficios.setPreferredSize(new Dimension(0, 150));
     contentPanel.add(scrollBeneficios);
@@ -297,19 +296,19 @@ public class RegisterTipoMembresia extends JPanel {
     if (!validateForm()) return false;
 
     try {
-      List<Integer> beneficiosSeleccionadosIds = listBeneficios.getSelectedValuesList()
-          .stream()
-          .map(BeneficioListadoDTO::getId)
-          .collect(Collectors.toList());
+      List<Integer> beneficiosSeleccionadosIds =
+          listBeneficios.getSelectedValuesList().stream()
+              .map(BeneficioListadoDTO::getId)
+              .collect(Collectors.toList());
 
-      TipoMembresiaCreateDTO tipoDto = new TipoMembresiaCreateDTO(
-          txtNombre.getText().trim(),
-          txtDescripcion.getText().trim().isEmpty() ? null : txtDescripcion.getText().trim(),
-          Integer.parseInt(txtDuracionDias.getText().trim()),
-          new BigDecimal(txtCosto.getText().trim()),
-          chkAccesoCompleto.isSelected(),
-          beneficiosSeleccionadosIds
-      );
+      TipoMembresiaCreateDTO tipoDto =
+          new TipoMembresiaCreateDTO(
+              txtNombre.getText().trim(),
+              txtDescripcion.getText().trim().isEmpty() ? null : txtDescripcion.getText().trim(),
+              Integer.parseInt(txtDuracionDias.getText().trim()),
+              new BigDecimal(txtCosto.getText().trim()),
+              chkAccesoCompleto.isSelected(),
+              beneficiosSeleccionadosIds);
 
       controller.createTipoConBeneficios(tipoDto);
 
@@ -338,7 +337,7 @@ public class RegisterTipoMembresia extends JPanel {
     txtDuracionDias.setText("");
     txtCosto.setText("");
     chkAccesoCompleto.setSelected(true);
-    listBeneficios.clearSelection(); 
+    listBeneficios.clearSelection();
     hideError();
   }
 
@@ -371,5 +370,4 @@ public class RegisterTipoMembresia extends JPanel {
       showErrorMessage("Error al cargar la lista de beneficios");
     }
   }
-
 }

@@ -446,7 +446,6 @@ public abstract class BaseTablePanel<T> extends JPanel {
     return panel;
   }
 
-
   private void validateSearchText() {
     String text = txtSearch.getText();
     if (text.length() > MAX_SEARCH_LENGTH) {
@@ -564,7 +563,6 @@ public abstract class BaseTablePanel<T> extends JPanel {
     }
     return selected.stream().mapToInt(Integer::intValue).toArray();
   }
-
 
   protected void showWarning(String message) {
     JOptionPane.showMessageDialog(this, message, "Advertencia", JOptionPane.WARNING_MESSAGE);

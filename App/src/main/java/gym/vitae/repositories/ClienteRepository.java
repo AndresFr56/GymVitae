@@ -362,9 +362,9 @@ public record ClienteRepository(DBConnectionManager db) implements IRepository<C
   }
 
   /**
-   * Obtiene el siguiente número secuencial para generar código de cliente del año actual.
-   * Busca el código más alto que coincida con el patrón CLI-{año}{secuencia}
-   * y retorna el siguiente número disponible.
+   * Obtiene el siguiente número secuencial para generar código de cliente del año actual. Busca el
+   * código más alto que coincida con el patrón CLI-{año}{secuencia} y retorna el siguiente número
+   * disponible.
    *
    * @param year Año actual
    * @return Siguiente número secuencial (1 si no hay clientes del año actual)
