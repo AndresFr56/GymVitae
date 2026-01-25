@@ -142,12 +142,15 @@ public class ClienteController extends BaseController {
         .orElseThrow(() -> new IllegalStateException("Error al recuperar cliente actualizado"));
   }
 
-  // ==================== UTILIDADES ====================
-
   private String generateCodigoCliente() {
-    long count = clienteRepository.count();
     int year = java.time.Year.now().getValue();
-    return String.format("CLI-%d%03d", year, count + 1);
+    int nextSecuencial = clienteRepository.getNextCodigoSecuencial(year);
+    return String.format("CLI-%d%05d", year, nextSecuencial);
+  }
+
+  /** Obtiene un código de cliente generado automáticamente. */
+  public String getCodigoClienteGenerado() {
+    return generateCodigoCliente();
   }
 
   private void validateClienteCreate(ClienteCreateDTO dto) {

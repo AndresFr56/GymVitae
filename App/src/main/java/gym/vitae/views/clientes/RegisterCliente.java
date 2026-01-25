@@ -103,6 +103,9 @@ public class RegisterCliente extends JPanel {
 
   private void initializeComponents() {
     txtCodigoCliente = new JTextField();
+    txtCodigoCliente.setEditable(false);
+    txtCodigoCliente.setEnabled(false);
+
     txtNombres = new JTextField();
     txtApellidos = new JTextField();
     txtCedula = new JTextField();
@@ -134,7 +137,7 @@ public class RegisterCliente extends JPanel {
   }
 
   private void applyStyles() {
-    txtCodigoCliente.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ej: CLI-001");
+    txtCodigoCliente.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Código generado automáticamente");
     txtNombres.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Nombres del cliente");
     txtApellidos.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Apellidos del cliente");
     txtCedula.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "10 dígitos");
@@ -350,6 +353,10 @@ public class RegisterCliente extends JPanel {
 
   public boolean saveCliente() {
     try {
+      // Generar código automáticamente
+      String codigoGenerado = controller.getCodigoClienteGenerado();
+      txtCodigoCliente.setText(codigoGenerado);
+
       ClienteCreateDTO clienteDTO = buildClienteDTOFromForm();
       var clienteDetalle = controller.createCliente(clienteDTO);
 

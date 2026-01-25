@@ -111,6 +111,9 @@ public class UpdateCliente extends JPanel {
 
   private void initializeComponents() {
     txtCodigoCliente = new JTextField();
+    txtCodigoCliente.setEditable(false);
+    txtCodigoCliente.setEnabled(false);
+
     txtNombres = new JTextField();
     txtApellidos = new JTextField();
     txtCedula = new JTextField();
@@ -130,9 +133,6 @@ public class UpdateCliente extends JPanel {
 
     // Configurar DatePicker
     dateFechaNacimiento.setEditor(new JFormattedTextField());
-
-    // El código no es editable
-    txtCodigoCliente.setEditable(false);
 
     // NO aplicar filtros aquí - se aplicarán después de cargar datos
   }

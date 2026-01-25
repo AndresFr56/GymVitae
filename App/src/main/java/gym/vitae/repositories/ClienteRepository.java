@@ -361,6 +361,46 @@ public record ClienteRepository(DBConnectionManager db) implements IRepository<C
         });
   }
 
+  /**
+   * Obtiene el siguiente número secuencial para generar código de cliente del año actual.
+   * Busca el código más alto que coincida con el patrón CLI-{año}{secuencia}
+   * y retorna el siguiente número disponible.
+   *
+   * @param year Año actual
+   * @return Siguiente número secuencial (1 si no hay clientes del año actual)
+   */
+  public int getNextCodigoSecuencial(int year) {
+    return TransactionHandler.inTransaction(
+        db,
+        em -> {
+          String prefix = "CLI-" + year;
+          TypedQuery<String> q =
+              em.createQuery(
+                  "SELECT c.codigoCliente FROM Cliente c WHERE c.codigoCliente LIKE :prefix ORDER BY c.codigoCliente DESC",
+                  String.class);
+          q.setParameter("prefix", prefix + "%");
+          q.setMaxResults(1);
+
+          List<String> results = q.getResultList();
+          if (results.isEmpty()) {
+            return 1;
+          }
+
+          // Extraer el número secuencial del último código (CLI-2026001 -> 001)
+          String lastCodigo = results.get(0);
+          try {
+            String secuenciaStr = lastCodigo.substring(prefix.length());
+            int ultimaSecuencia = Integer.parseInt(secuenciaStr);
+            return ultimaSecuencia + 1;
+          } catch (Exception e) {
+            // Si hay error al parsear, retornar el count total + 1 como fallback
+            TypedQuery<Long> countQuery =
+                em.createQuery("SELECT COUNT(c) FROM Cliente c", Long.class);
+            return countQuery.getSingleResult().intValue() + 1;
+          }
+        });
+  }
+
   @Override
   public boolean equals(Object obj) {
     if (obj == this) return true;
