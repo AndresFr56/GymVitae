@@ -286,7 +286,7 @@ public abstract class BaseTablePanel<T> extends JPanel {
   // ==================== MÉTODOS PRIVADOS DE INICIALIZACIÓN ====================
 
   private void initializePanel() {
-    setLayout(new MigLayout("fillx,wrap,insets 15 0 10 0", "[fill]", "[][][][fill,grow][]"));
+    setLayout(new MigLayout("fillx,wrap,insets 16 0 10 0", "[fill]", "[][][][fill,grow][]"));
     putClientProperty(FlatClientProperties.STYLE, "arc:10;background:$Table.background;");
 
     add(createTitleLabel(), "gapx 20");
@@ -397,7 +397,7 @@ public abstract class BaseTablePanel<T> extends JPanel {
         .getTableHeader()
         .putClientProperty(
             FlatClientProperties.STYLE,
-            "height:30;"
+            "height:32;"
                 + "hoverBackground:null;"
                 + "pressedBackground:null;"
                 + "separatorColor:$TableHeader.background;");
@@ -425,7 +425,7 @@ public abstract class BaseTablePanel<T> extends JPanel {
   }
 
   private Component createPaginationPanel() {
-    JPanel panel = new JPanel(new MigLayout("insets 5 15 5 15", "[][]push[]"));
+    JPanel panel = new JPanel(new MigLayout("insets 10 16 10 16,fillx,ay center", "[][]push[]"));
 
     lbTotalRecords = new JLabel("0");
     pagination = new Pagination();
@@ -440,13 +440,12 @@ public abstract class BaseTablePanel<T> extends JPanel {
 
     panel.add(new JLabel("Total:"));
     panel.add(lbTotalRecords);
-    panel.add(pagination);
+    panel.add(pagination, "ay center,h 32!");
 
     panel.putClientProperty(FlatClientProperties.STYLE, "background:null;");
     return panel;
   }
 
-  // ==================== MÉTODOS PRIVADOS DE LÓGICA ====================
 
   private void validateSearchText() {
     String text = txtSearch.getText();
@@ -566,7 +565,6 @@ public abstract class BaseTablePanel<T> extends JPanel {
     return selected.stream().mapToInt(Integer::intValue).toArray();
   }
 
-  // ==================== UTILIDADES ====================
 
   protected void showWarning(String message) {
     JOptionPane.showMessageDialog(this, message, "Advertencia", JOptionPane.WARNING_MESSAGE);

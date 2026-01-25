@@ -105,6 +105,17 @@ public class Pagination extends JPagination {
     setBorder(new ScaledEmptyBorder(5, 5, 5, 5));
   }
 
+  @Override
+  public Dimension getPreferredSize() {
+    Dimension size = super.getPreferredSize();
+    return new Dimension(size.width, 32);
+  }
+
+  @Override
+  public Dimension getMinimumSize() {
+    return new Dimension(100, 32);
+  }
+
   public void setColor(Color color1, Color color2) {
     colorSet = (color1 != null || color2 != null);
 
