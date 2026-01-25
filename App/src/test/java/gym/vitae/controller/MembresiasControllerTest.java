@@ -16,17 +16,16 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource; 
+import org.junit.jupiter.params.provider.ValueSource;
 
 class MembresiasControllerTest {
 
-    private MembresiasController controller;
-    
     private final LocalDate hoy = LocalDate.now();
     private final LocalDate manana = hoy.plusDays(1);
     private final LocalDate duracionCorrecta = hoy.plusMonths(1);
-    private final LocalDate duracionIncorrecta = hoy.plusDays(10); 
+    private final LocalDate duracionIncorrecta = hoy.plusDays(10);
     private final BigDecimal precioValido = BigDecimal.valueOf(100.00);
+    private MembresiasController controller;
 
     @BeforeEach
     void setUp() {

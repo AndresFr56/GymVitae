@@ -29,17 +29,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.internal.matchers.Null;
 
 class TiposMembresiaControllerTest {
-
-    private TiposMembresiaRepository repository;
-    private MembresiaBeneficioController asociacionController;
-    private TipoMembresiaMapper mapper;
-
-    private TiposMembresiaController controller;
 
     private final String nombreValido = "Estandar";
     private final String descripcionValida = "Acceso basico al gimnasio.";
@@ -54,12 +45,14 @@ class TiposMembresiaControllerTest {
     private final List<Integer> beneficiosIdsValidos = List.of(1, 2);
     private final List<Integer> beneficiosIdsVacios = Collections.emptyList();
     private final int TIPO_ID = 1;
-
+    private final Integer duracionInvalidaMayor365 = 366;
+    private final BigDecimal costoInvalidoMasDeDosDecimales = BigDecimal.valueOf(10.123);
+    private TiposMembresiaRepository repository;
+    private MembresiaBeneficioController asociacionController;
+    private TipoMembresiaMapper mapper;
+    private TiposMembresiaController controller;
     private TiposMembresia tipoBase;
     private TipoMembresiaDetalleDTO detalleDTO;
-
-    private final Integer duracionInvalidaMayor365 = 366; 
-    private final BigDecimal costoInvalidoMasDeDosDecimales = BigDecimal.valueOf(10.123);
 
     @BeforeEach
     void setUp() {
