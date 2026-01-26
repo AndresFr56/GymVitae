@@ -295,12 +295,6 @@ public class RegisterCliente extends JPanel {
 
     try {
       // Validar campos obligatorios
-      if (txtCodigoCliente.getText().trim().isEmpty()) {
-        showErrorMessage("El código de cliente es obligatorio");
-        txtCodigoCliente.requestFocus();
-        return false;
-      }
-
       if (txtNombres.getText().trim().isEmpty()) {
         showErrorMessage("Los nombres son obligatorios");
         txtNombres.requestFocus();

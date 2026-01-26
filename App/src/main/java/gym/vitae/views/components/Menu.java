@@ -74,7 +74,7 @@ public class Menu extends SimpleDrawerBuilder {
           new Item("Membresias", "employee.svg")
               .subMenu("Listado de Membresias", ViewMembresias.class)
               .subMenu("Tipos de Membresias", ViewTiposMembresia.class),
-          new Item("Iventario", "pack.svg")
+          new Item("Inventario", "pack.svg")
               .subMenu("Productos y Equipos", ViewInventario.class)
               .subMenu("Proveedores", ViewProveedores.class),
           new Item("Cerrar Session", "logout.svg")
