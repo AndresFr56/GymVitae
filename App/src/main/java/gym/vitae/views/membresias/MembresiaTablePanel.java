@@ -4,15 +4,19 @@ import gym.vitae.controller.ClienteController;
 import gym.vitae.controller.MembresiasController;
 import gym.vitae.controller.TiposMembresiaController;
 import gym.vitae.model.dtos.membresias.MembresiaListadoDTO;
+import gym.vitae.model.dtos.membresias.TipoMembresiaListadoDTO;
+import gym.vitae.model.enums.EstadoMembresia;
 import gym.vitae.views.components.tables.BaseTablePanel;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import javax.swing.*;
 import net.miginfocom.swing.MigLayout;
 import raven.modal.ModalDialog;
 import raven.modal.component.SimpleModalBorder;
 import raven.modal.option.Location;
 import raven.modal.option.Option;
+
+import javax.swing.*;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class MembresiaTablePanel extends BaseTablePanel<MembresiaListadoDTO> {
 
@@ -43,30 +47,33 @@ public class MembresiaTablePanel extends BaseTablePanel<MembresiaListadoDTO> {
     cmbTipos = new JComboBox<>();
     panel.add(cmbTipos, "width 200!");
 
+
     cmbTipos.addActionListener(e -> refresh());
 
     return panel;
   }
 
   private void cargarTipos() {
-    if (cmbTipos == null) return;
-    if (tipoController == null) return;
+    if (cmbTipos == null || tipoController == null) return;
 
     DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
     model.addElement("Todos");
 
-    tipoController.getTipos().forEach(t -> model.addElement(t.getNombre()));
+
+    tipoController.getTipos().stream()
+            .filter(TipoMembresiaListadoDTO::getActivo)
+            .forEach(t -> model.addElement(t.getNombre()));
 
     cmbTipos.setModel(model);
   }
 
   @Override
   public void loadData() {
+
     if (!tiposCargados) {
       cargarTipos();
       tiposCargados = true;
     }
-
     super.loadData();
   }
 
@@ -102,93 +109,80 @@ public class MembresiaTablePanel extends BaseTablePanel<MembresiaListadoDTO> {
   @Override
   protected void onAdd() {
     RegisterMembresia form = new RegisterMembresia(controller, tipoController, clienteController);
-
     Option option = ModalDialog.createOption();
-    option
-        .getLayoutOption()
-        .setSize(0.45f, 1f)
-        .setLocation(Location.TRAILING, Location.TOP)
-        .setAnimateDistance(0.7f, 0);
+    option.getLayoutOption().setSize(0.45f, 1f).setLocation(Location.TRAILING, Location.TOP).setAnimateDistance(0.7f, 0);
 
-    ModalDialog.showModal(
-        this,
-        new SimpleModalBorder(
-            form, "Nueva Membresía", SimpleModalBorder.DEFAULT_OPTION, (c, a) -> {}),
-        option);
+    ModalDialog.showModal(this, new SimpleModalBorder(form, "Nueva Membresía", SimpleModalBorder.DEFAULT_OPTION, (c, a) -> {
+    }), option);
 
-    form.getBtnGuardar()
-        .addOnClick(
-            e -> {
-              if (form.validateForm() && form.saveMembresia()) {
-                ModalDialog.closeAllModal();
-                refresh();
-              }
-            });
-
+    form.getBtnGuardar().addOnClick(e -> {
+      if (form.validateForm() && form.saveMembresia()) {
+        ModalDialog.closeAllModal();
+        refresh();
+      }
+    });
     form.getBtnCancelar().addOnClick(e -> ModalDialog.closeAllModal());
   }
 
   @Override
   protected void onUpdateEntity(MembresiaListadoDTO dto) {
-
     var detalle = controller.getMembresiaById(dto.getId());
-    UpdateMembresia form = new UpdateMembresia(controller, detalle);
-
+    UpdateMembresia form = new UpdateMembresia(controller, tipoController, detalle);
     Option option = ModalDialog.createOption();
-    option
-        .getLayoutOption()
-        .setSize(0.45f, 1f)
-        .setLocation(Location.TRAILING, Location.TOP)
-        .setAnimateDistance(0.7f, 0);
+    option.getLayoutOption().setSize(0.45f, 1f).setLocation(Location.TRAILING, Location.TOP).setAnimateDistance(0.7f, 0);
 
-    ModalDialog.showModal(
-        this,
-        new SimpleModalBorder(
-            form, "Editar Membresía", SimpleModalBorder.DEFAULT_OPTION, (c, a) -> {}),
-        option);
+    ModalDialog.showModal(this, new SimpleModalBorder(form, "Editar Membresía", SimpleModalBorder.DEFAULT_OPTION, (c, a) -> {
+    }), option);
 
-    form.getBtnGuardar()
-        .addOnClick(
-            e -> {
-              if (form.validateForm() && form.updateMembresia()) {
-                ModalDialog.closeAllModal();
-                refresh();
-              }
-            });
-
+    form.getBtnGuardar().addOnClick(e -> {
+      if (form.validateForm() && form.updateMembresia()) {
+        ModalDialog.closeAllModal();
+        refresh();
+      }
+    });
     form.getBtnCancelar().addOnClick(e -> ModalDialog.closeAllModal());
   }
 
   @Override
   protected void onDeleteEntities(List<MembresiaListadoDTO> entities) {
-    for (MembresiaListadoDTO dto : entities) {
-      controller.cancelarMembresia(dto.getId());
+
+    List<MembresiaListadoDTO> yaCanceladas = entities.stream()
+            .filter(m -> m.getEstado() == EstadoMembresia.CANCELADA)
+            .collect(Collectors.toList());
+
+    if (!yaCanceladas.isEmpty()) {
+      JOptionPane.showMessageDialog(this, "Ya esta cancelada esta Membresia.", "Aviso", JOptionPane.WARNING_MESSAGE);
+      if (yaCanceladas.size() == entities.size()) return;
     }
 
-    JOptionPane.showMessageDialog(
-        this, "Membresía(s) cancelada(s) correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+    List<MembresiaListadoDTO> paraCancelar = entities.stream()
+            .filter(m -> m.getEstado() != EstadoMembresia.CANCELADA)
+            .collect(Collectors.toList());
 
-    refresh();
+    int confirm = JOptionPane.showConfirmDialog(this, "¿Seguro que deseas cancelar las membresías seleccionadas?", "Confirmar", JOptionPane.YES_NO_OPTION);
+
+    if (confirm == JOptionPane.YES_OPTION) {
+      for (MembresiaListadoDTO dto : paraCancelar) {
+        controller.cancelarMembresia(dto.getId());
+      }
+      JOptionPane.showMessageDialog(this, "Membresía(s) cancelada(s) correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+      refresh();
+    }
   }
 
   @Override
   protected boolean filterEntity(MembresiaListadoDTO entity, String searchText) {
-
     boolean matchesSearchText = true;
     if (searchText != null && !searchText.isEmpty()) {
       String lowerSearch = searchText.toLowerCase();
-
-      matchesSearchText =
-          entity.getClienteNombre().toLowerCase().contains(lowerSearch)
+      matchesSearchText = entity.getClienteNombre().toLowerCase().contains(lowerSearch)
               || entity.getClienteDocumento().toLowerCase().contains(lowerSearch)
               || entity.getTipoMembresiaNombre().toLowerCase().contains(lowerSearch);
     }
 
     boolean matchesTipo = true;
-
     if (cmbTipos != null && cmbTipos.getSelectedItem() != null) {
       String selectedTipo = cmbTipos.getSelectedItem().toString();
-
       if (!selectedTipo.equals("Todos")) {
         matchesTipo = entity.getTipoMembresiaNombre().equals(selectedTipo);
       }

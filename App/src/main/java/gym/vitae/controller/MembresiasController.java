@@ -1,29 +1,21 @@
 package gym.vitae.controller;
 
-import static gym.vitae.controller.ValidationUtils.validateFechaSalida;
-import static gym.vitae.controller.ValidationUtils.validateId;
-
 import gym.vitae.mapper.MembresiaMapper;
-import gym.vitae.model.Cliente;
-import gym.vitae.model.DetallesFactura;
-import gym.vitae.model.Empleado;
-import gym.vitae.model.Factura;
-import gym.vitae.model.Membresia;
-import gym.vitae.model.TiposMembresia;
+import gym.vitae.model.*;
 import gym.vitae.model.dtos.membresias.MembresiaCreateDTO;
 import gym.vitae.model.dtos.membresias.MembresiaDetalleDTO;
 import gym.vitae.model.dtos.membresias.MembresiaListadoDTO;
 import gym.vitae.model.dtos.membresias.MembresiaUpdateDTO;
 import gym.vitae.model.enums.EstadoFactura;
 import gym.vitae.model.enums.TipoVenta;
-import gym.vitae.repositories.ClienteRepository;
-import gym.vitae.repositories.DetallesFacturaRepository;
-import gym.vitae.repositories.FacturaRepository;
-import gym.vitae.repositories.MembresiaRepository;
-import gym.vitae.repositories.TiposMembresiaRepository;
+import gym.vitae.repositories.*;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Random;
+
+import static gym.vitae.controller.ValidationUtils.validateFechaSalida;
+import static gym.vitae.controller.ValidationUtils.validateId;
 
 /**
  * Controlador para gestionar membresías.
@@ -196,19 +188,20 @@ public class MembresiasController extends BaseController {
       throw new IllegalArgumentException("Los datos actualizados no pueden ser nulos");
     }
 
-    Membresia membresia =
-        membresiaRepository
-            .findById(id)
-            .orElseThrow(
-                () -> new IllegalArgumentException("Membresía no encontrada con ID: " + id));
+    Membresia membresia = membresiaRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Membresía no encontrada con ID: " + id));
+
+    if (dto.getTipoMembresiaId() != null) {
+      TiposMembresia nuevoTipo = tiposMembresiaRepository.findById(dto.getTipoMembresiaId())
+              .orElseThrow(() -> new IllegalArgumentException("Tipo de membresía no encontrado"));
+      membresia.setTipoMembresia(nuevoTipo);
+    }
 
     MembresiaMapper.updateEntity(membresia, dto);
     membresiaRepository.update(membresia);
 
-    return membresiaRepository
-        .findDetalleById(id)
-        .orElseThrow(
-            () -> new IllegalStateException("Error al recuperar la membresía actualizada"));
+    return membresiaRepository.findDetalleById(id)
+            .orElseThrow(() -> new IllegalStateException("Error al recuperar la membresía actualizada"));
   }
 
   /**
@@ -220,11 +213,14 @@ public class MembresiasController extends BaseController {
   public void cancelarMembresia(int id) {
     validateId(id);
 
-    if (!membresiaRepository.existsById(id)) {
-      throw new IllegalArgumentException("Membresía no encontrada con ID: " + id);
-    }
+    Membresia membresia = membresiaRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Membresía no encontrada con ID: " + id));
 
-    membresiaRepository.delete(id);
+    // Cambiamos el estado a CANCELADO (Eliminación lógica tipo Netflix)
+    membresia.setEstado(gym.vitae.model.enums.EstadoMembresia.CANCELADA);
+
+    // Usamos update en lugar de delete para persistir el cambio de estado
+    membresiaRepository.update(membresia);
   }
 
   /**
@@ -241,4 +237,23 @@ public class MembresiasController extends BaseController {
     int to = Math.min(from + size, all.size());
     return all.subList(from, to);
   }
+
+  /**
+   * Cambia el estado de una membresía de forma específica.
+   * Útil para la lógica de suspensión.
+   *
+   * @param id          ID de la membresía.
+   * @param nuevoEstado El estado al que se desea cambiar.
+   */
+  public void cambiarEstado(int id, gym.vitae.model.enums.EstadoMembresia nuevoEstado) {
+    validateId(id);
+
+    Membresia membresia = membresiaRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Membresía no encontrada con ID: " + id));
+
+    membresia.setEstado(nuevoEstado);
+    membresiaRepository.update(membresia);
+  }
+
+
 }

@@ -8,335 +8,246 @@ import gym.vitae.model.dtos.cliente.ClienteListadoDTO;
 import gym.vitae.model.dtos.membresias.MembresiaCreateDTO;
 import gym.vitae.model.dtos.membresias.TipoMembresiaListadoDTO;
 import gym.vitae.views.components.primitives.ButtonOutline;
-import java.awt.*;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.logging.Logger;
-import javax.swing.*;
 import net.miginfocom.swing.MigLayout;
 import raven.datetime.DatePicker;
 
-/** Formulario para registrar una nueva membresía. */
+import javax.swing.*;
+import java.awt.*;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
 public class RegisterMembresia extends JPanel {
 
-  private static final Logger LOGGER = Logger.getLogger(RegisterMembresia.class.getName());
+    private final MembresiasController controller;
+    private final TiposMembresiaController tipoController;
+    private final ClienteController clienteController;
 
-  private final MembresiasController controller;
-  private final TiposMembresiaController tipoController;
-  private final ClienteController clienteController;
+    private JPanel contentPanel;
+    private JComboBox<ClienteListadoDTO> cmbCliente;
+    private JComboBox<TipoMembresiaListadoDTO> cmbTipoMembresia;
 
-  private JPanel contentPanel;
-  private JLabel lblError;
+    private DatePicker dateFechaInicio, dateFechaFin;
+    private JTextField txtPrecioPagado;
+    private JTextArea txtObservaciones;
+    private JLabel errCliente, errTipo, errFecha;
+    private ButtonOutline btnGuardar, btnCancelar;
 
-  private JComboBox<ClienteListadoDTO> cmbCliente;
-  private JComboBox<TipoMembresiaListadoDTO> cmbTipoMembresia;
-  private DatePicker dateFechaInicio;
-  private DatePicker dateFechaFin;
-  private JTextField txtPrecioPagado;
-  private JTextArea txtObservaciones;
+    public RegisterMembresia(MembresiasController controller, TiposMembresiaController tipoController, ClienteController clienteController) {
+        this.controller = controller;
+        this.tipoController = tipoController;
+        this.clienteController = clienteController;
+        init();
+    }
 
-  private ButtonOutline btnGuardar;
-  private ButtonOutline btnCancelar;
+    private void init() {
+        setLayout(new BorderLayout());
+        contentPanel = new JPanel(new MigLayout("fillx,wrap,insets 20", "[fill]", "[]5[]0[]10[]5[]0[]10[]5[]10[]5[]0[]10[]5[]10[]5[]push"));
 
-  public RegisterMembresia(
-      MembresiasController controller,
-      TiposMembresiaController tipoController,
-      ClienteController clienteController) {
-    this.controller = controller;
-    this.tipoController = tipoController;
-    this.clienteController = clienteController;
-    init();
-  }
+        JScrollPane scrollPane = new JScrollPane(contentPanel);
+        scrollPane.setBorder(null);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
-  private void init() {
-    setLayout(new BorderLayout());
+        initializeComponents();
+        buildForm();
 
-    lblError = new JLabel();
-    lblError.setVisible(false);
-    lblError.putClientProperty(
-        FlatClientProperties.STYLE, "foreground:#F44336;font:bold;border:0,0,10,0");
+        dateFechaInicio.setSelectedDate(LocalDate.now());
 
-    contentPanel = new JPanel(new MigLayout("fillx,wrap,insets 0", "[fill]", ""));
-    JScrollPane scrollPane = new JScrollPane(contentPanel);
-    scrollPane.setBorder(null);
-    scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        add(scrollPane, BorderLayout.CENTER);
+        add(createButtonPanel(), BorderLayout.SOUTH);
+    }
 
-    JPanel buttonPanel = createButtonPanel();
+    private void initializeComponents() {
+        var clientes = clienteController.getClientes().stream()
+                .filter(c -> c.estado().name().equals("ACTIVO"))
+                .toArray(ClienteListadoDTO[]::new);
 
-    JPanel topPanel = new JPanel(new MigLayout("fillx,wrap,insets 10 20 0 20", "[fill]"));
-    topPanel.add(lblError);
+        cmbCliente = new JComboBox<>(clientes);
+        cmbCliente.setSelectedIndex(-1);
+        String placeHolderCliente = "Seleccione un cliente...";
+        cmbCliente.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, placeHolderCliente);
 
-    add(topPanel, BorderLayout.NORTH);
-    add(scrollPane, BorderLayout.CENTER);
-    add(buttonPanel, BorderLayout.SOUTH);
-
-    initializeComponents();
-    applyStyles();
-    buildForm();
-  }
-
-  private JPanel createButtonPanel() {
-    JPanel panel = new JPanel(new MigLayout("insets 15 20 20 20", "[grow][120][120]"));
-    panel.putClientProperty(
-        FlatClientProperties.STYLE,
-        "background:$Panel.background;border:1,0,0,0,$Component.borderColor");
-
-    btnCancelar = new ButtonOutline("Cancelar");
-    btnCancelar.putClientProperty(FlatClientProperties.STYLE, "font:bold +1");
-
-    btnGuardar = new ButtonOutline("Guardar");
-    btnGuardar.putClientProperty(FlatClientProperties.STYLE, "foreground:#4CAF50;font:bold +1");
-
-    panel.add(new JLabel(), "grow");
-    panel.add(btnCancelar, "center");
-    panel.add(btnGuardar, "center");
-
-    return panel;
-  }
-
-  private void initializeComponents() {
-    var clientes =
-        clienteController.getClientes().stream()
-            .filter(c -> c.estado().name().equals("ACTIVO"))
-            .toArray(ClienteListadoDTO[]::new);
-    cmbCliente = new JComboBox<>(clientes);
-    cmbCliente.setRenderer(
-        new DefaultListCellRenderer() {
-          @Override
-          public Component getListCellRendererComponent(
-              JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            if (value instanceof ClienteListadoDTO cliente) {
-              setText(cliente.nombreCompleto() + " - " + cliente.cedula());
+        cmbCliente.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof ClienteListadoDTO c) {
+                    setText(c.nombreCompleto());
+                } else if (index == -1) {
+                    setText(placeHolderCliente);
+                    setForeground(UIManager.getColor("TextField.placeholderForeground"));
+                }
+                return this;
             }
-            return this;
-          }
         });
 
-    var tipos =
-        tipoController.getTipos().stream()
-            .filter(TipoMembresiaListadoDTO::getActivo)
-            .toArray(TipoMembresiaListadoDTO[]::new);
-    cmbTipoMembresia = new JComboBox<>(tipos);
-    cmbTipoMembresia.setRenderer(
-        new DefaultListCellRenderer() {
-          @Override
-          public Component getListCellRendererComponent(
-              JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            if (value instanceof TipoMembresiaListadoDTO tipo) {
-              setText(
-                  tipo.getNombre()
-                      + " - $"
-                      + tipo.getCosto()
-                      + " ("
-                      + tipo.getDuracionDias()
-                      + " días)");
+
+        var tipos = tipoController.getTipos().stream()
+                .filter(TipoMembresiaListadoDTO::getActivo)
+                .toArray(TipoMembresiaListadoDTO[]::new);
+
+        cmbTipoMembresia = new JComboBox<>(tipos);
+        cmbTipoMembresia.setSelectedIndex(-1);
+        String placeHolderPlan = "Seleccione un plan de membresia...";
+        cmbTipoMembresia.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, placeHolderPlan);
+
+        cmbTipoMembresia.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof TipoMembresiaListadoDTO t) {
+                    setText(t.getNombre());
+                } else if (index == -1) {
+                    setText(placeHolderPlan);
+                    setForeground(UIManager.getColor("TextField.placeholderForeground"));
+                }
+                return this;
             }
-            return this;
-          }
         });
 
-    cmbTipoMembresia.addActionListener(e -> calcularFechaFin());
+        cmbTipoMembresia.addActionListener(e -> {
+            actualizarPrecio();
+            calcularFechaFin();
+        });
 
-    dateFechaInicio = new DatePicker();
-    dateFechaInicio.setEditor(new JFormattedTextField());
-    dateFechaInicio.setSelectedDate(LocalDate.now());
-    dateFechaInicio.addDateSelectionListener(e -> calcularFechaFin());
+        dateFechaInicio = new DatePicker();
+        dateFechaInicio.setEditor(null);
+        dateFechaInicio.addDateSelectionListener(e -> calcularFechaFin());
 
-    dateFechaFin = new DatePicker();
-    dateFechaFin.setEditor(new JFormattedTextField());
-    dateFechaFin.setEnabled(false);
+        dateFechaFin = new DatePicker();
+        dateFechaFin.setEditor(null);
 
-    txtPrecioPagado = new JTextField();
-    txtObservaciones = new JTextArea(3, 20);
-    txtObservaciones.setLineWrap(true);
-    txtObservaciones.setWrapStyleWord(true);
-  }
+        txtPrecioPagado = new JTextField();
+        txtPrecioPagado.setEditable(false);
+        txtPrecioPagado.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "$ 0.00");
 
-  private void applyStyles() {
-    txtPrecioPagado.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "0.00");
-    txtObservaciones.putClientProperty(
-        FlatClientProperties.PLACEHOLDER_TEXT, "Observaciones adicionales (opcional)");
-  }
+        txtObservaciones = new JTextArea(3, 20);
+        txtObservaciones.setLineWrap(true);
+        txtObservaciones.setWrapStyleWord(true);
+        txtObservaciones.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Escriba aquí notas adicionales o condiciones especiales...");
 
-  private void buildForm() {
-    createTitle("Información de la Membresía");
-
-    contentPanel.add(new JLabel("Cliente *"));
-    contentPanel.add(cmbCliente);
-
-    contentPanel.add(new JLabel("Tipo de Membresía *"));
-    contentPanel.add(cmbTipoMembresia);
-
-    contentPanel.add(new JLabel("Fecha de Inicio *"));
-    contentPanel.add(dateFechaInicio);
-
-    contentPanel.add(new JLabel("Fecha de Fin"));
-    contentPanel.add(dateFechaFin);
-
-    contentPanel.add(new JLabel("Precio Pagado *"));
-    contentPanel.add(txtPrecioPagado);
-
-    contentPanel.add(new JLabel("Observaciones"));
-    JScrollPane scrollObs = new JScrollPane(txtObservaciones);
-    scrollObs.setPreferredSize(new Dimension(0, 80));
-    contentPanel.add(scrollObs);
-
-    contentPanel.add(new JLabel(" "), "gapy 10");
-    contentPanel.add(new JLabel("* Campos obligatorios"), "gapy 0");
-
-    calcularFechaFin();
-    actualizarPrecio();
-  }
-
-  private void createTitle(String title) {
-    JLabel lblTitle = new JLabel(title);
-    lblTitle.putClientProperty(FlatClientProperties.STYLE, "font:bold +2");
-    contentPanel.add(lblTitle, "gapy 10 5");
-  }
-
-  private void calcularFechaFin() {
-    LocalDate fechaInicio = dateFechaInicio.getSelectedDate();
-    TipoMembresiaListadoDTO tipoSeleccionado =
-        (TipoMembresiaListadoDTO) cmbTipoMembresia.getSelectedItem();
-
-    if (fechaInicio != null && tipoSeleccionado != null) {
-      LocalDate fechaFin = fechaInicio.plusDays(tipoSeleccionado.getDuracionDias());
-      dateFechaFin.setSelectedDate(fechaFin);
-      actualizarPrecio();
+        errCliente = createErrorLabel();
+        errTipo = createErrorLabel();
+        errFecha = createErrorLabel();
     }
-  }
 
-  private void actualizarPrecio() {
-    TipoMembresiaListadoDTO tipoSeleccionado =
-        (TipoMembresiaListadoDTO) cmbTipoMembresia.getSelectedItem();
+    private void buildForm() {
+        contentPanel.add(new JLabel("Cliente *"), "gapy 5 0");
+        contentPanel.add(cmbCliente);
+        contentPanel.add(errCliente, "hidemode 3");
 
-    if (tipoSeleccionado != null) {
-      txtPrecioPagado.setText(tipoSeleccionado.getCosto().toString());
+        contentPanel.add(new JLabel("Tipo de Membresía *"), "gapy 5 0");
+        contentPanel.add(cmbTipoMembresia);
+        contentPanel.add(errTipo, "hidemode 3");
+
+        contentPanel.add(new JLabel("Fecha de Inicio *"), "gapy 10 0");
+        contentPanel.add(dateFechaInicio);
+
+        contentPanel.add(new JLabel("Fecha de Fin *"), "gapy 10 0");
+        contentPanel.add(dateFechaFin);
+        contentPanel.add(errFecha, "hidemode 3");
+
+        contentPanel.add(new JLabel("Precio Pagado"), "gapy 10 0");
+        contentPanel.add(txtPrecioPagado);
+
+        contentPanel.add(new JLabel("Observaciones"), "gapy 10 0");
+        contentPanel.add(new JScrollPane(txtObservaciones), "h 80!");
     }
-  }
 
-  public boolean validateForm() {
-    hideError();
-
-    try {
-      if (cmbCliente.getSelectedItem() == null) {
-        showErrorMessage("Debe seleccionar un cliente");
-        cmbCliente.requestFocus();
-        return false;
-      }
-
-      if (cmbTipoMembresia.getSelectedItem() == null) {
-        showErrorMessage("Debe seleccionar un tipo de membresía");
-        cmbTipoMembresia.requestFocus();
-        return false;
-      }
-
-      if (dateFechaInicio.getSelectedDate() == null) {
-        showErrorMessage("La fecha de inicio es obligatoria");
-        return false;
-      }
-
-      LocalDate fechaInicio = dateFechaInicio.getSelectedDate();
-      LocalDate hoy = LocalDate.now();
-
-      if (fechaInicio.isBefore(hoy)) {
-        showErrorMessage(
-            "La fecha de inicio no puede ser anterior a la fecha de hoy (" + hoy + ")");
-        return false;
-      }
-
-      if (dateFechaFin.getSelectedDate() == null) {
-        showErrorMessage("La fecha de fin es obligatoria");
-        return false;
-      }
-
-      if (txtPrecioPagado.getText().trim().isEmpty()) {
-        showErrorMessage("El precio pagado es obligatorio");
-        txtPrecioPagado.requestFocus();
-        return false;
-      }
-
-      try {
-        BigDecimal precio = new BigDecimal(txtPrecioPagado.getText().trim());
-        if (precio.compareTo(BigDecimal.ZERO) <= 0) {
-          showErrorMessage("El precio debe ser mayor a 0");
-          txtPrecioPagado.requestFocus();
-          return false;
+    private void calcularFechaFin() {
+        LocalDate inicio = dateFechaInicio.getSelectedDate();
+        TipoMembresiaListadoDTO tipo = (TipoMembresiaListadoDTO) cmbTipoMembresia.getSelectedItem();
+        if (inicio != null && tipo != null) {
+            dateFechaFin.setSelectedDate(inicio.plusDays(tipo.getDuracionDias()));
+            validateForm();
         }
-      } catch (NumberFormatException e) {
-        showErrorMessage("El precio no es válido");
-        txtPrecioPagado.requestFocus();
-        return false;
-      }
-
-      return true;
-    } catch (Exception e) {
-      showErrorMessage("Error al validar el formulario: " + e.getMessage());
-      return false;
     }
-  }
 
-  public boolean saveMembresia() {
-    try {
-      MembresiaCreateDTO dto = buildDTOFromForm();
-      controller.createMembresia(dto);
-
-      JOptionPane.showMessageDialog(
-          this, "Membresía registrada exitosamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-
-      clearForm();
-      return true;
-
-    } catch (IllegalArgumentException e) {
-      showErrorMessage(e.getMessage());
-      return false;
-    } catch (Exception e) {
-      LOGGER.severe("Error al guardar la membresía: " + e.getMessage());
-      showErrorMessage("Error al guardar la membresía: " + e.getMessage());
-      return false;
+    private void actualizarPrecio() {
+        TipoMembresiaListadoDTO tipo = (TipoMembresiaListadoDTO) cmbTipoMembresia.getSelectedItem();
+        if (tipo != null) {
+            txtPrecioPagado.setText(tipo.getCosto().toString());
+        }
     }
-  }
 
-  private MembresiaCreateDTO buildDTOFromForm() {
-    ClienteListadoDTO cliente = (ClienteListadoDTO) cmbCliente.getSelectedItem();
-    TipoMembresiaListadoDTO tipo = (TipoMembresiaListadoDTO) cmbTipoMembresia.getSelectedItem();
+    public boolean validateForm() {
+        boolean valid = true;
+        errCliente.setVisible(false);
+        errTipo.setVisible(false);
+        errFecha.setVisible(false);
 
-    return new MembresiaCreateDTO(
-        cliente.id(),
-        tipo.getId(),
-        null,
-        dateFechaInicio.getSelectedDate(),
-        dateFechaFin.getSelectedDate(),
-        new BigDecimal(txtPrecioPagado.getText().trim()),
-        txtObservaciones.getText().trim().isEmpty() ? null : txtObservaciones.getText().trim());
-  }
+        if (cmbCliente.getSelectedItem() == null) {
+            errCliente.setText("Debe seleccionar un cliente");
+            errCliente.setVisible(true);
+            valid = false;
+        }
+        if (cmbTipoMembresia.getSelectedItem() == null) {
+            errTipo.setText("Debe seleccionar un tipo de membresía");
+            errTipo.setVisible(true);
+            valid = false;
+        }
 
-  private void clearForm() {
-    cmbCliente.setSelectedIndex(0);
-    cmbTipoMembresia.setSelectedIndex(0);
-    dateFechaInicio.setSelectedDate(LocalDate.now());
-    txtPrecioPagado.setText("");
-    txtObservaciones.setText("");
-    hideError();
-    calcularFechaFin();
-  }
+        LocalDate inicio = dateFechaInicio.getSelectedDate();
+        LocalDate fin = dateFechaFin.getSelectedDate();
+        if (inicio != null && fin != null && fin.isBefore(inicio)) {
+            errFecha.setText("La Fecha de Fin no debe ser anterior a la de Fecha de Inicio");
+            errFecha.setVisible(true);
+            valid = false;
+        }
 
-  private void showErrorMessage(String message) {
-    lblError.setText(message);
-    lblError.setVisible(true);
-  }
+        contentPanel.revalidate();
+        return valid;
+    }
 
-  private void hideError() {
-    lblError.setVisible(false);
-  }
+    public boolean saveMembresia() {
+        if (!validateForm()) return false;
+        try {
+            ClienteListadoDTO cliente = (ClienteListadoDTO) cmbCliente.getSelectedItem();
+            TipoMembresiaListadoDTO tipo = (TipoMembresiaListadoDTO) cmbTipoMembresia.getSelectedItem();
 
-  public ButtonOutline getBtnGuardar() {
-    return btnGuardar;
-  }
+            MembresiaCreateDTO dto = new MembresiaCreateDTO(
+                    cliente.id(),
+                    tipo.getId(),
+                    null,
+                    dateFechaInicio.getSelectedDate(),
+                    dateFechaFin.getSelectedDate(),
+                    new BigDecimal(txtPrecioPagado.getText()),
+                    txtObservaciones.getText()
+            );
 
-  public ButtonOutline getBtnCancelar() {
-    return btnCancelar;
-  }
+            controller.createMembresia(dto);
+            return true;
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error al guardar: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+    }
+
+    private JLabel createErrorLabel() {
+        JLabel label = new JLabel();
+        label.setForeground(new Color(244, 67, 54));
+        label.setFont(label.getFont().deriveFont(11f));
+        label.setVisible(false);
+        return label;
+    }
+
+    private JPanel createButtonPanel() {
+        JPanel panel = new JPanel(new MigLayout("insets 15 20 20 20", "[grow][120][120]"));
+        btnCancelar = new ButtonOutline("Cancelar");
+        btnGuardar = new ButtonOutline("Guardar");
+
+        btnGuardar.putClientProperty(FlatClientProperties.STYLE, "foreground:#4CAF50;font:bold +1");
+
+        panel.add(new JLabel(), "grow");
+        panel.add(btnCancelar, "center");
+        panel.add(btnGuardar, "center");
+        return panel;
+    }
+
+    public ButtonOutline getBtnGuardar() {
+        return btnGuardar;
+    }
+
+    public ButtonOutline getBtnCancelar() {
+        return btnCancelar;
+    }
 }

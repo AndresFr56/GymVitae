@@ -4,13 +4,15 @@ import gym.vitae.controller.BeneficiosController;
 import gym.vitae.controller.TiposMembresiaController;
 import gym.vitae.model.dtos.membresias.TipoMembresiaListadoDTO;
 import gym.vitae.views.components.tables.BaseTablePanel;
-import gym.vitae.views.components.tables.TableAction; // <-- ASUMO que esta clase existe
-import java.util.List;
-import javax.swing.JOptionPane;
+import gym.vitae.views.components.tables.TableAction;
 import raven.modal.ModalDialog;
 import raven.modal.component.SimpleModalBorder;
 import raven.modal.option.Location;
 import raven.modal.option.Option;
+
+import javax.swing.*;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class TipoMembresiaTablePanel extends BaseTablePanel<TipoMembresiaListadoDTO> {
 
@@ -166,18 +168,35 @@ public class TipoMembresiaTablePanel extends BaseTablePanel<TipoMembresiaListado
 
   @Override
   protected void onDeleteEntities(List<TipoMembresiaListadoDTO> tipos) {
+    List<TipoMembresiaListadoDTO> yaInactivos = tipos.stream()
+            .filter(t -> !t.getActivo())
+            .collect(Collectors.toList());
+
+    if (!yaInactivos.isEmpty()) {
+      JOptionPane.showMessageDialog(
+              this,
+              "Este tipo de membresia ya esta inactiva",
+              "Aviso",
+              JOptionPane.WARNING_MESSAGE);
+
+      if (yaInactivos.size() == tipos.size()) return;
+    }
+
+    List<TipoMembresiaListadoDTO> activos = tipos.stream()
+            .filter(TipoMembresiaListadoDTO::getActivo)
+            .collect(Collectors.toList());
 
     int confirm =
         JOptionPane.showConfirmDialog(
             this,
-            "¿Seguro que deseas inactivar " + tipos.size() + " tipo(s)?",
+                "¿Seguro que deseas inactivar " + activos.size() + " tipo(s)?",
             "Confirmar eliminación",
             JOptionPane.YES_NO_OPTION,
             JOptionPane.WARNING_MESSAGE);
 
     if (confirm != JOptionPane.YES_OPTION) return;
 
-    for (var t : tipos) {
+    for (var t : activos) {
       controller.deleteTipo(t.getId());
     }
 

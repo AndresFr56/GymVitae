@@ -8,6 +8,7 @@ import gym.vitae.model.dtos.membresias.MembresiaCreateDTO;
 import gym.vitae.model.dtos.membresias.MembresiaDetalleDTO;
 import gym.vitae.model.dtos.membresias.MembresiaListadoDTO;
 import gym.vitae.model.dtos.membresias.MembresiaUpdateDTO;
+
 import java.util.List;
 
 public class MembresiaMapper {
@@ -90,6 +91,9 @@ public class MembresiaMapper {
     }
     if (dto.getObservaciones() != null) {
       membresia.setObservaciones(dto.getObservaciones());
+    }
+    if (dto.getPrecioPagado() != null) {
+      membresia.setPrecioPagado(dto.getPrecioPagado());
     }
   }
 
