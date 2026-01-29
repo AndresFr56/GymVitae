@@ -21,6 +21,8 @@ public class Main extends JFrame {
   }
 
   public static void main(String[] args) {
+    System.setProperty("file.encoding", "UTF-8");
+    System.setProperty("client.encoding.override", "UTF-8");
 
     Runtime.getRuntime()
         .addShutdownHook(
