@@ -1,3 +1,7 @@
+SET NAMES utf8mb4;
+SET CHARACTER SET utf8mb4;
+SET character_set_connection=utf8mb4;
+
 SET
     SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 
@@ -859,7 +863,7 @@ VALUES (1, 2, 1, '2025-11-01', '2025-11-30', 50.00, 'ACTIVA'),
        (3, 5, 3, '2025-09-01', '2026-08-31', 480.00, 'ACTIVA'),
        (4, 2, 4, '2025-11-05', '2025-12-05', 50.00, 'ACTIVA'),
        (5, 1, 5, '2025-11-10', '2025-12-10', 35.00, 'ACTIVA');
-  
+
 
 -- ============================================
 -- VISTAS
