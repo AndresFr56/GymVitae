@@ -5,14 +5,13 @@ import gym.vitae.controller.TiposMembresiaController;
 import gym.vitae.model.dtos.membresias.TipoMembresiaListadoDTO;
 import gym.vitae.views.components.tables.BaseTablePanel;
 import gym.vitae.views.components.tables.TableAction;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.swing.*;
 import raven.modal.ModalDialog;
 import raven.modal.component.SimpleModalBorder;
 import raven.modal.option.Location;
 import raven.modal.option.Option;
-
-import javax.swing.*;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class TipoMembresiaTablePanel extends BaseTablePanel<TipoMembresiaListadoDTO> {
 

@@ -143,8 +143,7 @@ public class RegisterCliente extends JPanel {
     txtApellidos.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Apellidos del cliente");
     txtCedula.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "10 dígitos");
     txtTelefono.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "10 dígitos");
-    txtEmail.putClientProperty(
-        FlatClientProperties.PLACEHOLDER_TEXT, "correo@ejemplo.com (opcional)");
+    txtEmail.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "correo@ejemplo.com");
     txtDireccion.putClientProperty(
         FlatClientProperties.PLACEHOLDER_TEXT, "Dirección completa (opcional)");
   }
@@ -264,7 +263,7 @@ public class RegisterCliente extends JPanel {
     contentPanel.add(new JLabel("Teléfono *"));
     contentPanel.add(txtTelefono);
 
-    contentPanel.add(new JLabel("Email"));
+    contentPanel.add(new JLabel("Email *"));
     contentPanel.add(txtEmail);
 
     contentPanel.add(new JLabel("Dirección"));

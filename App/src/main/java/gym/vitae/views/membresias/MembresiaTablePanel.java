@@ -7,16 +7,15 @@ import gym.vitae.model.dtos.membresias.MembresiaListadoDTO;
 import gym.vitae.model.dtos.membresias.TipoMembresiaListadoDTO;
 import gym.vitae.model.enums.EstadoMembresia;
 import gym.vitae.views.components.tables.BaseTablePanel;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.swing.*;
 import net.miginfocom.swing.MigLayout;
 import raven.modal.ModalDialog;
 import raven.modal.component.SimpleModalBorder;
 import raven.modal.option.Location;
 import raven.modal.option.Option;
-
-import javax.swing.*;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class MembresiaTablePanel extends BaseTablePanel<MembresiaListadoDTO> {
 

@@ -277,7 +277,7 @@ public class UpdateCliente extends JPanel {
     contentPanel.add(new JLabel("Teléfono *"));
     contentPanel.add(txtTelefono);
 
-    contentPanel.add(new JLabel("Email"));
+    contentPanel.add(new JLabel("Email *"));
     contentPanel.add(txtEmail);
 
     contentPanel.add(new JLabel("Dirección"));

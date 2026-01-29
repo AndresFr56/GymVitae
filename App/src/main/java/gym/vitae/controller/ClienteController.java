@@ -145,7 +145,7 @@ public class ClienteController extends BaseController {
   private String generateCodigoCliente() {
     int year = java.time.Year.now().getValue();
     int nextSecuencial = clienteRepository.getNextCodigoSecuencial(year);
-    return String.format("CLI-%d%05d", year, nextSecuencial);
+    return String.format("CLI-%d%06d", year, nextSecuencial);
   }
 
   /** Obtiene un código de cliente generado automáticamente. */
@@ -162,8 +162,8 @@ public class ClienteController extends BaseController {
     validateApellidos(dto.apellidos());
     validateCedula(dto.cedula());
     validateTelefono(dto.telefono());
-    validateEmailOpcional(dto.email());
-    validateDireccion(dto.direccion());
+    validateEmail(dto.email());
+    validateOptionalString(dto.direccion(), "La dirección", 200);
     validateFechaNacimiento(dto.fechaNacimiento());
     validateOptionalString(dto.contactoEmergencia(), "El contacto de emergencia", 100);
     validateTelefonoOpcional(dto.telefonoEmergencia(), "El teléfono de emergencia");
@@ -182,8 +182,8 @@ public class ClienteController extends BaseController {
     validateApellidos(dto.apellidos());
     validateCedula(dto.cedula());
     validateTelefono(dto.telefono());
-    validateEmailOpcional(dto.email());
-    validateDireccion(dto.direccion());
+    validateEmail(dto.email());
+    validateOptionalString(dto.direccion(), "La dirección", 200);
     validateFechaNacimiento(dto.fechaNacimiento());
     validateOptionalString(dto.contactoEmergencia(), "El contacto de emergencia", 100);
     validateTelefonoOpcional(dto.telefonoEmergencia(), "El teléfono de emergencia");

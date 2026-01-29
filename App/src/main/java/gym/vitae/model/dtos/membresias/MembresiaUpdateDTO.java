@@ -12,8 +12,12 @@ public class MembresiaUpdateDTO {
   private String observaciones;
   private BigDecimal precioPagado;
 
-  public MembresiaUpdateDTO(Integer tipoMembresiaId, EstadoMembresia estado,
-                            LocalDate fechaFin, String observaciones, BigDecimal precioPagado) {
+  public MembresiaUpdateDTO(
+      Integer tipoMembresiaId,
+      EstadoMembresia estado,
+      LocalDate fechaFin,
+      String observaciones,
+      BigDecimal precioPagado) {
     this.tipoMembresiaId = tipoMembresiaId;
     this.estado = estado;
     this.fechaFin = fechaFin;
