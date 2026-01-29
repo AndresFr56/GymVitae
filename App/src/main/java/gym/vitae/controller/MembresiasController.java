@@ -188,11 +188,16 @@ public class MembresiasController extends BaseController {
       throw new IllegalArgumentException("Los datos actualizados no pueden ser nulos");
     }
 
-    Membresia membresia = membresiaRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Membresía no encontrada con ID: " + id));
+    Membresia membresia =
+        membresiaRepository
+            .findById(id)
+            .orElseThrow(
+                () -> new IllegalArgumentException("Membresía no encontrada con ID: " + id));
 
     if (dto.getTipoMembresiaId() != null) {
-      TiposMembresia nuevoTipo = tiposMembresiaRepository.findById(dto.getTipoMembresiaId())
+      TiposMembresia nuevoTipo =
+          tiposMembresiaRepository
+              .findById(dto.getTipoMembresiaId())
               .orElseThrow(() -> new IllegalArgumentException("Tipo de membresía no encontrado"));
       membresia.setTipoMembresia(nuevoTipo);
     }
@@ -200,8 +205,10 @@ public class MembresiasController extends BaseController {
     MembresiaMapper.updateEntity(membresia, dto);
     membresiaRepository.update(membresia);
 
-    return membresiaRepository.findDetalleById(id)
-            .orElseThrow(() -> new IllegalStateException("Error al recuperar la membresía actualizada"));
+    return membresiaRepository
+        .findDetalleById(id)
+        .orElseThrow(
+            () -> new IllegalStateException("Error al recuperar la membresía actualizada"));
   }
 
   /**
@@ -213,8 +220,11 @@ public class MembresiasController extends BaseController {
   public void cancelarMembresia(int id) {
     validateId(id);
 
-    Membresia membresia = membresiaRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Membresía no encontrada con ID: " + id));
+    Membresia membresia =
+        membresiaRepository
+            .findById(id)
+            .orElseThrow(
+                () -> new IllegalArgumentException("Membresía no encontrada con ID: " + id));
 
     // Cambiamos el estado a CANCELADO (Eliminación lógica tipo Netflix)
     membresia.setEstado(gym.vitae.model.enums.EstadoMembresia.CANCELADA);
@@ -239,21 +249,21 @@ public class MembresiasController extends BaseController {
   }
 
   /**
-   * Cambia el estado de una membresía de forma específica.
-   * Útil para la lógica de suspensión.
+   * Cambia el estado de una membresía de forma específica. Útil para la lógica de suspensión.
    *
-   * @param id          ID de la membresía.
+   * @param id ID de la membresía.
    * @param nuevoEstado El estado al que se desea cambiar.
    */
   public void cambiarEstado(int id, gym.vitae.model.enums.EstadoMembresia nuevoEstado) {
     validateId(id);
 
-    Membresia membresia = membresiaRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Membresía no encontrada con ID: " + id));
+    Membresia membresia =
+        membresiaRepository
+            .findById(id)
+            .orElseThrow(
+                () -> new IllegalArgumentException("Membresía no encontrada con ID: " + id));
 
     membresia.setEstado(nuevoEstado);
     membresiaRepository.update(membresia);
   }
-
-
 }

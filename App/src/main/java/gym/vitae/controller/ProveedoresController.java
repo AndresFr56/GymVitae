@@ -15,16 +15,12 @@ import gym.vitae.model.dtos.inventario.ProveedorUpdateDTO;
 import gym.vitae.repositories.ProveedoreRepository;
 import java.util.List;
 
-/**
- * Controlador que gestionara la lógica de proveedores. Hereda del base controller
- */
+/** Controlador que gestionara la lógica de proveedores. Hereda del base controller */
 public class ProveedoresController extends BaseController {
 
   private final ProveedoreRepository proveedorRepository;
 
-  /**
-   * Constructor por defecto que inicializa repositorio.
-   */
+  /** Constructor por defecto que inicializa repositorio. */
   public ProveedoresController() {
     super();
     this.proveedorRepository = getRepository(ProveedoreRepository.class);

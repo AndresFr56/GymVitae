@@ -8,7 +8,6 @@ import gym.vitae.model.dtos.membresias.MembresiaCreateDTO;
 import gym.vitae.model.dtos.membresias.MembresiaDetalleDTO;
 import gym.vitae.model.dtos.membresias.MembresiaListadoDTO;
 import gym.vitae.model.dtos.membresias.MembresiaUpdateDTO;
-
 import java.util.List;
 
 public class MembresiaMapper {

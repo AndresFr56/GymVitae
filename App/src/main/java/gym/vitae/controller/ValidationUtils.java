@@ -72,7 +72,7 @@ public final class ValidationUtils {
     if (email == null || email.trim().isEmpty()) {
       throw new IllegalArgumentException("El email es obligatorio");
     }
-    if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+    if (!email.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
       throw new IllegalArgumentException("El formato del email no es válido");
     }
     if (email.length() > 100) {

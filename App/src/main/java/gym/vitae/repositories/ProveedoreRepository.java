@@ -109,7 +109,7 @@ public record ProveedoreRepository(DBConnectionManager db) implements IRepositor
    * Obtiene proveedores con paginación.
    *
    * @param offset posición inicial
-   * @param limit  cantidad de registros
+   * @param limit cantidad de registros
    * @return lista de proveedores
    */
   @Override
@@ -199,7 +199,7 @@ public record ProveedoreRepository(DBConnectionManager db) implements IRepositor
    * Obtiene proveedores paginados como DTOs de listado.
    *
    * @param offset posición inicial
-   * @param limit  cantidad de registros
+   * @param limit cantidad de registros
    * @return lista de ProveedorListadoDTO
    */
   public List<ProveedorListadoDTO> findAllListadoPaginated(int offset, int limit) {
@@ -252,9 +252,9 @@ public record ProveedoreRepository(DBConnectionManager db) implements IRepositor
    * Filtrar por nombre o correo del proveedor.
    *
    * @param searchText nombre, correo o codigo
-   * @param estado     true (activo) o false (inactivo)
-   * @param offset     posición inicial
-   * @param limit      cantidad de registros
+   * @param estado true (activo) o false (inactivo)
+   * @param offset posición inicial
+   * @param limit cantidad de registros
    * @return lista filtrada de proveedores
    */
   public List<ProveedorListadoDTO> findAllWithFiltersListado(
@@ -297,7 +297,7 @@ public record ProveedoreRepository(DBConnectionManager db) implements IRepositor
    * Cuenta proveedores con filtros opcionales.
    *
    * @param searchText Texto de búsqueda en nombre/email (puede ser null)
-   * @param estado     Estado activo para filtrar (puede ser null)
+   * @param estado Estado activo para filtrar (puede ser null)
    * @return Cantidad de proveedores que coinciden con los filtros
    */
   public long countWithFilters(String searchText, Boolean estado) {
