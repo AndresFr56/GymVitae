@@ -3,7 +3,6 @@ package gym.vitae.controller;
 import static gym.vitae.controller.ValidationUtils.validateDireccion;
 import static gym.vitae.controller.ValidationUtils.validateEmail;
 import static gym.vitae.controller.ValidationUtils.validateId;
-import static gym.vitae.controller.ValidationUtils.validateNombres;
 import static gym.vitae.controller.ValidationUtils.validateRequiredString;
 import static gym.vitae.controller.ValidationUtils.validateTelefono;
 
@@ -16,12 +15,16 @@ import gym.vitae.model.dtos.inventario.ProveedorUpdateDTO;
 import gym.vitae.repositories.ProveedoreRepository;
 import java.util.List;
 
-/** Controlador que gestionara la lógica de proveedores. Hereda del base controller */
+/**
+ * Controlador que gestionara la lógica de proveedores. Hereda del base controller
+ */
 public class ProveedoresController extends BaseController {
 
   private final ProveedoreRepository proveedorRepository;
 
-  /** Constructor por defecto que inicializa repositorio. */
+  /**
+   * Constructor por defecto que inicializa repositorio.
+   */
   public ProveedoresController() {
     super();
     this.proveedorRepository = getRepository(ProveedoreRepository.class);
@@ -67,6 +70,7 @@ public class ProveedoresController extends BaseController {
    */
   public ProveedorDetalleDTO createProveedor(ProveedorCreateDTO proveedorCreateDto) {
     validateProveedorCreate(proveedorCreateDto);
+    validateDuplicado(proveedorCreateDto.getNombre(), null);
 
     // Código del proveedor
     String codigoProveedor = generateCodigoProveedor();
@@ -92,6 +96,7 @@ public class ProveedoresController extends BaseController {
   public ProveedorDetalleDTO updateProveedor(int id, ProveedorUpdateDTO proveedorUpdateDto) {
     validateId(id);
     validateProveedorUpdate(proveedorUpdateDto);
+    validateDuplicado(proveedorUpdateDto.getNombre(), id);
 
     // Carga el proveedor existente
     Proveedore proveedor =
@@ -160,7 +165,7 @@ public class ProveedoresController extends BaseController {
       throw new IllegalArgumentException("Los datos del proveedor no pueden estar vacios");
     }
 
-    validateNombres(proveedorDto.getNombre());
+    validateNombreProveedor(proveedorDto.getNombre());
     validateContacto(proveedorDto.getContacto());
     validateTelefono(proveedorDto.getTelefono());
     validateEmail(proveedorDto.getEmail());
@@ -177,11 +182,37 @@ public class ProveedoresController extends BaseController {
       throw new IllegalArgumentException("Los datos del proveedor no pueden estar vacios");
     }
 
-    validateNombres(proveedorUpdateDto.getNombre());
+    validateNombreProveedor(proveedorUpdateDto.getNombre());
     validateContacto(proveedorUpdateDto.getContacto());
     validateTelefono(proveedorUpdateDto.getTelefono());
     validateEmail(proveedorUpdateDto.getEmail());
     validateDireccion(proveedorUpdateDto.getDireccion());
+  }
+
+  private void validateNombreProveedor(String nombre) {
+    if (nombre == null || nombre.trim().isEmpty()) {
+      throw new IllegalArgumentException("El nombre del proveedor es obligatorio");
+    }
+    if (nombre.length() > 100) {
+      throw new IllegalArgumentException("El nombre del proveedor no puede exceder 100 caracteres");
+    }
+    if (!nombre.matches("^[a-zA-ZÀ-ÿ\\u00f1\\u00d10-9\\s.,&-]+$")) {
+      throw new IllegalArgumentException(
+          "El nombre del proveedor contiene caracteres inválidos (solo se permiten letras, números, puntos, comas y guiones)");
+    }
+  }
+
+  /**
+   * Valida que no exista duplicidad de nombres en la base de datos.
+   *
+   * @param nombre Nombre del proveedor.
+   * @param idExcluir ID del proveedor actual (null si es creación).
+   */
+  private void validateDuplicado(String nombre, Integer idExcluir) {
+    if (proveedorRepository.existsByNombre(nombre, idExcluir)) {
+      throw new IllegalArgumentException(
+          "Ya existe un proveedor registrado con el nombre: " + nombre);
+    }
   }
 
   /**
