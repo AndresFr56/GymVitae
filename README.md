@@ -1,6 +1,7 @@
 <div align="center">
 
 ## GymVitae - Sistema de gestion de Gimnasio Open Source
+<img src=".github/assets/image.png" alt="GymVitae App" />
 
 ![Stargazers]
 [![License]](LICENSE)
@@ -69,7 +70,7 @@ Para una mejor experiencia instale [MAVEN](https://maven.apache.org/install.html
 ```sh
 cd App && mvn clean install
 mvn clean package
-mvn exec:java -Dexec.mainClass="com.gymvitae.Main"
+mvn exec:java -Dexec.mainClass="gym.vitae.Main"
 
 ```
 
@@ -100,7 +101,7 @@ pmd -d ./App/main/java -R rulesets/java/quickstart.xml -f html -r report.html
 
 ### SonarQube
 
-Para ejecutar SonarQube en el proyecto, asegúrese de tener SonarQube instalado y en ejecución p utilizar la extension de SonarQube.
+Para ejecutar SonarQube en el proyecto y ver las metricas de calidad, asegúrese de tener SonarQube instalado y en ejecución p utilizar la extension de SonarQube. (Este paso es opcional)
 
 ## 🤝 Contribuciones
 
