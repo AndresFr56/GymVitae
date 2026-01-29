@@ -2,9 +2,9 @@ name: Java-Maven-Workflow
 
 on:
   push:
-    branches: ["main", "testing"]
+    branches: ['main', 'testing']
   pull_request:
-    branches: ["main"]
+    branches: ['main']
 
 jobs:
   dependencies-run-tests:
@@ -14,8 +14,8 @@ jobs:
       - name: defined sdk
         uses: actions/setup-java@v4
         with:
-          java-version: "21"
-          distribution: "temurin"
+          java-version: '21'
+          distribution: 'temurin'
           architecture: x64
           cache: maven
 
@@ -58,12 +58,20 @@ jobs:
       - name: show download file jar
         run: ls -R ./deploy
 
+      - name: List downloaded files
+        run: |
+          echo "=== Archivos descargados ==="
+          ls -lhR ./deploy
+          echo ""
+          echo "=== Verificando ejecutabilidad del JAR ==="
+          java -jar ./deploy/*.jar --version 2>&1 || echo "JAR no ejecutable directamente"
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: latest
-          name: Latest Release
-          body: "Automated release from main branch."
+          tag_name: v${{ github.run_number }}
+          name: Release v${{ github.run_number }}
+          body: 'Automated release from main branch.'
           files: ./deploy/*.jar # Matches the path from the download step
           draft: false
           prerelease: false
