@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<persistence version="2.2" xmlns="http://xmlns.jcp.org/xml/ns/persistence">
+<persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd"
+             >
     <persistence-unit name="gym_vitaePU" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <class>gym.vitae.model.Cargo</class>
@@ -25,7 +28,8 @@
 
         <properties>
             <property name="javax.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
-            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/gym_system?useUnicode=true&amp;characterEncoding=UTF-8&amp;characterSetResults=UTF-8"/>
+            <property name="javax.persistence.jdbc.url"
+                      value="jdbc:mysql://localhost:3306/gym_system?useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=America/Guayaquil"/>
             <property name="javax.persistence.jdbc.user" value="gym_admin"/>
             <property name="javax.persistence.jdbc.password" value="gym_pass_2025"/>
 
