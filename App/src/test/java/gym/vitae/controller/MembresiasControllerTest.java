@@ -1,15 +1,14 @@
 package gym.vitae.controller;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import gym.vitae.model.dtos.membresias.MembresiaCreateDTO;
 import gym.vitae.model.dtos.membresias.MembresiaUpdateDTO;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class MembresiasControllerTest {
 

@@ -36,8 +36,8 @@ class ProveedoresControllerTest {
     // Utilizado para llamar metodo privado del controlador
     private void invokeValidateProveedorCreate(ProveedorCreateDTO dto) throws Exception {
       Method m =
-          ProveedoresController.class.getDeclaredMethod("validateProveedorCreate",
-              ProveedorCreateDTO.class);
+          ProveedoresController.class.getDeclaredMethod(
+              "validateProveedorCreate", ProveedorCreateDTO.class);
       m.setAccessible(true);
       m.invoke(proveedoresController, dto);
     }
@@ -63,10 +63,10 @@ class ProveedoresControllerTest {
     @ParameterizedTest(name = "RE-CPI-NOMBRES-[{index}]")
     @ValueSource(
         strings = {
-            "",
-            "   ",
-            "Lorem Ipsum es simplemente el texto de relleno de las imprentas y archivos de texto. "
-                + "Lorem Ipsum ha sido el texto de relleno estándar de las industrias desde el año 1500, cuando un impresor."
+          "",
+          "   ",
+          "Lorem Ipsum es simplemente el texto de relleno de las imprentas y archivos de texto. "
+              + "Lorem Ipsum ha sido el texto de relleno estándar de las industrias desde el año 1500, cuando un impresor."
         })
     @DisplayName("RE-CPI: Nombres Inválidos (Caracteres prohibidos)")
     void RE_CPI_NOMBRES(String nombreInvalido) {
@@ -79,8 +79,7 @@ class ProveedoresControllerTest {
               "Avenida Barcelona");
       assertThrows(
           IllegalArgumentException.class,
-          () -> proveedoresController.createProveedor(dtoProveedor)
-      );
+          () -> proveedoresController.createProveedor(dtoProveedor));
     }
 
     // Caso de prueba 3 - Contacto no cumple con las validaciones
@@ -88,10 +87,10 @@ class ProveedoresControllerTest {
     @ParameterizedTest(name = "RE-CPI-CONTACTO-[{index}]")
     @ValueSource(
         strings = {
-            "",
-            "   ",
-            "Lorem Ipsum es simplemente el texto de relleno de las imprentas y archivos de texto. "
-                + "Lorem Ipsum ha sido el texto de relleno estándar de las industrias desde el año 1500."
+          "",
+          "   ",
+          "Lorem Ipsum es simplemente el texto de relleno de las imprentas y archivos de texto. "
+              + "Lorem Ipsum ha sido el texto de relleno estándar de las industrias desde el año 1500."
         })
     @DisplayName("RE-CPI: Contacto Inválido (Vacío o Excede Longitud)")
     void RE_CPI_CONTACTO(String contactoInvalido) {
@@ -104,23 +103,14 @@ class ProveedoresControllerTest {
               "Av. Las Américas");
 
       assertThrows(
-          IllegalArgumentException.class,
-          () -> proveedoresController.createProveedor(dto));
+          IllegalArgumentException.class, () -> proveedoresController.createProveedor(dto));
     }
 
     // Caso de prueba 4 - Teléfono no cumple con las validaciones
     @Order(4)
     @ParameterizedTest(name = "RE-CPI-TELEFONO-[{index}]")
     @ValueSource(
-        strings = {
-            "",
-            "   ",
-            "098765432",
-            "09876543210",
-            "ABCDEFGHIJ",
-            "091234567a",
-            "09-1234567"
-        })
+        strings = {"", "   ", "098765432", "09876543210", "ABCDEFGHIJ", "091234567a", "09-1234567"})
     @DisplayName("RE-CPI: Teléfono Inválido (Vacío, longitud incorrecta o no numérico)")
     void RE_CPI_TELEFONO(String telefonoInvalido) {
       ProveedorCreateDTO dto =
@@ -132,8 +122,7 @@ class ProveedoresControllerTest {
               "Av. Las Américas 100");
 
       assertThrows(
-          IllegalArgumentException.class,
-          () -> proveedoresController.createProveedor(dto));
+          IllegalArgumentException.class, () -> proveedoresController.createProveedor(dto));
     }
 
     // Caso de prueba 5 - Email no cumple con las validaciones
@@ -141,27 +130,22 @@ class ProveedoresControllerTest {
     @ParameterizedTest(name = "RE-CPI-EMAIL-[{index}]")
     @ValueSource(
         strings = {
-            "",
-            "   ",
-            "fabiani.gmail.com",
-            "fabia@",
-            "@gmail.com",
-            "un_correo_extremadamente_largo_y_repetitivo_para_superar_el_limite_de_cien_caracteres"
-                + "_permitidos_en_la_base_de_datos@gmail.com"
+          "",
+          "   ",
+          "fabiani.gmail.com",
+          "fabia@",
+          "@gmail.com",
+          "un_correo_extremadamente_largo_y_repetitivo_para_superar_el_limite_de_cien_caracteres"
+              + "_permitidos_en_la_base_de_datos@gmail.com"
         })
     @DisplayName("RE-CPI: Email Inválido (Vacío, formato incorrecto o muy largo)")
     void RE_CPI_EMAIL(String emailInvalido) {
       ProveedorCreateDTO dto =
           new ProveedorCreateDTO(
-              "FitCorp Distri",
-              "Domenica Polo",
-              "0912345678",
-              emailInvalido,
-              "Gomez Rendon");
+              "FitCorp Distri", "Domenica Polo", "0912345678", emailInvalido, "Gomez Rendon");
 
       assertThrows(
-          IllegalArgumentException.class,
-          () -> proveedoresController.createProveedor(dto));
+          IllegalArgumentException.class, () -> proveedoresController.createProveedor(dto));
     }
 
     // Caso de prueba 6 - Dirección no cumple con las validaciones
@@ -169,9 +153,9 @@ class ProveedoresControllerTest {
     @ParameterizedTest(name = "RE-CPI-DIRECCION-[{index}]")
     @ValueSource(
         strings = {
-            "Esta dirección es absurdamente larga y definitivamente tiene más de cien caracteres "
-                + "para probar que el sistema valida correctamente la longitud máxima permitida "
-                + "en la base de datos para este campo opcional del proveedor."
+          "Esta dirección es absurdamente larga y definitivamente tiene más de cien caracteres "
+              + "para probar que el sistema valida correctamente la longitud máxima permitida "
+              + "en la base de datos para este campo opcional del proveedor."
         })
     @DisplayName("RE-CPI: Dirección Inválida (Excede longitud máxima)")
     void RE_CPI_DIRECCION(String direccionInvalida) {
@@ -184,19 +168,19 @@ class ProveedoresControllerTest {
               direccionInvalida);
 
       assertThrows(
-          IllegalArgumentException.class,
-          () -> proveedoresController.createProveedor(dto));
+          IllegalArgumentException.class, () -> proveedoresController.createProveedor(dto));
     }
 
     // Caso de prueba 7 - Nombre inválido al actualizar
     @Order(7)
     @ParameterizedTest(name = "AE-CPI-NOMBRES-[{index}]")
-    @ValueSource(strings = {
-        "",
-        "   ",
-        "Lorem Ipsum es simplemente el texto de relleno de las imprentas y archivos de texto. "
-            + "Lorem Ipsum ha sido el texto de relleno estándar de las industrias."
-    })
+    @ValueSource(
+        strings = {
+          "",
+          "   ",
+          "Lorem Ipsum es simplemente el texto de relleno de las imprentas y archivos de texto. "
+              + "Lorem Ipsum ha sido el texto de relleno estándar de las industrias."
+        })
     @DisplayName("AE-CPI: Actualización Inválida - Campo Nombre")
     void AE_CPI_NOMBRES(String nombreInvalido) {
       ProveedorUpdateDTO dto =
@@ -218,12 +202,13 @@ class ProveedoresControllerTest {
     // Caso de prueba 8 - Contacto inválido al actualizar
     @Order(8)
     @ParameterizedTest(name = "AE-CPI-CONTACTO-[{index}]")
-    @ValueSource(strings = {
-        "",
-        "   ",
-        "Lorem Ipsum es simplemente el texto de relleno de las imprentas y archivos de texto. "
-            + "Lorem Ipsum ha sido el texto de relleno estándar de las industrias."
-    })
+    @ValueSource(
+        strings = {
+          "",
+          "   ",
+          "Lorem Ipsum es simplemente el texto de relleno de las imprentas y archivos de texto. "
+              + "Lorem Ipsum ha sido el texto de relleno estándar de las industrias."
+        })
     @DisplayName("AE-CPI: Actualización Inválida - Campo Contacto")
     void AE_CPI_CONTACTO(String contactoInvalido) {
       ProveedorUpdateDTO dto =
@@ -245,14 +230,7 @@ class ProveedoresControllerTest {
     // Caso de prueba 9 - Teléfono inválido al actualizar
     @Order(9)
     @ParameterizedTest(name = "AE-CPI-TELEFONO-[{index}]")
-    @ValueSource(strings = {
-        "",
-        "   ",
-        "098765432",
-        "09876543210",
-        "ABCDEFGHIJ",
-        "09-1234567"
-    })
+    @ValueSource(strings = {"", "   ", "098765432", "09876543210", "ABCDEFGHIJ", "09-1234567"})
     @DisplayName("AE-CPI: Actualización Inválida - Campo Teléfono")
     void AE_CPI_TELEFONO(String telefonoInvalido) {
       ProveedorUpdateDTO dto =
@@ -274,23 +252,19 @@ class ProveedoresControllerTest {
     // Caso de prueba 10 - Email inválido al actualizar
     @Order(10)
     @ParameterizedTest(name = "AE-CPI-EMAIL-[{index}]")
-    @ValueSource(strings = {
-        "helma.elestudiante",
-        "helma.com",
-        "HELMA estudiante@gmail.com",
-        "correo@",
-        "@gmail.com"
-    })
+    @ValueSource(
+        strings = {
+          "helma.elestudiante",
+          "helma.com",
+          "HELMA estudiante@gmail.com",
+          "correo@",
+          "@gmail.com"
+        })
     @DisplayName("AE-CPI: Actualización Inválida - Campo Email")
     void AE_CPI_EMAIL(String emailInvalido) {
       ProveedorUpdateDTO dto =
           new ProveedorUpdateDTO(
-              "DistriFit",
-              "Julia Peralta",
-              "0990345678",
-              emailInvalido,
-              "Daule km 19",
-              true);
+              "DistriFit", "Julia Peralta", "0990345678", emailInvalido, "Daule km 19", true);
 
       assertThrows(
           IllegalArgumentException.class,
@@ -301,10 +275,11 @@ class ProveedoresControllerTest {
 
     @Order(11)
     @ParameterizedTest(name = "AE-CPI-DIRECCION-[{index}]")
-    @ValueSource(strings = {
-        "Esta dirección es absurdamente larga y definitivamente tiene más de cien caracteres para probar "
-            + "que el sistema valida correctamente el límite permitido."
-    })
+    @ValueSource(
+        strings = {
+          "Esta dirección es absurdamente larga y definitivamente tiene más de cien caracteres para probar "
+              + "que el sistema valida correctamente el límite permitido."
+        })
     @DisplayName("AE-CPI: Actualización Inválida - Campo Dirección")
     void AE_CPI_DIRECCION(String direccionInvalida) {
       ProveedorUpdateDTO dto =

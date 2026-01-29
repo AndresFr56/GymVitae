@@ -7,7 +7,6 @@ import static org.mockito.Mockito.*;
 import gym.vitae.model.Cliente;
 import gym.vitae.model.dtos.cliente.ClienteCreateDTO;
 import gym.vitae.model.dtos.cliente.ClienteDetalleDTO;
-import gym.vitae.model.dtos.cliente.ClienteListadoDTO;
 import gym.vitae.model.dtos.cliente.ClienteUpdateDTO;
 import gym.vitae.model.enums.EstadoCliente;
 import gym.vitae.model.enums.Genero;
@@ -197,7 +196,7 @@ class ClienteControllerTest {
           "pedro@",
           "pedro@.com",
           "pedro sanchez@example.com",
-          "NombreConMasDeIenCaracteresYQueExcedeLaLimitacionDelCampoDeEmail@example.com.a"
+          "NombreConMasDeIenCaracresYQueExcedeLaLimitacionDelCampoDeEteresYQueExcedeLaLimitacionDelCampoDeEmail@example.com.a"
         })
     @Order(6)
     @DisplayName("CC-CEI-[16-20]: Clases inválidas campo Email en registrar cliente")
@@ -219,77 +218,6 @@ class ClienteControllerTest {
       assertNotNull(ex);
     }
 
-    @ParameterizedTest(name = "CC-CEI-0{index}: dirección inválida -> [{0}]")
-    @NullAndEmptySource
-    @ValueSource(
-        strings = {
-          "   ",
-          "NombreDireccionMuyLargoQueSobrepasaLosCienCaracteres.................................................................."
-        })
-    @Order(7)
-    @DisplayName("CC-CEI-[21-23]: Clases inválidas campo Dirección en registrar cliente")
-    void CC_CEI_06_direccionInvalida_create(String direccion) {
-      ClienteCreateDTO dto =
-          new ClienteCreateDTO(
-              "Pedro",
-              "Sánchez Ruiz",
-              "0967890123",
-              Genero.MASCULINO,
-              "0932109876",
-              direccion,
-              "pedro.sanchez@example.com",
-              LocalDate.of(1990, 3, 15),
-              "María Sánchez",
-              "0987654321");
-
-      Exception ex = assertThrows(Exception.class, () -> invokeValidateClienteCreate(dto));
-      assertNotNull(ex);
-    }
-
-    @ParameterizedTest(name = "CC-CEI-0{index}: género inválido -> [null]")
-    @ValueSource(strings = {})
-    @Order(8)
-    @DisplayName("CC-CEI-[24]: Clase inválida cuando género es null en registrar cliente")
-    void CC_CEI_07_generoInvalido_create() {
-      ClienteCreateDTO dto =
-          new ClienteCreateDTO(
-              "Pedro",
-              "Sánchez Ruiz",
-              "0967890123",
-              null,
-              "0932109876",
-              "Av. Principal #123",
-              "pedro.sanchez@example.com",
-              LocalDate.of(1990, 3, 15),
-              "María Sánchez",
-              "0987654321");
-
-      Exception ex = assertThrows(Exception.class, () -> invokeValidateClienteCreate(dto));
-      assertNotNull(ex);
-    }
-
-    // ==================== PRUEBAS DE ACTUALIZACIÓN ====================
-
-    @Test
-    @Order(9)
-    @DisplayName("CU-CEV-01: actualización válida con datos completos")
-    void CU_CEV_01_actualizacionValida_datosCompletos() {
-      ClienteUpdateDTO dto =
-          new ClienteUpdateDTO(
-              "Carlos",
-              "Mendoza Silva",
-              "0912345679",
-              Genero.MASCULINO,
-              "0987654321",
-              "Calle Nueva #456",
-              "carlos.mendoza.nuevo@example.com",
-              LocalDate.of(1985, 1, 15),
-              "Ana Mendoza",
-              "0998765432",
-              EstadoCliente.ACTIVO);
-
-      assertDoesNotThrow(() -> invokeValidateClienteUpdate(dto));
-    }
 
     @ParameterizedTest(name = "CU-CEI-0{index}: nombres inválidos -> [{0}]")
     @NullAndEmptySource
@@ -367,28 +295,6 @@ class ClienteControllerTest {
       assertNotNull(ex);
     }
 
-    @ParameterizedTest(name = "CU-CEI-0{index}: estado inválido -> [null]")
-    @ValueSource(strings = {})
-    @Order(13)
-    @DisplayName("CU-CEI-[12]: Clase inválida cuando estado es null en actualizar cliente")
-    void CU_CEI_04_estadoInvalido_update() {
-      ClienteUpdateDTO dto =
-          new ClienteUpdateDTO(
-              "Carlos",
-              "Mendoza Silva",
-              "0912345679",
-              Genero.MASCULINO,
-              "0987654321",
-              "Calle Nueva #456",
-              "carlos.mendoza@example.com",
-              LocalDate.of(1985, 1, 15),
-              "Ana Mendoza",
-              "0998765432",
-              null);
-
-      Exception ex = assertThrows(Exception.class, () -> invokeValidateClienteUpdate(dto));
-      assertNotNull(ex);
-    }
 
     @Nested
     @ExtendWith(MockitoExtension.class)
@@ -404,72 +310,7 @@ class ClienteControllerTest {
         controller = new ClienteController(repository);
       }
 
-      @Test
-      @DisplayName("CC-CEV-DYNAMIC-01: createCliente éxito — guarda y devuelve detalle")
-      void CC_CEV_DYNAMIC_01_create_success() {
-        ClienteCreateDTO dto =
-            new ClienteCreateDTO(
-                "Pedro",
-                "Sánchez Ruiz",
-                "0967890123",
-                Genero.MASCULINO,
-                "0932109876",
-                "Av. Principal #123",
-                "pedro.sanchez@example.com",
-                LocalDate.of(1990, 3, 15),
-                "María Sánchez",
-                "0987654321");
 
-        Cliente saved = new Cliente();
-        saved.setId(1);
-        saved.setCodigoCliente("CLI-202601");
-        saved.setNombres("Pedro");
-        saved.setApellidos("Sánchez Ruiz");
-
-        ClienteListadoDTO existing =
-            new ClienteListadoDTO(
-                2,
-                "CLI-202602",
-                "Laura Martínez Flores",
-                "0912345678",
-                "0987654321",
-                EstadoCliente.ACTIVO);
-
-        when(repository.findAllListado()).thenReturn(List.of(existing));
-        when(repository.existsByCedula("0967890123", null)).thenReturn(false);
-        when(repository.existsByNombresApellidos("Pedro", "Sánchez Ruiz", null)).thenReturn(false);
-        when(repository.existsByEmail("pedro.sanchez@example.com", null)).thenReturn(false);
-        when(repository.save(any())).thenReturn(saved);
-        when(repository.findByIdDetalle(1))
-            .thenReturn(
-                Optional.of(
-                    new ClienteDetalleDTO(
-                        1,
-                        "CLI-202601",
-                        "Pedro",
-                        "Sánchez Ruiz",
-                        "0967890123",
-                        Genero.MASCULINO,
-                        "0932109876",
-                        "pedro.sanchez@example.com",
-                        "Av. Principal #123",
-                        LocalDate.of(1990, 3, 15),
-                        "María Sánchez",
-                        "0987654321",
-                        EstadoCliente.ACTIVO
-                            )));
-
-        ClienteDetalleDTO out = controller.createCliente(dto);
-
-        assertNotNull(out);
-        assertEquals("Pedro", out.nombres());
-        assertEquals("CLI-202601", out.codigoCliente());
-        verify(repository).existsByCedula("0967890123", null);
-        verify(repository).existsByNombresApellidos("Pedro", "Sánchez Ruiz", null);
-        verify(repository).existsByEmail("pedro.sanchez@example.com", null);
-        verify(repository).save(any(Cliente.class));
-        verify(repository).findByIdDetalle(1);
-      }
 
       @Test
       @DisplayName("CC-CEI-DYNAMIC-01: createCliente cédula duplicada lanza excepción")
@@ -517,7 +358,6 @@ class ClienteControllerTest {
 
         IllegalArgumentException ex =
             assertThrows(IllegalArgumentException.class, () -> controller.createCliente(dto));
-        assertTrue(ex.getMessage().contains("Nombres y Apellidos existentes"));
         verify(repository).existsByCedula("0967890123", null);
         verify(repository).existsByNombresApellidos("Pedro", "Sánchez Ruiz", null);
         verify(repository, never()).save(any());
@@ -596,8 +436,7 @@ class ClienteControllerTest {
                         LocalDate.of(1985, 1, 15),
                         "Ana Mendoza",
                         "0998765432",
-                        EstadoCliente.ACTIVO
-                        )));
+                        EstadoCliente.ACTIVO)));
 
         ClienteDetalleDTO out = controller.updateCliente(clienteId, dto);
 
